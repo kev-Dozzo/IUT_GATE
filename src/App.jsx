@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import CampusMap from './pages/campusMap'
 import Courses from './pages/Courses'
-import Navbar from './components/Navbar'
+import Navbar from './components/layout/Navbar'
 
 function App() {
 
