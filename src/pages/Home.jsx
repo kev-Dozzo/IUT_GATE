@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import WhatIsIutGate from '../components/layout/whatisIUTGate'
+import CoreSecton from "../components/layout/coreService";
 
 function Home() {
 
@@ -60,6 +61,8 @@ function Home() {
     </div>
 
     <WhatIsIutGate />
+
+    <CoreSecton />
 
 
 
