@@ -20,7 +20,7 @@ sequelize
     console.log("✅ Base de données synchronisée");
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port y http://localhost:${PORT}`);
     });
   })
   .catch((err) => console.error("❌ Erreur BDD:", err));
