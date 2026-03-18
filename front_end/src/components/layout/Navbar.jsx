@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import SearchModal from '../searchModal';
 
 const navigation = [
-  { name: 'Dashboard Etudiant', href: '#', current: true },
+  // { name: 'Dashboard Etudiant', href: '#', current: true },
   { name: 'Accueil', href: '/', current: false },
   { name: 'carte', href: '/campus-map', current: false },
   { name: 'cours', href: '/courses', current: false },
