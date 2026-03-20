@@ -1,138 +1,209 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { Link } from "react-router-dom";
-import SearchModal from '../searchModal';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { MdMenu, MdClose } from "react-icons/md";
 
-const navigation = [
-  // { name: 'Dashboard Etudiant', href: '#', current: true },
-  { name: 'Accueil', href: '/', current: false },
-  { name: 'carte', href: '/campus-map', current: false },
-  { name: 'cours', href: '/courses', current: false },
-]
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
-
+const navLinks = [
+  { label: "Accueil", path: "/" },
+  { label: "Annonces", path: "/annonces" },
+  { label: "Filières", path: "/filieres" },
+  { label: "Enseignants", path: "/enseignants" },
+  { label: "Départements", path: "/departements" },
+  { label: "Services", path: "/services" },
+  { label: "Carte", path: "/carte" },
+  { label: "À propos", path: "/apropos" }, 
+];
 export default function Navbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+
   return (
-    <Disclosure
-      as="nav"
-      className="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
-    >
-      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-18 items-center justify-between">
-          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+    <>
+      <nav
+        style={{
+          background: "var(--navy)",
+          padding: "0 24px",
+          height: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          borderBottom: "1px solid rgba(255,255,255,.07)",
+        }}
+      >
+        {/* Logo */}
+        <div
+          onClick={() => navigate("/")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            cursor: "pointer",
+          }}
+        >
+          <img
+            src="/logo.png"
+            alt="IUTGate"
+            style={{
+              width: 60,
+              height: 44,
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "1px solid var(--cyan)",
+            }}
+            onError={(e) => (e.target.style.display = "none")}
+          />
+        </div>
 
-            {/* Mobile menu button*/}
-            <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
-              <span className="absolute -inset-0.5" />
-              <span className="sr-only">Open main menu</span>
-              <Bars3Icon aria-hidden="true" className="block size-6 group-data-open:hidden" />
-              <XMarkIcon aria-hidden="true" className="hidden size-6 group-data-open:block" />
-            </DisclosureButton>
-          </div>
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex shrink-0 items-center">
-              <img
-                alt="iut-logo1"
-                src="public/iut-logo1.jpg"
-                className="h-10 rounded-3xl w-auto"
-              />
-            </div>
-            <div className="hidden sm:ml-6 sm:block">
-              <div className="flex space-x-4">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    aria-current={item.current ? 'page' : undefined}
-                    className={classNames(
-                      item.current ? 'bg-gray-950/50 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white',
-                      'rounded-md px-3 py-2 text-sm font-medium',
-                    )}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-           {/*search field*/}
-
-    <div className="relative w-full max-w-md ">
-       
-
-        <SearchModal />
-
-       
-      </div>
-
-           
-
-            {/* on va travailler sur ca apres sa ne s'affiche pour l'instant car je doute pour l'integration de backend */}
-            <Menu as="div" className="relative ml-3">
-              <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-                <span className="absolute -inset-1.5" />
-                <span className="sr-only">Open user menu</span>
-                
-              </MenuButton>
-
-              <MenuItems
-                transition
-                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 outline -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+        {/* Links desktop */}
+        <div className="desktop-only" style={{ gap: 22 }}>
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path;
+            return (
+              <span
+                key={link.path}
+                onClick={() => navigate(link.path)}
+                style={{
+                  fontFamily: "var(--font-head)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: isActive ? "var(--cyan)" : "#94a3b8",
+                  cursor: "pointer",
+                  transition: "color .2s",
+                  borderBottom: isActive
+                    ? "2px solid var(--cyan)"
+                    : "2px solid transparent",
+                  paddingBottom: 2,
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.target.style.color = "#fff";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.target.style.color = "#94a3b8";
+                }}
               >
-                <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                  >
-                    Your profile
-                  </a>
-                </MenuItem>
-                <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                  >
-                    Settings
-                  </a>
-                </MenuItem>
-                <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                  >
-                    Sign out
-                  </a>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
+                {link.label}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* CTA desktop + hamburger mobile */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            className="desktop-only"
+            onClick={() => navigate("/admin/login")}
+            style={{
+              background: "var(--cyan)",
+              color: "var(--cyan-text)",
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 16px",
+              fontFamily: "var(--font-head)",
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Espace Admin
+          </button>
+
+          {/* Hamburger */}
+          <button
+            className="mobile-only"
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#fff",
+              padding: 4,
+            }}
+          >
+            {open ? <MdClose size={24} /> : <MdMenu size={24} />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Menu mobile */}
+      {open && (
+        <div
+          style={{
+            position: "fixed",
+            top: 60,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "var(--navy)",
+            zIndex: 9999, // ← c'est ça qui manquait
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 24px",
+            gap: 4,
+            overflowY: "auto",
+          }}
+        >
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path;
+            return (
+              <div
+                key={link.path}
+                onClick={() => {
+                  navigate(link.path);
+                  setOpen(false);
+                }}
+                style={{
+                  padding: "14px 16px",
+                  borderRadius: 10,
+                  cursor: "pointer",
+                  background: isActive ? "rgba(6,182,212,.15)" : "transparent",
+                  borderLeft: isActive
+                    ? "3px solid var(--cyan)"
+                    : "3px solid transparent",
+                  fontFamily: "var(--font-head)",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: isActive ? "var(--cyan)" : "#94a3b8",
+                  transition: "all .2s",
+                }}
+              >
+                {link.label}
+              </div>
+            );
+          })}
+
+          <div
+            style={{
+              borderTop: "1px solid rgba(255,255,255,.1)",
+              marginTop: 12,
+              paddingTop: 12,
+            }}
+          >
+            <button
+              onClick={() => {
+                navigate("/admin/login");
+                setOpen(false);
+              }}
+              style={{
+                width: "100%",
+                padding: "13px",
+                background: "var(--cyan)",
+                color: "var(--cyan-text)",
+                border: "none",
+                borderRadius: 10,
+                fontFamily: "var(--font-head)",
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
+              Espace Admin
+            </button>
           </div>
         </div>
-      </div>
-
-      {/*La bar pour ptit ecran*/}
-
-      <DisclosurePanel className="sm:hidden">
-        <div className="space-y-1 px-2 pt-2 pb-3">
-          {navigation.map((item) => (
-            <DisclosureButton
-              key={item.name}
-              as="Link"
-              href={item.href}
-              aria-current={item.current ? 'page' : undefined}
-              className={classNames(
-                item.current ? 'bg-gray-950/50 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white',
-                'block rounded-md px-3 py-2 text-base font-medium',
-              )}
-            >
-              {item.name}
-            </DisclosureButton>
-          ))}
-        </div>
-      </DisclosurePanel>
-    </Disclosure>
-  )
+      )}
+    </>
+  );
 }
