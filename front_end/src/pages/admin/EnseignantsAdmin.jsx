@@ -28,6 +28,8 @@ const ROLES = [
   "Chargé de cours",
   "Assistant",
 ];
+import PhotoUpload from "../../components/ui/PhotoUpload";
+import Avatar from "../../components/ui/Avatar";
 
 const AVATAR_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -69,6 +71,7 @@ export default function EnseignantsAdmin() {
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [photo, setPhoto] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -100,6 +103,7 @@ export default function EnseignantsAdmin() {
       ...emptyForm,
       id_departement: departements[0]?.id_departement || "",
     });
+    setPhoto(null);
     setSelected(null);
     setModal("add");
   };
@@ -114,6 +118,7 @@ export default function EnseignantsAdmin() {
       bureau: ens.bureau || "",
       id_departement: ens.id_departement || "",
     });
+    setPhoto(null);
     setSelected(ens);
     setModal("edit");
   };
@@ -137,10 +142,10 @@ export default function EnseignantsAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createEnseignant(form);
+        await createEnseignant(form, photo);
         showToast("Enseignant ajouté avec succès !");
       } else {
-        await updateEnseignant(selected.id_enseignant, form);
+        await updateEnseignant(selected.id_enseignant, form, photo);
         showToast("Enseignant modifié avec succès !");
       }
       await fetchData();
@@ -674,6 +679,25 @@ export default function EnseignantsAdmin() {
               >
                 <MdClose size={18} color="var(--muted)" />
               </button>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 8,
+              }}
+            >
+              <PhotoUpload
+                value={
+                  selected?.photo_url
+                    ? `http://localhost:5000${selected.photo_url}`
+                    : null
+                }
+                onChange={setPhoto}
+                size={90}
+                shape="circle"
+                label="Photo de profil"
+              />
             </div>
 
             {/* Champs */}

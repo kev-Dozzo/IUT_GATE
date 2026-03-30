@@ -113,29 +113,13 @@ export default function EnseignantDetailPage() {
                 alignItems: "flex-start",
               }}
             >
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 20,
-                  background: "var(--cyan-light)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontSize: 28,
-                    fontWeight: 800,
-                    color: "var(--cyan-dark)",
-                  }}
-                >
-                  {getInitials(ens.nom)}
-                </span>
-              </div>
+              <Avatar
+                nom={ens.nom}
+                photoUrl={ens.photo_url}
+                size={90}
+                shape="circle"
+                index={0}
+              />
               <div style={{ flex: 1 }}>
                 <h1
                   style={{
@@ -291,7 +275,7 @@ export default function EnseignantDetailPage() {
                     opacity: 0.8,
                   }}
                 >
-                  Retrouvez ce bureau sur la carte interactive du campus
+                  Retrouvez ce bureau sur la carte du campus
                 </p>
               </div>
               <button

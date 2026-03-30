@@ -12,6 +12,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignants } from "../../services/enseignantService";
+import Avatar from "../../components/ui/Avatar";
 
 const AVATAR_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -218,7 +219,7 @@ export default function EnseignantsPage() {
             style={{
               textAlign: "center",
               padding: "40px",
-              background: "#fee2e2",
+              background: "#cffafe",
               borderRadius: 12,
               border: "1px solid #fca5a5",
             }}
@@ -228,9 +229,13 @@ export default function EnseignantsPage() {
                 fontFamily: "var(--font-head)",
                 fontWeight: 600,
                 color: "#991b1b",
+                marginBottom: 8,
               }}
             >
               {error}
+            </p>
+            <p style={{ fontSize: 13, color: "#164e63" }}>
+              Un Problem est survenu.
             </p>
           </div>
         )}
@@ -264,8 +269,6 @@ export default function EnseignantsPage() {
         {!loading && !error && filtered.length > 0 && (
           <div className="grid-auto">
             {filtered.map((ens, i) => {
-              const av = AVATAR_COLORS[i % AVATAR_COLORS.length];
-              const initiales = getInitials(ens.nom);
               return (
                 <div
                   key={ens.id_enseignant}
@@ -294,29 +297,13 @@ export default function EnseignantsPage() {
                   }}
                 >
                   {/* Avatar */}
-                  <div
-                    style={{
-                      width: 54,
-                      height: 54,
-                      borderRadius: 14,
-                      background: av.bg,
-                      flexShrink: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        fontSize: 18,
-                        fontWeight: 800,
-                        color: av.color,
-                      }}
-                    >
-                      {initiales}
-                    </span>
-                  </div>
+                  <Avatar
+                    nom={ens.nom}
+                    photoUrl={ens.photo_url}
+                    size={54}
+                    index={i}
+                    shape="rounded"
+                  />
 
                   {/* Infos */}
                   <div style={{ flex: 1, minWidth: 0 }}>

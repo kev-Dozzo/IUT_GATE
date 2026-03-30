@@ -17,6 +17,7 @@ import {
   updateAnnonce,
   deleteAnnonce,
 } from "../../services/annonceService";
+import { FiPaperclip } from "react-icons/fi";
 
 const CATEGORIES = [
   "Examens",
@@ -47,6 +48,9 @@ export default function AnnoncesAdmin() {
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const fileInputRef = useRef();
+  const [files, setFiles] = useState([]);
+
 
   useEffect(() => {
     fetchAnnonces();
@@ -704,6 +708,48 @@ export default function AnnoncesAdmin() {
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleClick}
+                    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+                  >
+                    <FiPaperclip size={20} />
+                  </button>
+
+                  <span className="text-sm text-gray-500">
+                    Ajouter image / vidéo
+                  </span>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    multiple
+                    accept="image/*,video/*"
+                    hidden
+                  />
+                </div>
+
+                {/* Preview */}
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="border p-2 rounded">
+                      {file.type.startsWith("image") ? (
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt=""
+                          className="w-full h-20 object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={URL.createObjectURL(file)}
+                          className="w-full h-20"
+                          controls
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Boutons */}
