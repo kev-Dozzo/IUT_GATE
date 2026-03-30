@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
+=======
+//import { useNavigate } from "react-router-dom";
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 import {
   MdSearch,
   MdAccessTime,
@@ -19,7 +23,11 @@ const dureeColors = {
 };
 
 export default function FilieresPage() {
+<<<<<<< HEAD
   const navigate = useNavigate();
+=======
+ // const navigate = useNavigate();
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

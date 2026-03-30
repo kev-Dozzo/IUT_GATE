@@ -41,7 +41,11 @@ export default function AnnonceDetailPage() {
       <Navbar />
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "40px 32px" }}>
         <button
+<<<<<<< HEAD
           onClick={() => navigate("/annonces")}
+=======
+          onClick={() => navigate("/actualites")}
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
           style={{
             display: "flex",
             alignItems: "center",

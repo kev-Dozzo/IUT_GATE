@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
+=======
+//import { useNavigate } from "react-router-dom";
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 import {
   MdSearch,
   MdCalendarToday,
@@ -29,7 +33,11 @@ const CATEGORIES = [
 ];
 
 export default function AnnoncesPage() {
+<<<<<<< HEAD
   const navigate = useNavigate();
+=======
+  //const navigate = useNavigate();
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
   const [annonces, setAnnonces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -177,7 +185,14 @@ export default function AnnoncesPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Compteur */}
+=======
+       
+
+        {/* Compteur */}
+        
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
         {!loading && (
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 20 }}>
             {filtered.length} annonce{filtered.length > 1 ? "s" : ""} trouvée

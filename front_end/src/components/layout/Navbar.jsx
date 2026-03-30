@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdMenu, MdClose } from "react-icons/md";
+<<<<<<< HEAD
+=======
+import campusLogo from '../../assets/public/logo.png'
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 
 const navLinks = [
   { label: "Accueil", path: "/" },
   { label: "Annonces", path: "/annonces" },
   { label: "Filières", path: "/filieres" },
   { label: "Enseignants", path: "/enseignants" },
+<<<<<<< HEAD
   { label: "Départements", path: "/departements" },
+=======
+  //{ label: "Départements", path: "/departements" },
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
   { label: "Services", path: "/services" },
   { label: "Carte", path: "/carte" },
   { label: "À propos", path: "/apropos" }, 
@@ -44,7 +52,11 @@ export default function Navbar() {
           }}
         >
           <img
+<<<<<<< HEAD
             src="/logo.png"
+=======
+            src={`${campusLogo}`}
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
             alt="IUTGate"
             style={{
               width: 60,

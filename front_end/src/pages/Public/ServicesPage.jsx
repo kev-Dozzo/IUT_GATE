@@ -59,7 +59,11 @@ export default function ServicesPage() {
 
   return (
     <div>
+<<<<<<< HEAD
       <Navbar />
+=======
+      <Navbar /> 
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 
       {/* ── HEADER ── */}
       <section
@@ -576,7 +580,11 @@ export default function ServicesPage() {
           );
         })()}
 
+<<<<<<< HEAD
       <Footer />
+=======
+      <Footer /> 
+>>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
     </div>
   );
 }
