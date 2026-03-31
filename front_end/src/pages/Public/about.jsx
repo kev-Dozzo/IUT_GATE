@@ -9,7 +9,7 @@ import {
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-
+import iutRassam1 from "../../assets/public/iut-rassam1.jpg";
 const equipe = [
   {
     nom: "DAGANG TCHUIKOUA YOBS KOLER",
@@ -27,7 +27,7 @@ const equipe = [
   },
   {
     nom: "ELATE NGALLE KEVIN AUXENCE",
-    role: "Backend Express",
+    role: "FULLSTACK",
     initiales: "ENKA",
     bg: "#fef3c7",
     color: "#92400e",
@@ -72,8 +72,9 @@ export default function AProposPage() {
       {/* ── HERO ── */}
       <section
         style={{
-          background:
-            "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)",
+          backgroundImage: `linear-gradient(rgba(12,26,64,0.7), rgba(14,95,117,0.7)),url(${iutRassam1})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           padding: "clamp(40px, 8vw, 72px) 24px",
         }}
       >

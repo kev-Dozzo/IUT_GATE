@@ -60,7 +60,6 @@ export default function ServicesPage() {
   return (
     <div>
       <Navbar />
-
       {/* ── HEADER ── */}
       <section
         style={{
@@ -575,7 +574,6 @@ export default function ServicesPage() {
             </div>
           );
         })()}
-
       <Footer />
     </div>
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"
+//import { useNavigate } from "react-router-dom";
 import {
   MdSearch,
   MdCalendarToday,
@@ -29,7 +29,7 @@ const CATEGORIES = [
 ];
 
 export default function AnnoncesPage() {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [annonces, setAnnonces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -176,7 +176,6 @@ export default function AnnoncesPage() {
             />
           </div>
         </div>
-
         {/* Compteur */}
         {!loading && (
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 20 }}>

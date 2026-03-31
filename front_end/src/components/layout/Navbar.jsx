@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MdMenu, MdClose } from "react-icons/md";
+import campusLogo from "../../assets/public/logo.png";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
@@ -10,7 +11,7 @@ const navLinks = [
   { label: "Départements", path: "/departements" },
   { label: "Services", path: "/services" },
   { label: "Carte", path: "/carte" },
-  { label: "À propos", path: "/apropos" }, 
+  { label: "À propos", path: "/apropos" },
 ];
 export default function Navbar() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function Navbar() {
           }}
         >
           <img
-            src="/logo.png"
+            src={`${campusLogo}`}
             alt="IUTGate"
             style={{
               width: 60,
