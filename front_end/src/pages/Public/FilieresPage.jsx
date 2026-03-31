@@ -1,9 +1,5 @@
-import { useState, useEffect } from "react";
-<<<<<<< HEAD
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
-=======
-//import { useNavigate } from "react-router-dom";
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 import {
   MdSearch,
   MdAccessTime,
@@ -23,11 +19,7 @@ const dureeColors = {
 };
 
 export default function FilieresPage() {
-<<<<<<< HEAD
   const navigate = useNavigate();
-=======
- // const navigate = useNavigate();
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -168,7 +160,7 @@ export default function FilieresPage() {
             style={{
               textAlign: "center",
               padding: "40px",
-              background: "#fee2e2",
+              background: "#cffafe",
               borderRadius: 12,
               border: "1px solid #fca5a5",
             }}
@@ -183,8 +175,8 @@ export default function FilieresPage() {
             >
               {error}
             </p>
-            <p style={{ fontSize: 13, color: "#b91c1c" }}>
-              Vérifiez que le serveur backend est bien démarré.
+            <p style={{ fontSize: 13, color: "#164e63" }}>
+              Un Problem est survenu.
             </p>
           </div>
         )}

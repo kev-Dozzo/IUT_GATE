@@ -164,7 +164,7 @@ export default function DepartementsPage() {
             style={{
               textAlign: "center",
               padding: "40px",
-              background: "#fee2e2",
+              background: "#cffafe",
               borderRadius: 12,
               border: "1px solid #fca5a5",
             }}
@@ -179,8 +179,8 @@ export default function DepartementsPage() {
             >
               {error}
             </p>
-            <p style={{ fontSize: 13, color: "#b91c1c" }}>
-              Vérifiez que le serveur backend est bien démarré.
+            <p style={{ fontSize: 13, color: "#164e63" }}>
+              Un Problem est survenu.
             </p>
           </div>
         )}

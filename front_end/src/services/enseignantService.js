@@ -10,13 +10,23 @@ export const getEnseignantById = async (id) => {
   return res.data;
 };
 
-export const createEnseignant = async (data) => {
-  const res = await api.post("/enseignants", data);
+export const createEnseignant = async (data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (val !== undefined && val !== null) formData.append(key, val);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.post("/enseignants", formData);
   return res.data;
 };
 
-export const updateEnseignant = async (id, data) => {
-  const res = await api.put(`/enseignants/${id}`, data);
+export const updateEnseignant = async (id, data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, val]) => {
+    if (val !== undefined && val !== null) formData.append(key, val);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.put(`/enseignants/${id}`, formData);
   return res.data;
 };
 
