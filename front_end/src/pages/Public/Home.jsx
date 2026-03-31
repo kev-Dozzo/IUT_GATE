@@ -11,13 +11,10 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getAnnonces } from "../../services/annonceService";
-<<<<<<< HEAD
-=======
 import { getServices } from "../../services/serviceAdminService";
 import ServicesPage from "./ServicesPage";
 import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
 
 const quickLinks = [
   {
@@ -65,19 +62,13 @@ const catColors = {
 
 export default function HomePage() {
   const navigate = useNavigate();
-<<<<<<< HEAD
-=======
   const [services, setServices] = useState([]);
   const [error, setError] = useState(false);
-
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
   const [search, setSearch] = useState("");
   const [annonces, setAnnonces] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-<<<<<<< HEAD
-=======
     getServices()
       .then((data) => setServices(data))
       .catch(() => setError("Impossible de charger les services."))
@@ -85,7 +76,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
     getAnnonces()
       .then((data) => setAnnonces(data.slice(0, 3)))
       .catch((err) => console.error("Erreur annonces:", err))
@@ -104,17 +94,12 @@ export default function HomePage() {
       {/* HERO */}
       <section
         style={{
-<<<<<<< HEAD
-          background:
-            "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)",
-=======
           backgroundImage: `linear-gradient(rgba(12,26,64,0.7), rgba(14,95,117,0.7)) ,url(${iutCampus1})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           /* background:
             "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)", */
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
           padding: "clamp(40px, 8vw, 72px) 24px 80px",
         }}
       >
@@ -162,13 +147,8 @@ export default function HomePage() {
               margin: "0 auto 36px",
             }}
           >
-<<<<<<< HEAD
-            Votre campus à portée de main. Filières, enseignants, services et
-            annonces en un seul endroit.
-=======
             Votre guide intelligent pour vous orienter, informer et accompagner
-            tout au long de votre parcours universitaire.
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
+            tout au long de votre parcours universitaire
           </p>
 
           {/* Search bar */}
@@ -186,21 +166,13 @@ export default function HomePage() {
             }}
           >
             <MdSearch
-<<<<<<< HEAD
-              size={20}
-=======
               size={40}
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
               style={{ color: "#94a3b8", flexShrink: 0, marginTop: 2 }}
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-<<<<<<< HEAD
-              placeholder="Rechercher un enseignant, une filière..."
-=======
               placeholder="Rechercher une Filière,un enseignant, un Batiment..."
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
               style={{
                 flex: 1,
                 border: "none",
@@ -336,14 +308,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-<<<<<<< HEAD
-=======
       {/* Services RÉCENTES */}
 
       <CoreService />
-
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
       {/* ANNONCES RÉCENTES */}
       <section className="page-container" style={{ marginTop: 56 }}>
         <div
@@ -383,11 +350,7 @@ export default function HomePage() {
             </h2>
           </div>
           <button
-<<<<<<< HEAD
             onClick={() => navigate("/annonces")}
-=======
-            onClick={() => navigate("/actualites")}
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
             style={{
               display: "flex",
               alignItems: "center",
@@ -434,11 +397,7 @@ export default function HomePage() {
               return (
                 <div
                   key={annonce.id_annonce}
-<<<<<<< HEAD
                   onClick={() => navigate(`/annonces/${annonce.id_annonce}`)}
-=======
-                  onClick={() => navigate(`/actualites/${annonce.id_annonce}`)}
->>>>>>> 4e485acb05f89501a047512e9a31571d5c0847e4
                   style={{
                     background: "#fff",
                     borderRadius: 14,
