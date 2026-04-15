@@ -11,6 +11,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getDepartements } from "../../services/departementService";
+import { useNavigate } from "react-router-dom";
 
 const DEPT_COLORS = [
   { bg: "#cffafe", color: "#0e7490", border: "#67e8f9" },
@@ -27,6 +28,7 @@ export default function DepartementsPage() {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getDepartements()
@@ -221,7 +223,9 @@ export default function DepartementsPage() {
               return (
                 <div
                   key={dept.id_departement}
-                  onClick={() => setSelected(dept)}
+                  onClick={() =>
+                    navigate(`/departements/${dept.id_departement}`)
+                  }
                   style={{
                     background: "#fff",
                     borderRadius: 16,

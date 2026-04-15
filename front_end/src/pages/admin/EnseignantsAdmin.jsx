@@ -75,6 +75,7 @@ export default function EnseignantsAdmin() {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {

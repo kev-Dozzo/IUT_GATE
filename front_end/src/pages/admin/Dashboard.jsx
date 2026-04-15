@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MdCampaign,
   MdSchool,
@@ -41,6 +42,7 @@ const statsConfig = [
 ];
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +52,13 @@ export default function DashboardPage() {
       .catch((err) => console.error("Erreur stats:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  const quickActions = [
+    { label: "+ Nouvelle annonce", path: "/admin/annonces" },
+    { label: "+ Ajouter enseignant", path: "/admin/enseignants" },
+    { label: "+ Nouvelle filière", path: "/admin/filieres" },
+    { label: "+ Ajouter bâtiment", path: "/admin/batiments" },
+  ];
 
   return (
     <AdminLayout>
@@ -102,7 +111,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Activité + Accès rapide */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 18 }}>
+      <div
+        className="grid-cols-1"
+        style={{ display: "grid ", gridTemplateColumns: "2fr 1fr", gap: 18 }}
+      >
         <div
           style={{
             background: "var(--card)",
@@ -150,14 +162,9 @@ export default function DashboardPage() {
           >
             Accès rapide
           </p>
-          {[
-            "+ Nouvelle annonce",
-            "+ Ajouter enseignant",
-            "+ Nouvelle filière",
-            "+ Ajouter bâtiment",
-          ].map((action) => (
+          {quickActions.map((action) => (
             <button
-              key={action}
+              key={action.label}
               style={{
                 display: "block",
                 width: "100%",
@@ -173,6 +180,7 @@ export default function DashboardPage() {
                 marginBottom: 8,
                 textAlign: "left",
               }}
+              onClick={() => navigate(action.path)}
               onMouseEnter={(e) => {
                 e.target.style.background = "var(--cyan-light)";
                 e.target.style.borderColor = "var(--cyan)";
@@ -184,7 +192,7 @@ export default function DashboardPage() {
                 e.target.style.color = "var(--text)";
               }}
             >
-              {action}
+              {action.label}
             </button>
           ))}
         </div>

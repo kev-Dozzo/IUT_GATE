@@ -1,39 +1,41 @@
-import db from "../config/db.js";
+import {
+  getAllFilieres,
+  getFiliereById,
+  createFiliere,
+  updateFiliere as updateFiliereModel,
+  deleteFiliere as deleteFiliereModel,
+  countFilieres,
+} from "../models/Filiere.js";
 
-// AFfiche tout les Filliere /api/filieres
 export const getAllFilliere = async (req, res, next) => {
   try {
-    const [rows] = await db.query("SELECT * FROM filieres ORDER BY id DESC");
+    const rows = await getAllFilieres();
     res.status(200).json(rows);
   } catch (err) {
-    //res.status(500).json({ message: "Erreur au niveux du serveur..." });
     next(err);
   }
 };
 
-//get single Filliere via Filliere id
-
 export const getSingleFilliere = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const [rows] = await db.query("SELECT * FROM filieres WHERE id = ?", [id]);
 
     if (!id || isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
-    if (rows.length === 0) {
+    const filiere = await getFiliereById(id);
+
+    if (!filiere) {
       return res.status(404).json({ message: "Filière introuvable" });
     }
 
-    res.status(200).json(rows[0]);
+    res.status(200).json(filiere);
   } catch (err) {
-    //res.status(500).json({ message: "Internal server Error..." });
     next(err);
   }
 };
 
-//Post Request to Create new Filliere
 export const addFilliere = async (req, res, next) => {
   try {
     const { nom, code, description, duree, debouches } = req.body;
@@ -42,26 +44,19 @@ export const addFilliere = async (req, res, next) => {
       return res.status(400).json({ message: "nom et code sont Obligatoires" });
     }
 
-    const [result] = await db.query(
-      "INSERT INTO filieres (nom, code, description, duree, debouches) VALUES(?,?,?,?,?)",
-      [nom, code, description, duree, debouches || null],
-    );
-
-    res.status(201).json({
-      id: result.insertId,
+    const filiere = await createFiliere({
       nom,
       code,
-      description: description || null,
+      description,
       duree,
       debouches: debouches || null,
     });
+
+    res.status(201).json(filiere);
   } catch (err) {
-    // res.status(500).json({ message: "Internal server Error..." });
     next(err);
   }
 };
-
-//put request To Update Filiere
 
 export const updateFilliere = async (req, res, next) => {
   try {
@@ -78,10 +73,13 @@ export const updateFilliere = async (req, res, next) => {
         .json({ message: "Remplisez tout les Champ disponible" });
     }
 
-    const [result] = await db.query(
-      "UPDATE filieres SET nom =?, code=?, description=?, duree=?,debouches=? WHERE id =?",
-      [nom, code, description, duree, debouches, id],
-    );
+    const result = await updateFiliereModel(id, {
+      nom,
+      code,
+      description,
+      duree,
+      debouches: debouches || null,
+    });
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Filière introuvable" });
@@ -93,31 +91,38 @@ export const updateFilliere = async (req, res, next) => {
       code,
       description,
       duree,
-      debouches,
+      debouches: debouches || null,
     });
   } catch (err) {
-    // res.status(500).json({ message: "Internal server Error..." });
     next(err);
   }
 };
 
-//DElete Request
-
 export const deleteFilliere = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const [result] = await db.query("DELETE FROM filieres WHERE id=?", [id]);
 
     if (!id || isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
+    const result = await deleteFiliereModel(id);
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Filière introuvable" });
     }
+
     res.status(204).send();
   } catch (err) {
-    //res.status(500).json({ message: "Internal server Error..." });
+    next(err);
+  }
+};
+
+export const getFilliereCount = async (req, res, next) => {
+  try {
+    const count = await countFilieres();
+    res.status(200).json({ count });
+  } catch (err) {
     next(err);
   }
 };

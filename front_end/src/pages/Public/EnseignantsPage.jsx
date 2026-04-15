@@ -13,6 +13,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignants } from "../../services/enseignantService";
 import Avatar from "../../components/ui/Avatar";
+import {useNavigate } from "react-router-dom";  
 
 const AVATAR_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -41,6 +42,7 @@ export default function EnseignantsPage() {
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("Tous");
   const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getEnseignants()
@@ -272,7 +274,7 @@ export default function EnseignantsPage() {
               return (
                 <div
                   key={ens.id_enseignant}
-                  onClick={() => setSelected(ens)}
+                  onClick={() => navigate(`/enseignants/${ens.id_enseignant}`)}
                   style={{
                     background: "#fff",
                     borderRadius: 16,
@@ -422,8 +424,6 @@ export default function EnseignantsPage() {
           </div>
         )}
       </section>
-
-      {/* ── MODAL PROFIL ── */}
       {selected && (
         <div
           onClick={() => setSelected(null)}

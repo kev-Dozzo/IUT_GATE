@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MdAdd,
   MdEdit,
@@ -37,7 +37,12 @@ const catColors = {
   Général: { bg: "#f1f5f9", color: "#475569" },
 };
 
-const emptyForm = { titre: "", contenu: "", categorie: "Général" };
+const emptyForm = {
+  titre: "",
+  contenu: "",
+  categorie: "Général",
+  image_url: "",
+};
 
 export default function AnnoncesAdmin() {
   const [annonces, setAnnonces] = useState([]);
@@ -51,6 +56,36 @@ export default function AnnoncesAdmin() {
   const fileInputRef = useRef();
   const [files, setFiles] = useState([]);
 
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const readFileAsDataURL = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleFileChange = async (event) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles) return;
+
+    const fileArray = Array.from(selectedFiles);
+    setFiles(fileArray);
+
+    const imageFile = fileArray.find((file) => file.type.startsWith("image/"));
+    if (imageFile) {
+      const dataUrl = await readFileAsDataURL(imageFile);
+      setForm((prevForm) => ({ ...prevForm, image_url: dataUrl }));
+    }
+  };
+
+  const removeSelectedFile = () => {
+    setFiles([]);
+    setForm((prevForm) => ({ ...prevForm, image_url: "" }));
+  };
 
   useEffect(() => {
     fetchAnnonces();
@@ -75,6 +110,7 @@ export default function AnnoncesAdmin() {
 
   const openAdd = () => {
     setForm(emptyForm);
+    setFiles([]);
     setSelected(null);
     setModal("add");
   };
@@ -84,7 +120,9 @@ export default function AnnoncesAdmin() {
       titre: annonce.titre,
       contenu: annonce.contenu,
       categorie: annonce.categorie || "Général",
+      image_url: annonce.image_url || "",
     });
+    setFiles([]);
     setSelected(annonce);
     setModal("edit");
   };
@@ -708,48 +746,89 @@ export default function AnnoncesAdmin() {
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
-                <div className="flex items-center gap-3">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    flexWrap: "wrap",
+                  }}
+                >
                   <button
                     onClick={handleClick}
-                    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+                    type="button"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      padding: "10px 14px",
+                      background: "#f8fafc",
+                      border: "1px solid var(--border)",
+                      borderRadius: 10,
+                      cursor: "pointer",
+                      color: "#0f172a",
+                      fontFamily: "var(--font-head)",
+                      fontWeight: 700,
+                    }}
                   >
-                    <FiPaperclip size={20} />
+                    <FiPaperclip size={18} /> Choisir une image
                   </button>
 
-                  <span className="text-sm text-gray-500">
-                    Ajouter image / vidéo
+                  <span style={{ color: "var(--muted)", fontSize: 13 }}>
+                    Fichier image uniquement. Une seule image sera enregistrée.
                   </span>
 
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    multiple
-                    accept="image/*,video/*"
+                    accept="image/*"
                     hidden
                   />
                 </div>
 
-                {/* Preview */}
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {files.map((file, index) => (
-                    <div key={index} className="border p-2 rounded">
-                      {file.type.startsWith("image") ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt=""
-                          className="w-full h-20 object-cover"
-                        />
-                      ) : (
-                        <video
-                          src={URL.createObjectURL(file)}
-                          className="w-full h-20"
-                          controls
-                        />
-                      )}
+                {form.image_url && (
+                  <div style={{ marginTop: 16, maxWidth: 320 }}>
+                    <div
+                      style={{
+                        position: "relative",
+                        overflow: "hidden",
+                        borderRadius: 14,
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <img
+                        src={form.image_url}
+                        alt="Prévisualisation"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          height: 180,
+                          objectFit: "cover",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={removeSelectedFile}
+                        style={{
+                          position: "absolute",
+                          top: 10,
+                          right: 10,
+                          background: "rgba(15,23,42,.9)",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 999,
+                          width: 32,
+                          height: 32,
+                          cursor: "pointer",
+                        }}
+                      >
+                        ✕
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Boutons */}

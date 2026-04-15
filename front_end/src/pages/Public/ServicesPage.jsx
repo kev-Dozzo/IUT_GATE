@@ -16,6 +16,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getServices } from "../../services/serviceAdminService";
+import { useNavigate } from "react-router-dom";
 
 const SERVICE_ICONS = [
   MdAssignment,
@@ -38,6 +39,7 @@ const SERVICE_COLORS = [
 ];
 
 export default function ServicesPage() {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -234,7 +236,7 @@ export default function ServicesPage() {
               return (
                 <div
                   key={service.id_service}
-                  onClick={() => setSelected(service)}
+                  onClick={() => navigate(`/services/${service.id_service}`)}
                   style={{
                     background: "#fff",
                     borderRadius: 16,
@@ -337,7 +339,6 @@ export default function ServicesPage() {
         )}
       </section>
 
-      {/* ── MODAL DÉTAIL ── */}
       {selected &&
         (() => {
           const i = services.findIndex(

@@ -38,22 +38,7 @@ export default function AdminLayout({ children }) {
                 {admin?.nom || "Admin"}
               </strong>
             </span>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "#fee2e2",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 12px",
-                fontFamily: "var(--font-head)",
-                fontWeight: 600,
-                fontSize: 11,
-                color: "#991b1b",
-                cursor: "pointer",
-              }}
-            >
-              Déconnexion
-            </button>
+            
           </div>
         </header>
 

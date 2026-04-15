@@ -10,9 +10,8 @@ import {
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-import { getAnnonces } from "../../services/annonceService"
+import { getAnnonces } from "../../services/annonceService";
 import { getServices } from "../../services/serviceAdminService";
-import ServicesPage from "./ServicesPage";
 import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
 
@@ -61,9 +60,9 @@ const catColors = {
 };
 
 export default function HomePage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [annonces, setAnnonces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +77,7 @@ export default function HomePage() {
   useEffect(() => {
     getAnnonces()
       .then((data) => setAnnonces(data.slice(0, 3)))
-      .catch((err) => console.error("Erreur annonces:", err))
+      .catch(() => setError("Impossible de charger les annonces."))
       .finally(() => setLoading(false));
   }, []);
 

@@ -3,6 +3,7 @@ import {
   addEnseignant,
   deleteEnseignant,
   getAllEnseignant,
+  getEnseignantCount,
   getSingleEnseignant,
   updateEnseignant,
 } from "../controllers/enseignantController.js";
@@ -10,6 +11,7 @@ import {
 const router = express.Router();
 
 router.get("/", getAllEnseignant);
+router.get("/count", getEnseignantCount);
 router.get("/:id", getSingleEnseignant);
 router.post("/", addEnseignant);
 router.put("/:id", updateEnseignant);

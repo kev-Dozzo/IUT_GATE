@@ -1,19 +1,19 @@
 import express from "express";
 import {
   addActualiter,
-  getSingleActualiter,
   deleteActualiter,
   getAllActualiter,
+  getAnnonceCount,
+  getSingleActualiter,
   updateActualiter,
-  
 } from "../controllers/actualiterController.js";
 
 const router = express.Router();
 
 router.get("/", getAllActualiter);
+router.get("/count", getAnnonceCount);
 
 router.get("/:id", getSingleActualiter);
-
 
 router.post("/", addActualiter);
 

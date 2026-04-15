@@ -12,29 +12,28 @@ import {
   MdArrowBack,
   MdMenu,
   MdClose,
+  MdPerson,
 } from "react-icons/md";
+import Logo from "../../components/ui/logo";
 
 const navItems = [
-  { icon: MdDashboard, label: "Dashboard", path: "/admin/dashboard" },
-  { icon: MdCampaign, label: "Annonces", path: "/admin/annonces" },
-  { icon: MdPeople, label: "Enseignants", path: "/admin/enseignants" },
-  { icon: MdSchool, label: "Filières", path: "/admin/filieres" },
+  { Icon: MdDashboard, label: "Dashboard", path: "/admin/dashboard" },
+  { Icon: MdCampaign, label: "Annonces", path: "/admin/annonces" },
+  { Icon: MdPeople, label: "Enseignants", path: "/admin/enseignants" },
+  { Icon: MdSchool, label: "Filières", path: "/admin/filieres" },
   {
-    icon: MdAccountBalance,
+    Icon: MdAccountBalance,
     label: "Départements",
     path: "/admin/departements",
   },
-  { icon: MdApartment, label: "Bâtiments", path: "/admin/batiments" },
-  { icon: MdMeetingRoom, label: "Salles", path: "/admin/salles" },
-  { icon: MdSettings, label: "Services", path: "/admin/services" },
+  { Icon: MdApartment, label: "Bâtiments", path: "/admin/batiments" },
+  { Icon: MdMeetingRoom, label: "Salles", path: "/admin/salles" },
+  { Icon: MdSettings, label: "Services", path: "/admin/services" },
+  { Icon: MdPerson, label: "Profile", path: "/admin/profile" },
 ];
 
-export default function Sidebar() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [open, setOpen] = useState(false);
-
-  const SidebarContent = () => (
+function SidebarContent({ navigate, location, closeSidebar }) {
+  return (
     <>
       {/* Logo */}
       <div
@@ -44,30 +43,27 @@ export default function Sidebar() {
           marginBottom: 8,
         }}
       >
-        <p
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: 15,
-            fontWeight: 800,
-            color: "var(--navy)",
-          }}
-        >
-          IUT<span style={{ color: "var(--cyan)" }}>Gate</span>
-        </p>
+        <Logo
+          variant="compact"
+          size="300%"
+          white
+          onClick={() => navigate("/")}
+        />
         <p style={{ fontSize: 11, color: "var(--subtle)", marginTop: 2 }}>
           Espace administrateur
         </p>
       </div>
 
       {/* Nav items */}
-      {navItems.map(({ icon: Icon, label, path }) => {
-        const isActive = location.pathname === path;
+      {navItems.map((item) => {
+        const Icon = item.Icon;
+        const isActive = location.pathname === item.path;
         return (
           <div
-            key={path}
+            key={item.path}
             onClick={() => {
-              navigate(path);
-              setOpen(false);
+              navigate(item.path);
+              closeSidebar();
             }}
             style={{
               display: "flex",
@@ -91,7 +87,7 @@ export default function Sidebar() {
             }}
           >
             <Icon size={18} />
-            <span>{label}</span>
+            <span>{item.label}</span>
           </div>
         );
       })}
@@ -122,6 +118,12 @@ export default function Sidebar() {
       </div>
     </>
   );
+}
+
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -139,7 +141,11 @@ export default function Sidebar() {
           flexShrink: 0,
         }}
       >
-        <SidebarContent />
+        <SidebarContent
+          navigate={navigate}
+          location={location}
+          closeSidebar={() => setOpen(false)}
+        />
       </aside>
 
       {/* Topbar mobile pour admin */}
@@ -159,16 +165,12 @@ export default function Sidebar() {
           padding: "0 16px",
         }}
       >
-        <p
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: 14,
-            fontWeight: 800,
-            color: "var(--navy)",
-          }}
-        >
-          IUT<span style={{ color: "var(--cyan)" }}>Gate</span>
-        </p>
+        <Logo
+          variant="compact"
+          size="300%"
+          white
+          onClick={() => navigate("/")}
+        />
         <button
           onClick={() => setOpen(!open)}
           style={{ background: "none", border: "none", cursor: "pointer" }}
@@ -204,7 +206,11 @@ export default function Sidebar() {
               gap: 4,
             }}
           >
-            <SidebarContent />
+            <SidebarContent
+              navigate={navigate}
+              location={location}
+              closeSidebar={() => setOpen(false)}
+            />
           </aside>
         </div>
       )}
