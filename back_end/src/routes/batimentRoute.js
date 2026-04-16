@@ -1,18 +1,12 @@
-import express from "express";
-import {
-  addBatiment,
-  deleteBatimentController,
-  getAllBatiment,
-  getSingleBatiment,
-  updateBatimentController,
-} from "../controllers/batimentController.js";
+const router = require("express").Router();
+const ctrl = require("../controllers/batimentController");
+const auth = require("../middlewares/auth");
+const upload = require("../middlewares/upload");
 
-const router = express.Router();
+router.get("/", ctrl.getAll);
+router.get("/:id", ctrl.getById);
+router.post("/", auth, upload.single("photo"), ctrl.create);
+router.put("/:id", auth, upload.single("photo"), ctrl.update);
+router.delete("/:id", auth, ctrl.delete);
 
-router.get("/", getAllBatiment);
-router.get("/:id", getSingleBatiment);
-router.post("/", addBatiment);
-router.put("/:id", updateBatimentController);
-router.delete("/:id", deleteBatimentController);
-
-export default router;
+module.exports = router;

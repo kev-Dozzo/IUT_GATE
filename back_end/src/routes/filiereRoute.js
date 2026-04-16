@@ -1,12 +1,13 @@
 const router = require("express").Router();
-const ctrl = require("../controllers/serviceAdminController");
+const ctrl = require("../controllers/filliereController");
 const auth = require("../middlewares/auth");
+const upload = require("../middlewares/upload");
 
 router.get("/", ctrl.getAll);
 router.get("/count", ctrl.count);
 router.get("/:id", ctrl.getById);
-router.post("/", auth, ctrl.create);
-router.put("/:id", auth, ctrl.update);
+router.post("/", auth, upload.single("photo"), ctrl.create);
+router.put("/:id", auth, upload.single("photo"), ctrl.update);
 router.delete("/:id", auth, ctrl.delete);
 
 module.exports = router;

@@ -1,62 +1,20 @@
-import db from "../config/db.js";
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-export const getAllServicesAdmin = async () => {
-  const [rows] = await db.query(
-    "SELECT * FROM services_admin ORDER BY id DESC",
-  );
-  return rows;
-};
+const ServiceAdministratif = sequelize.define(
+  "ServiceAdministratif",
+  {
+    id_service: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nom: { type: DataTypes.STRING, allowNull: false },
+    description: { type: DataTypes.TEXT },
+    contact: { type: DataTypes.STRING },
+    id_batiment: { type: DataTypes.INTEGER },
+  },
+  { tableName: "services_administratifs", timestamps: true },
+);
 
-export const getServiceAdminById = async (id) => {
-  const [rows] = await db.query("SELECT * FROM services_admin WHERE id = ?", [
-    id,
-  ]);
-  return rows[0] ?? null;
-};
-
-export const createServiceAdmin = async (service) => {
-  const { nom, description, horaires, telephone, email, localisation } =
-    service;
-  const [result] = await db.query(
-    "INSERT INTO services_admin (nom, description, horaires, telephone, email, localisation) VALUES (?, ?, ?, ?, ?, ?)",
-    [
-      nom,
-      description,
-      horaires,
-      telephone || null,
-      email || null,
-      localisation,
-    ],
-  );
-  return { id: result.insertId, ...service };
-};
-
-export const updateServiceAdmin = async (id, service) => {
-  const { nom, description, horaires, telephone, email, localisation } =
-    service;
-  const [result] = await db.query(
-    "UPDATE services_admin SET nom = ?, description = ?, horaires = ?, telephone = ?, email = ?, localisation = ? WHERE id = ?",
-    [
-      nom,
-      description,
-      horaires,
-      telephone || null,
-      email || null,
-      localisation,
-      id,
-    ],
-  );
-  return result;
-};
-
-export const deleteServiceAdmin = async (id) => {
-  const [result] = await db.query("DELETE FROM services_admin WHERE id = ?", [
-    id,
-  ]);
-  return result;
-};
-
-export const countServicesAdmin = async () => {
-  const [rows] = await db.query("SELECT COUNT(*) AS count FROM services_admin");
-  return rows[0]?.count ?? 0;
-};
+module.exports = ServiceAdministratif;

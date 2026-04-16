@@ -1,133 +1,72 @@
-import {
-  getAllServicesAdmin,
-  getServiceAdminById,
-  createServiceAdmin,
-  updateServiceAdmin as updateServiceAdminModel,
-  deleteServiceAdmin as deleteServiceAdminModel,
-  countServicesAdmin,
-} from "../models/ServiceAdmin.js";
+const ServiceAdministratif = require("../models/ServiceAdmin");
+const Batiment = require("../models/Batiment");
 
-export const getAllService = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllServicesAdmin();
-    res.status(200).json(rows);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getSingleService = async (req, res, next) => {
-  try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const service = await getServiceAdminById(id);
-
-    if (!service) {
-      return res.status(404).json({ message: "Service introuvable" });
-    }
-
-    res.status(200).json(service);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const addService = async (req, res, next) => {
-  try {
-    const { nom, description, horaires, telephone, email, localisation } =
-      req.body;
-
-    if (!nom || !description || !horaires || !localisation) {
-      return res.status(400).json({ message: "champs Obligatoires" });
-    }
-
-    const service = await createServiceAdmin({
-      nom,
-      description,
-      horaires,
-      telephone: telephone || null,
-      email: email || null,
-      localisation,
+    const services = await ServiceAdministratif.findAll({
+      order: [["nom", "ASC"]],
+      include: [
+        {
+          model: Batiment,
+          as: "batiment",
+          attributes: ["id_batiment", "nom", "latitude", "longitude"],
+        },
+      ],
     });
-
-    res.status(201).json(service);
+    res.json(services);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const updateService = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, description, horaires, telephone, email, localisation } =
-      req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (!nom || !description || !horaires || !localisation) {
-      return res
-        .status(400)
-        .json({ message: "Remplisez tout les Champ disponible" });
-    }
-
-    const result = await updateServiceAdminModel(id, {
-      nom,
-      description,
-      horaires,
-      telephone: telephone || null,
-      email: email || null,
-      localisation,
+    const svc = await ServiceAdministratif.findByPk(req.params.id, {
+      include: [{ model: Batiment, as: "batiment" }],
     });
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Services introuvable" });
-    }
-
-    res.status(200).json({
-      id,
-      nom,
-      description,
-      horaires,
-      telephone: telephone || null,
-      email: email || null,
-      localisation,
-    });
+    if (!svc) return res.status(404).json({ message: "Service non trouvé" });
+    res.json(svc);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const deleteService = async (req, res, next) => {
+exports.count = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteServiceAdminModel(id);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Services introuvable" });
-    }
-
-    res.status(204).send();
+    const count = await ServiceAdministratif.count();
+    res.json({ count });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const getServiceCount = async (req, res, next) => {
+exports.create = async (req, res) => {
   try {
-    const count = await countServicesAdmin();
-    res.status(200).json({ count });
+    const svc = await ServiceAdministratif.create(req.body);
+    res.status(201).json(svc);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const svc = await ServiceAdministratif.findByPk(req.params.id);
+    if (!svc) return res.status(404).json({ message: "Service non trouvé" });
+    await svc.update(req.body);
+    res.json(svc);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const svc = await ServiceAdministratif.findByPk(req.params.id);
+    if (!svc) return res.status(404).json({ message: "Service non trouvé" });
+    await svc.destroy();
+    res.json({ message: "Service supprimé" });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };

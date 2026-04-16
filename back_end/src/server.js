@@ -1,44 +1,53 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import auth from "../src/middlewares/auth.js";
-import filliereRoute from "../src/routes/filliereRoute.js";
-import enseignantRoute from "../src/routes/enseignantRoute.js";
-import actualiterRoute from "../src/routes/actualiterRoute.js";
-import serviceAdminRoute from "../src/routes/serviceAdminRoute.js";
-import departementRoute from "../src/routes/departementRoute.js";
-import batimentRoute from "../src/routes/batimentRoute.js";
-import salleRoute from "../src/routes/salleRoute.js";
-import authRoutes from "../src/routes/authRoutes.js";
-import errorHandler from "../src/middlewares/errorHandler.js";
-
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const dotenv = require("dotenv");
 dotenv.config();
+
+const sequelize = require("./config/db");
+
+// Routes
+const authRoutes = require("./routes/authRoutes");
+const annonceRoutes = require("./routes/actualiterRoute");
+const departementRoutes = require("./routes/departementRoute");
+const filiereRoutes = require("./routes/filiereRoute");
+const enseignantRoutes = require("./routes/enseignantRoute");
+const batimentRoutes = require("./routes/batimentRoute");
+const salleRoutes = require("./routes/salleRoute");
+const serviceRoutes = require("./routes/serviceAdminRoute");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173"],
-  }),
-);
+// Servir les images uploadées
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-app.use("/api/filieres", filliereRoute);
-app.use("/api/enseignants", enseignantRoute);
-app.use("/api/departements", auth, departementRoute);
-app.use("/api/batiments", batimentRoute);
-app.use("/api/salles", salleRoute);
-app.use("/api/actualiter", actualiterRoute);
-app.use("/api/annonces", actualiterRoute);
-// app.use("/api/servicesadmin", serviceAdminRoute);
-app.use("/api/services", serviceAdminRoute);
+// Routes API
 app.use("/api/auth", authRoutes);
+app.use("/api/annonces", annonceRoutes);
+app.use("/api/departements", departementRoutes);
+app.use("/api/filieres", filiereRoutes);
+app.use("/api/enseignants", enseignantRoutes);
+app.use("/api/batiments", batimentRoutes);
+app.use("/api/salles", salleRoutes);
+app.use("/api/services", serviceRoutes);
 
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 App is listening on Port: http://localhost:${PORT}`);
+// Route test
+app.get("/", (req, res) => {
+  res.json({ message: "🚀 IUTGate API is running !" });
 });
+
+// Sync BDD + démarrage
+sequelize
+  .sync({ alter: true })
+  .then(() => {
+    console.log("✅ Base de données synchronisée");
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => console.error("❌ Erreur BDD:", err));

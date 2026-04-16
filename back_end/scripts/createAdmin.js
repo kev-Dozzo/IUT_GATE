@@ -1,49 +1,37 @@
-import dotenv from "dotenv";
-import bcrypt from "bcryptjs";
-import db from "../src/config/db.js";
-import { findByEmail, createAdmin as createAdminModel } from "../src/models/Admin.js";
-
-dotenv.config();
+require("dotenv").config();
+const bcrypt = require("bcryptjs");
+const sequelize = require("../src/config/database");
+const Admin = require("../src/models/Admin");
 
 const createAdmin = async () => {
   try {
-    await db.query("SELECT 1");
+    await sequelize.authenticate();
     console.log("✅ Connecté à la base de données");
 
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS admin (
-        id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        nom VARCHAR(150) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `);
-    console.log("✅ Table admins créée ou existante");
+    await Admin.sync({ alter: true });
 
-    const nom = "Admin IUT";
     const email = "admin@iut.cm";
     const password = "Admin@2026";
 
-    const existing = await findByEmail(email);
+    const existing = await Admin.findOne({ where: { email } });
     if (existing) {
-      console.log("⚠️  Un admin avec cet email existe déjà !");
+      console.log("⚠️  Admin existe déjà !");
       process.exit(0);
     }
 
     const hashed = await bcrypt.hash(password, 10);
+    const admin = await Admin.create({
+      nom: "Admin IUT",
+      email,
+      mot_de_passe: hashed,
+    });
 
-    const admin = await createAdminModel({ nom, email, password: hashed });
-
-    console.log("\n✅ Admin créé avec succès !");
+    console.log("\n  Admin créé avec succès !");
     console.log("─────────────────────────────");
     console.log(` Email    : ${email}`);
     console.log(` Password : ${password}`);
-    console.log(` ID       : ${admin.id}`);
-    console.log("─────────────────────────────");
-    console.log("⚠️  Changez le mot de passe après la première connexion !\n");
-
+    console.log(` ID       : ${admin.id_admin}`);
+    console.log("─────────────────────────────\n");
     process.exit(0);
   } catch (err) {
     console.error("❌ Erreur :", err.message);

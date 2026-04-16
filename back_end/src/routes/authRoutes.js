@@ -1,17 +1,11 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import db from "../config/db.js";
-import {
-  forgotPassword,
-  login,
-  resetPassword,
-} from "../controllers/authController.js";
-
+const express = require("express");
 const router = express.Router();
+const authController = require("../controllers/authController");
+const auth = require("../middlewares/auth");
 
-router.post("/login", login);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post("/login", authController.login);
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
 
-export default router;
+module.exports = router;
+

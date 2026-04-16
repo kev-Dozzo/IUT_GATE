@@ -1,44 +1,22 @@
-import db from "../config/db.js";
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-export const getAllBatiments = async () => {
-  const [rows] = await db.query("SELECT * FROM batiments ORDER BY id DESC");
-  return rows;
-};
+const Batiment = sequelize.define(
+  "Batiment",
+  {
+    id_batiment: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nom: { type: DataTypes.STRING, allowNull: false },
+    description: { type: DataTypes.TEXT },
+    latitude: { type: DataTypes.FLOAT },
+    longitude: { type: DataTypes.FLOAT },
+    photo_url: { type: DataTypes.STRING },
+    id_admin: { type: DataTypes.INTEGER },
+  },
+  { tableName: "batiments", timestamps: true },
+);
 
-export const getBatimentById = async (id) => {
-  const [rows] = await db.query("SELECT * FROM batiments WHERE id = ?", [id]);
-  return rows[0] ?? null;
-};
-
-export const createBatiment = async ({
-  nom,
-  description,
-  latitude,
-  longitude,
-}) => {
-  const [result] = await db.query(
-    "INSERT INTO batiments (nom, description, latitude, longitude) VALUES (?, ?, ?, ?)",
-    [nom, description || null, latitude || null, longitude || null],
-  );
-  return {
-    id: result.insertId,
-    nom,
-    description: description || null,
-    latitude: latitude || null,
-    longitude: longitude || null,
-  };
-};
-
-export const updateBatiment = async (id, batiment) => {
-  const { nom, description, latitude, longitude } = batiment;
-  const [result] = await db.query(
-    "UPDATE batiments SET nom = ?, description = ?, latitude = ?, longitude = ? WHERE id = ?",
-    [nom, description || null, latitude || null, longitude || null, id],
-  );
-  return result;
-};
-
-export const deleteBatiment = async (id) => {
-  const [result] = await db.query("DELETE FROM batiments WHERE id = ?", [id]);
-  return result;
-};
+module.exports = Batiment;

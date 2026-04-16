@@ -1,18 +1,11 @@
-import express from "express";
-import {
-  addDepartement,
-  deleteDepartementController,
-  getAllDepartement,
-  getSingleDepartement,
-  updateDepartementController,
-} from "../controllers/departementController.js";
+const router = require("express").Router();
+const ctrl = require("../controllers/departementController");
+const auth = require("../middlewares/auth");
 
-const router = express.Router();
+router.get("/", ctrl.getAll);
+router.get("/:id", ctrl.getById);
+router.post("/", auth, ctrl.create);
+router.put("/:id", auth, ctrl.update);
+router.delete("/:id", auth, ctrl.delete);
 
-router.get("/", getAllDepartement);
-router.get("/:id", getSingleDepartement);
-router.post("/", addDepartement);
-router.put("/:id", updateDepartementController);
-router.delete("/:id", deleteDepartementController);
-
-export default router;
+module.exports = router;

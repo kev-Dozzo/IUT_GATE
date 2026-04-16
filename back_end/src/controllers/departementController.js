@@ -1,99 +1,87 @@
-import {
-  getAllDepartements,
-  getDepartementById,
-  createDepartement,
-  updateDepartement,
-  deleteDepartement,
-} from "../models/Departement.js";
+const Departement = require("../models/Departement");
+const StaffEnseignant = require("../models/Enseignant");
+const Filiere = require("../models/Filiere");
+const sequelize = require("../config/db");
 
-export const getAllDepartement = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllDepartements();
-    res.status(200).json(rows);
+    const depts = await Departement.findAll({
+      order: [["nom", "ASC"]],
+      attributes: {
+        include: [
+          [
+            sequelize.fn("COUNT", sequelize.col("Enseignants.id_enseignant")),
+            "enseignants_count",
+          ],
+          [
+            sequelize.fn("COUNT", sequelize.col("Filieres.id_filiere")),
+            "filieres_count",
+          ],
+        ],
+      },
+    });
+    res.json(depts);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const getSingleDepartement = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const departement = await getDepartementById(id);
-    if (!departement) {
-      return res.status(404).json({ message: "Département introuvable" });
-    }
-
-    res.status(200).json(departement);
+    const dept = await Departement.findByPk(req.params.id, {
+      include: [
+        {
+          model: Filiere,
+          as: "filieres",
+          attributes: ["id_filiere", "nom", "duree"],
+        },
+        {
+          model: StaffEnseignant,
+          as: "enseignants",
+          attributes: ["id_enseignant", "nom", "role", "poste", "photo_url"],
+        },
+      ],
+    });
+    if (!dept)
+      return res.status(404).json({ message: "Département non trouvé" });
+    res.json(dept);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const addDepartement = async (req, res, next) => {
+exports.create = async (req, res) => {
   try {
-    console.log("body recu:", req.body);
-
-    const { nom, description } = req.body;
-    const adminId = req.user?.id || req.session?.admin?.id;
-
-    if (!nom) {
-      return res.status(400).json({ message: "Le nom est obligatoire" });
-    }
-
-    const departement = await createDepartement({ nom, description, adminId });
-    res.status(201).json(departement);
+    const dept = await Departement.create({
+      ...req.body,
+      id_admin: req.admin.id_admin,
+    });
+    res.status(201).json(dept);
   } catch (err) {
-    console.error("ERREUR CONTROLLER :", err);
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-
-export const updateDepartementController = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, description } = req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-    if (!nom) {
-      return res.status(400).json({ message: "Le nom est obligatoire" });
-    }
-
-    const result = await updateDepartement(id, { nom, description });
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Département introuvable" });
-    }
-
-    res.status(200).json({ id, nom, description });
+    const dept = await Departement.findByPk(req.params.id);
+    if (!dept)
+      return res.status(404).json({ message: "Département non trouvé" });
+    await dept.update(req.body);
+    res.json(dept);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const deleteDepartementController = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteDepartement(id);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Département introuvable" });
-    }
-
-    res.status(204).send();
+    const dept = await Departement.findByPk(req.params.id);
+    if (!dept)
+      return res.status(404).json({ message: "Département non trouvé" });
+    await dept.destroy();
+    res.json({ message: "Département supprimé" });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
-
-

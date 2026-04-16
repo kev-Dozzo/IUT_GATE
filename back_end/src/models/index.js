@@ -1,10 +1,10 @@
-import * as AdminModel from "./Admin.js";
-import * as ActualiterModel from "./Actualiter.js";
-import * as EnseignantModel from "./Enseignant.js";
-import * as FiliereModel from "./Filiere.js";
-import * as ServiceAdminModel from "./ServiceAdmin.js";
+const AdminModel = require("./Admin");
+const ActualiterModel = require("./Actualiter");
+const EnseignantModel = require("./Enseignant");
+const FiliereModel = require("./Filiere");
+const ServiceAdminModel = require("./ServiceAdmin");
 
-export {
+module.exports = {
   AdminModel,
   ActualiterModel,
   EnseignantModel,

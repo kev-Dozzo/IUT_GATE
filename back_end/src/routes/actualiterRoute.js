@@ -1,25 +1,13 @@
-import express from "express";
-import {
-  addActualiter,
-  deleteActualiter,
-  getAllActualiter,
-  getAnnonceCount,
-  getSingleActualiter,
-  updateActualiter,
-} from "../controllers/actualiterController.js";
+const router = require("express").Router();
+const ctrl = require("../controllers/actualiterController");
+const auth = require("../middlewares/auth");
+const upload = require("../middlewares/upload");
 
-const router = express.Router();
+router.get("/", ctrl.getAll);
+router.get("/count", ctrl.count);
+router.get("/:id", ctrl.getById);
+router.post("/", auth, upload.single("photo"), ctrl.create);
+router.put("/:id", auth, upload.single("photo"), ctrl.update);
+router.delete("/:id", auth, ctrl.delete);
 
-router.get("/", getAllActualiter);
-router.get("/count", getAnnonceCount);
-
-router.get("/:id", getSingleActualiter);
-
-router.post("/", addActualiter);
-
-router.put("/:id", updateActualiter);
-
-router.delete("/:id", deleteActualiter);
-
-
-export default router;
+module.exports = router;

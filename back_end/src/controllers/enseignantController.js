@@ -1,135 +1,90 @@
-import {
-  getAllEnseignants,
-  getEnseignantById,
-  createEnseignant,
-  updateEnseignant as updateEnseignantModel,
-  deleteEnseignant as deleteEnseignantModel,
-  countEnseignants,
-} from "../models/Enseignant.js";
+const StaffEnseignant = require("../models/Enseignant");
+const Departement = require("../models/Departement");
+const Batiment = require("../models/Batiment");
 
-export const getAllEnseignant = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllEnseignants();
-    res.status(200).json(rows);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getSingleEnseignant = async (req, res, next) => {
-  try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const enseignant = await getEnseignantById(id);
-
-    if (!enseignant) {
-      return res.status(404).json({ message: "enseignant introuvable" });
-    }
-
-    res.status(200).json(enseignant);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const addEnseignant = async (req, res, next) => {
-  try {
-    const { nom, prenom, email, telephone, bureau, matiere, filiere_id } =
-      req.body;
-
-    if (!nom || !prenom || !email || !matiere) {
-      return res.status(400).json({ message: "champ Obligatoires" });
-    }
-
-    const enseignant = await createEnseignant({
-      nom,
-      prenom,
-      email,
-      telephone: telephone || null,
-      bureau: bureau || null,
-      matiere: matiere || null,
-      filiere_id: filiere_id || null,
+    const enseignants = await StaffEnseignant.findAll({
+      order: [["nom", "ASC"]],
+      include: [
+        {
+          model: Departement,
+          as: "departement",
+          attributes: ["id_departement", "nom"],
+        },
+      ],
     });
-
-    res.status(201).json(enseignant);
+    res.json(enseignants);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const updateEnseignant = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, prenom, email, telephone, bureau, matiere, filiere_id } =
-      req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (!nom || !prenom || !email || !matiere) {
-      return res
-        .status(400)
-        .json({ message: "Remplisez tout les Champ disponible" });
-    }
-
-    const result = await updateEnseignantModel(id, {
-      nom,
-      prenom,
-      email,
-      telephone: telephone || null,
-      bureau: bureau || null,
-      matiere: matiere || null,
-      filiere_id: filiere_id || null,
+    const ens = await StaffEnseignant.findByPk(req.params.id, {
+      include: [
+        {
+          model: Departement,
+          as: "departement",
+          attributes: ["id_departement", "nom"],
+        },
+        {
+          model: Batiment,
+          as: "batiment",
+          attributes: ["id_batiment", "nom", "latitude", "longitude"],
+        },
+      ],
     });
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    res.json(ens);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Enseignant introuvable" });
-    }
+exports.count = async (req, res) => {
+  try {
+    const count = await StaffEnseignant.count();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
 
-    res.status(200).json({
-      id,
-      nom,
-      prenom,
-      email,
-      telephone: telephone || null,
-      bureau: bureau || null,
-      matiere: matiere || null,
-      filiere_id: filiere_id || null,
+exports.create = async (req, res) => {
+  try {
+    const ens = await StaffEnseignant.create({
+      ...req.body,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
+      created_by_admin: req.admin.id_admin,
     });
+    res.status(201).json(ens);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const deleteEnseignant = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteEnseignantModel(id);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Enseignant  introuvable" });
-    }
-    res.status(204).send();
+    const ens = await StaffEnseignant.findByPk(req.params.id);
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await ens.update(updates);
+    res.json(ens);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const getEnseignantCount = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
-    const count = await countEnseignants();
-    res.status(200).json({ count });
+    const ens = await StaffEnseignant.findByPk(req.params.id);
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    await ens.destroy();
+    res.json({ message: "Enseignant supprimé" });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };

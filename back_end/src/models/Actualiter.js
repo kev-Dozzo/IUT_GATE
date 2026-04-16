@@ -1,39 +1,22 @@
-import db from "../config/db.js";
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-export const getAllActualites = async () => {
-  const [rows] = await db.query("SELECT * FROM actualites ORDER BY id DESC");
-  return rows;
-};
+const Annonce = sequelize.define(
+  "Annonce",
+  {
+    id_annonce: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    titre: { type: DataTypes.STRING, allowNull: false },
+    contenu: { type: DataTypes.TEXT, allowNull: false },
+    categorie: { type: DataTypes.STRING, defaultValue: "Général" },
+    photo_url: { type: DataTypes.STRING, allowNull: true },
+    date_publication: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    id_admin: { type: DataTypes.INTEGER, allowNull: true },
+  },
+  { tableName: "annonces", timestamps: true },
+);
 
-export const getActualiteById = async (id) => {
-  const [rows] = await db.query("SELECT * FROM actualites WHERE id = ?", [id]);
-  return rows[0] ?? null;
-};
-
-export const createActualite = async (actualite) => {
-  const { titre, contenu, extrait, categorie, image_url } = actualite;
-  const [result] = await db.query(
-    "INSERT INTO actualites (titre, contenu, extrait, categorie, image_url) VALUES (?, ?, ?, ?, ?)",
-    [titre, contenu, extrait || null, categorie, image_url || null],
-  );
-  return { id: result.insertId, ...actualite };
-};
-
-export const updateActualite = async (id, actualite) => {
-  const { titre, contenu, extrait, categorie, image_url } = actualite;
-  const [result] = await db.query(
-    "UPDATE actualites SET titre = ?, contenu = ?, extrait = ?, categorie = ?, image_url = ? WHERE id = ?",
-    [titre, contenu, extrait || null, categorie, image_url || null, id],
-  );
-  return result;
-};
-
-export const deleteActualite = async (id) => {
-  const [result] = await db.query("DELETE FROM actualites WHERE id = ?", [id]);
-  return result;
-};
-
-export const countActualites = async () => {
-  const [rows] = await db.query("SELECT COUNT(*) AS count FROM actualites");
-  return rows[0]?.count ?? 0;
-};
+module.exports = Annonce;

@@ -1,54 +1,40 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { findByEmail, updatePasswordById } from "../models/Admin.js";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const { findByEmail, updatePasswordById } = require("../models/Admin");
 
 dotenv.config();
 
 const resetTokens = new Map();
 
-export const login = async (req, res, next) => {
+exports.login = async (req, res) => {
   try {
     const { email, mot_de_passe } = req.body;
-
-    if (!email || !mot_de_passe) {
-      return res.status(400).json({ message: "Email et mot de passe requis" });
-    }
-
     const admin = await findByEmail(email);
-    if (!admin) {
-      return res
-        .status(401)
-        .json({ message: "Email ou mot de passe incorrect" });
-    }
-
-    const isValid = await bcrypt.compare(mot_de_passe, admin.password);
-    if (!isValid) {
-      return res
-        .status(401)
-        .json({ message: "Email ou mot de passe incorrect" });
-    }
-
+    if (!admin) return res.status(404).json({ message: "Admin non trouvé" });
+    const isMatch = await bcrypt.compare(mot_de_passe, admin.mot_de_passe);
+    if (!isMatch)
+      return res.status(400).json({ message: "Mot de passe incorrect" });
     const token = jwt.sign(
-      { id: admin.id, email: admin.email },
+      { id_admin: admin.id_admin, email: admin.email },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "2h",
-      },
+      { expiresIn: "24h" },
     );
-
-    res
-      .status(200)
-      .json({
-        token,
-        admin: { id: admin.id, nom: admin.nom, email: admin.email },
-      });
+    res.json({
+      message: "Connexion réussie",
+      token,
+      admin: {
+        id_admin: admin.id_admin,
+        nom: admin.nom,
+        email: admin.email,
+      },
+    });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const forgotPassword = async (req, res, next) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -63,7 +49,7 @@ export const forgotPassword = async (req, res, next) => {
 
     const token = Math.random().toString(36).slice(2, 18);
     resetTokens.set(token, {
-      id: admin.id,
+      id: admin.id_admin,
       email,
       expiresAt: Date.now() + 1000 * 60 * 30,
     });
@@ -74,7 +60,7 @@ export const forgotPassword = async (req, res, next) => {
   }
 };
 
-export const resetPassword = async (req, res, next) => {
+exports.resetPassword = async (req, res, next) => {
   try {
     const { token, mot_de_passe } = req.body;
 

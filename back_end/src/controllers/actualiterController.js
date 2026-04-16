@@ -1,128 +1,75 @@
-import {
-  getAllActualites,
-  getActualiteById,
-  createActualite,
-  updateActualite as updateActualiteModel,
-  deleteActualite as deleteActualiteModel,
-  countActualites,
-} from "../models/Actualiter.js";
+const Annonce = require("../models/Actualiter");
 
-export const getAllActualiter = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllActualites();
-    res.status(200).json(rows);
+    const annonces = await Annonce.findAll({
+      order: [["date_publication", "DESC"]],
+    });
+    res.json(annonces);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const getSingleActualiter = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const actualite = await getActualiteById(id);
-
-    if (!actualite) {
-      return res.status(404).json({ message: "Actualité introuvable" });
-    }
-
-    res.status(200).json(actualite);
+    const annonce = await Annonce.findByPk(req.params.id);
+    if (!annonce)
+      return res.status(404).json({ message: "Annonce non trouvée" });
+    res.json(annonce);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const addActualiter = async (req, res, next) => {
+exports.count = async (req, res) => {
   try {
-    const { titre, contenu, extrait, categorie, image_url } = req.body;
+    const count = await Annonce.count();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
 
-    if (!titre || !contenu || !categorie) {
-      return res.status(400).json({ message: "champ Obligatoires" });
-    }
-
-    const actualite = await createActualite({
+exports.create = async (req, res) => {
+  try {
+    const { titre, contenu, categorie } = req.body;
+    const annonce = await Annonce.create({
       titre,
       contenu,
-      extrait: extrait || null,
       categorie,
-      image_url: image_url || null,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
+      id_admin: req.admin.id_admin,
+      date_publication: new Date(),
     });
-
-    res.status(201).json(actualite);
+    res.status(201).json(annonce);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const updateActualiter = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { titre, contenu, extrait, categorie, image_url } = req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (!titre || !contenu || !categorie) {
-      return res
-        .status(400)
-        .json({ message: "Remplisez tout les Champ disponible" });
-    }
-
-    const result = await updateActualiteModel(id, {
-      titre,
-      contenu,
-      extrait: extrait || null,
-      categorie,
-      image_url: image_url || null,
-    });
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Actualité introuvable" });
-    }
-
-    res.status(200).json({
-      id,
-      titre,
-      contenu,
-      extrait: extrait || null,
-      categorie,
-      image_url: image_url || null,
-    });
+    const annonce = await Annonce.findByPk(req.params.id);
+    if (!annonce)
+      return res.status(404).json({ message: "Annonce non trouvée" });
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await annonce.update(updates);
+    res.json(annonce);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const deleteActualiter = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteActualiteModel(id);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Actualiter introuvable" });
-    }
-
-    res.status(204).send();
+    const annonce = await Annonce.findByPk(req.params.id);
+    if (!annonce)
+      return res.status(404).json({ message: "Annonce non trouvée" });
+    await annonce.destroy();
+    res.json({ message: "Annonce supprimée" });
   } catch (err) {
-    next(err);
-  }
-};
-
-export const getAnnonceCount = async (req, res, next) => {
-  try {
-    const count = await countActualites();
-    res.status(200).json({ count });
-  } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };

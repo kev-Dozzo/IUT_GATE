@@ -1,128 +1,84 @@
-import {
-  getAllFilieres,
-  getFiliereById,
-  createFiliere,
-  updateFiliere as updateFiliereModel,
-  deleteFiliere as deleteFiliereModel,
-  countFilieres,
-} from "../models/Filiere.js";
+const Filiere = require("../models/Filiere");
+const StaffEnseignant = require("../models/Enseignant");
+const Departement = require("../models/Departement");
 
-export const getAllFilliere = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllFilieres();
-    res.status(200).json(rows);
+    const filieres = await Filiere.findAll({ order: [["nom", "ASC"]] });
+    res.json(filieres);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const getSingleFilliere = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const filiere = await getFiliereById(id);
-
-    if (!filiere) {
-      return res.status(404).json({ message: "Filière introuvable" });
-    }
-
-    res.status(200).json(filiere);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const addFilliere = async (req, res, next) => {
-  try {
-    const { nom, code, description, duree, debouches } = req.body;
-
-    if (!nom || !code || !description || !duree) {
-      return res.status(400).json({ message: "nom et code sont Obligatoires" });
-    }
-
-    const filiere = await createFiliere({
-      nom,
-      code,
-      description,
-      duree,
-      debouches: debouches || null,
+    const filiere = await Filiere.findByPk(req.params.id, {
+      include: [
+        {
+          model: Departement,
+          as: "departement",
+          attributes: ["id_departement", "nom"],
+        },
+        {
+          model: StaffEnseignant,
+          as: "enseignants",
+          attributes: ["id_enseignant", "nom", "role", "poste", "photo_url"],
+        },
+      ],
     });
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
+    res.json(filiere);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
 
+exports.count = async (req, res) => {
+  try {
+    const count = await Filiere.count();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
+
+exports.create = async (req, res) => {
+  try {
+    const filiere = await Filiere.create({
+      ...req.body,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
+      id_admin: req.admin.id_admin,
+    });
     res.status(201).json(filiere);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const updateFilliere = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, code, description, duree, debouches } = req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (!nom || !code || !description || !duree) {
-      return res
-        .status(400)
-        .json({ message: "Remplisez tout les Champ disponible" });
-    }
-
-    const result = await updateFiliereModel(id, {
-      nom,
-      code,
-      description,
-      duree,
-      debouches: debouches || null,
-    });
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Filière introuvable" });
-    }
-
-    res.status(200).json({
-      id,
-      nom,
-      code,
-      description,
-      duree,
-      debouches: debouches || null,
-    });
+    const filiere = await Filiere.findByPk(req.params.id);
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await filiere.update(updates);
+    res.json(filiere);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
 
-export const deleteFilliere = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteFiliereModel(id);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Filière introuvable" });
-    }
-
-    res.status(204).send();
+    const filiere = await Filiere.findByPk(req.params.id);
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
+    await filiere.destroy();
+    res.json({ message: "Filière supprimée" });
   } catch (err) {
-    next(err);
-  }
-};
-
-export const getFilliereCount = async (req, res, next) => {
-  try {
-    const count = await countFilieres();
-    res.status(200).json({ count });
-  } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err });
   }
 };
