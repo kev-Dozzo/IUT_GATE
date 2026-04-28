@@ -56,21 +56,38 @@ function CoreService() {
   }, []);
 
   // Filtrage des services
-  const filtered = services.filter((s) =>
-    (s.nom?.toLowerCase() || "").includes(search.toLowerCase()) ||
-    (s.description?.toLowerCase() || "").includes(search.toLowerCase())
+  const filtered = services.filter(
+    (s) =>
+      (s.nom?.toLowerCase() || "").includes(search.toLowerCase()) ||
+      (s.description?.toLowerCase() || "").includes(search.toLowerCase()),
   );
 
   return (
     <>
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}>
-
-        <div style={{
-          textAlign: "center",
-          margin: "10px auto",
-        }}>
-          <h2 style={{fontSize:"4rem", textAlign: "center", fontWeight:"bolder"}} >Nos <span style={{color:"#06B6D4"}} >Services</span></h2>
-          <p style={{textAlign: "center", fontSize: "16px", color:"#7DD3FC"}} >Tout ce dont vous avez besoin pour votre vie universitaire, au même endroit.</p>
+      <section
+        style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            margin: "10px auto",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "4rem",
+              textAlign: "center",
+              fontWeight: "bolder",
+            }}
+          >
+            Nos <span style={{ color: "#06B6D4" }}>Services</span>
+          </h2>
+          <p
+            style={{ textAlign: "center", fontSize: "16px", color: "#7DD3FC" }}
+          >
+            Tout ce dont vous avez besoin pour votre vie universitaire, au même
+            endroit.
+          </p>
         </div>
 
         {/* Barre de recherche */}
@@ -120,7 +137,8 @@ function CoreService() {
         {/* Compteur */}
         {!loading && !error && (
           <p style={{ fontSize: 14, color: "#64748b", marginBottom: 24 }}>
-            {filtered.length} service{filtered.length > 1 ? "s" : ""} trouvé{filtered.length > 1 ? "s" : ""}
+            {filtered.length} service{filtered.length > 1 ? "s" : ""} trouvé
+            {filtered.length > 1 ? "s" : ""}
           </p>
         )}
 
@@ -138,7 +156,9 @@ function CoreService() {
                 animation: "spin 1s linear infinite",
               }}
             />
-            <p style={{ color: "#64748b", fontSize: 14 }}>Chargement des services...</p>
+            <p style={{ color: "#64748b", fontSize: 14 }}>
+              Chargement des services...
+            </p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
         )}
@@ -154,19 +174,27 @@ function CoreService() {
               border: "1px solid #fca5a5",
             }}
           >
-            <p style={{ fontWeight: 600, color: "#991b1b", marginBottom: 8 }}>{error}</p>
+            <p style={{ fontWeight: 600, color: "#991b1b", marginBottom: 8 }}>
+              {error}
+            </p>
             <p style={{ fontSize: 13, color: "#b91c1c" }}>
-              Vérifiez que le serveur backend est bien démarré.
+              Desoler une erreur est souvenu .
             </p>
           </div>
         )}
 
         {/* Aucun résultat */}
         {!loading && !error && filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#64748b" }}>
+          <div
+            style={{ textAlign: "center", padding: "80px 0", color: "#64748b" }}
+          >
             <MdBusiness size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
-            <p style={{ fontWeight: 600, fontSize: 16 }}>Aucun service trouvé</p>
-            <p style={{ fontSize: 14, marginTop: 8 }}>Essayez un autre mot-clé.</p>
+            <p style={{ fontWeight: 600, fontSize: 16 }}>
+              Aucun service trouvé
+            </p>
+            <p style={{ fontSize: 14, marginTop: 8 }}>
+              Essayez un autre mot-clé.
+            </p>
           </div>
         )}
 
@@ -187,7 +215,9 @@ function CoreService() {
               return (
                 <div
                   key={service.id_service || service.id}
-                  onClick={() => navigate(`/services/${service.id_service || service.id}`)}
+                  onClick={() =>
+                    navigate(`/services/${service.id_service || service.id}`)
+                  }
                   style={{
                     background: "#fff",
                     borderRadius: 16,
@@ -251,20 +281,23 @@ function CoreService() {
                   </p>
 
                   {/* Localisation */}
-                  {service.batiment?.nom || service.localisation && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        color: "#64748b",
-                        fontSize: 12.5,
-                      }}
-                    >
-                      <MdLocationOn size={15} color={col.color} />
-                      <span>{service.batiment?.nom || service.localisation}</span>
-                    </div>
-                  )}
+                  {service.batiment?.nom ||
+                    (service.localisation && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          color: "#64748b",
+                          fontSize: 12.5,
+                        }}
+                      >
+                        <MdLocationOn size={15} color={col.color} />
+                        <span>
+                          {service.batiment?.nom || service.localisation}
+                        </span>
+                      </div>
+                    ))}
 
                   {/* CTA */}
                   <div

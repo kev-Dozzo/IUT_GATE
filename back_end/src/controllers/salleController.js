@@ -27,6 +27,15 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.count = async (req, res) => {
+  try {
+    const count = await Salle.count();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const salle = await Salle.create(req.body);

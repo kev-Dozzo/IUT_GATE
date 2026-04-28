@@ -117,7 +117,7 @@ export default function HomePage() {
               marginBottom: 22,
             }}
           >
-            ✦ Portail Numérique du Campus
+             Portail Numérique du Campus
           </span>
 
           <h1

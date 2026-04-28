@@ -10,6 +10,11 @@ export const getSalleById = async (id) => {
   return res.data;
 };
 
+export const getSalleCount = async () => {
+  const res = await api.get("/salles/count");
+  return res.data.count;
+};
+
 export const createSalle = async (data) => {
   const res = await api.post("/salles", data);
   return res.data;

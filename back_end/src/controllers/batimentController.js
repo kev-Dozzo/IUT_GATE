@@ -31,6 +31,15 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.count = async (req, res) => {
+  try {
+    const count = await Batiment.count();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const bat = await Batiment.create({

@@ -10,6 +10,11 @@ export const getBatimentById = async (id) => {
   return res.data;
 };
 
+export const getBatimentCount = async () => {
+  const res = await api.get("/batiments/count");
+  return res.data.count;
+};
+
 export const createBatiment = async (data) => {
   const res = await api.post("/batiments", data);
   return res.data;

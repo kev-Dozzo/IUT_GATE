@@ -10,6 +10,11 @@ export const getDepartementById = async (id) => {
   return res.data;
 };
 
+export const getDepartementCount = async () => {
+  const res = await api.get("/departements/count");
+  return res.data.count;
+};
+
 export const createDepartement = async (data) => {
   const res = await api.post("/departements", data);
   return res.data;

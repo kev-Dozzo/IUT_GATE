@@ -6,6 +6,9 @@ dotenv.config();
 
 const sequelize = require("./config/db");
 
+// Charger les associations AVANT la sync
+require("./models/associations");
+
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const annonceRoutes = require("./routes/actualiterRoute");
