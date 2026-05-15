@@ -15,7 +15,7 @@ exports.getAll = async (req, res) => {
     });
     res.json(services);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -27,7 +27,7 @@ exports.getById = async (req, res) => {
     if (!svc) return res.status(404).json({ message: "Service non trouvé" });
     res.json(svc);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -36,16 +36,23 @@ exports.count = async (req, res) => {
     const count = await ServiceAdministratif.count();
     res.json({ count });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
 exports.create = async (req, res) => {
   try {
-    const svc = await ServiceAdministratif.create(req.body);
+    const { nom, description, contact, id_batiment } = req.body;
+    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    const svc = await ServiceAdministratif.create({
+      nom,
+      description,
+      contact,
+      id_batiment,
+    });
     res.status(201).json(svc);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -56,7 +63,7 @@ exports.update = async (req, res) => {
     await svc.update(req.body);
     res.json(svc);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -67,6 +74,6 @@ exports.delete = async (req, res) => {
     await svc.destroy();
     res.json({ message: "Service supprimé" });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

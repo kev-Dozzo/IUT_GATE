@@ -9,7 +9,10 @@ import {
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-import { getAnnonceById, getAnnonces } from "../../services/annonceService";
+import {
+  getActualiteById,
+  getActualites,
+} from "../../services/actualiteService";
 
 const catColors = {
   Examens: { bg: "#fee2e2", color: "#991b1b" },
@@ -20,22 +23,23 @@ const catColors = {
   Général: { bg: "#f1f5f9", color: "#475569" },
 };
 
-export default function AnnonceDetailPage() {
+export default function ActualiteDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [annonce, setAnnonce] = useState(null);
+  const [actualite, setActualite] = useState(null);
   const [autres, setAutres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([getAnnonceById(id), getAnnonces()])
+    Promise.all([getActualiteById(id), getActualites()])
       .then(([ann, all]) => {
-        setAnnonce(ann);
-        setAutres(all.filter((a) => a.id_annonce !== parseInt(id)).slice(0, 3));
+        setActualite(ann);
+        setAutres(
+          all.filter((a) => a.id_actualite !== parseInt(id)).slice(0, 3),
+        );
       })
-      .catch(() => setError("Annonce introuvable."))
+      .catch(() => setError("Actualité introuvable."))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -60,7 +64,7 @@ export default function AnnonceDetailPage() {
       >
         {/* Retour */}
         <button
-          onClick={() => navigate("/annonces")}
+          onClick={() => navigate("/actualites")}
           style={{
             display: "flex",
             alignItems: "center",
@@ -76,7 +80,7 @@ export default function AnnonceDetailPage() {
             padding: 0,
           }}
         >
-          <MdArrowBack size={16} /> Retour aux annonces
+          <MdArrowBack size={16} /> Retour aux actualités
         </button>
 
         {loading && (
@@ -108,7 +112,7 @@ export default function AnnonceDetailPage() {
           </p>
         )}
 
-        {!loading && annonce && (
+        {!loading && actualite && (
           <div
             style={{
               display: "grid",
@@ -127,10 +131,10 @@ export default function AnnonceDetailPage() {
                 }}
               >
                 {/* Photo si existe */}
-                {annonce.photo_url && (
+                {actualite.photo_url && (
                   <img
-                    src={`http://localhost:5000${annonce.photo_url}`}
-                    alt={annonce.titre}
+                    src={`http://localhost:5000${actualite.photo_url}`}
+                    alt={actualite.titre}
                     style={{ width: "100%", height: 280, objectFit: "cover" }}
                   />
                 )}
@@ -140,7 +144,7 @@ export default function AnnonceDetailPage() {
                   style={{
                     height: 5,
                     background: (
-                      catColors[annonce.categorie] || catColors["Général"]
+                      catColors[actualite.categorie] || catColors["Général"]
                     ).color,
                   }}
                 />
@@ -166,14 +170,14 @@ export default function AnnonceDetailPage() {
                         fontWeight: 700,
                         fontFamily: "var(--font-head)",
                         background: (
-                          catColors[annonce.categorie] || catColors["Général"]
+                          catColors[actualite.categorie] || catColors["Général"]
                         ).bg,
                         color: (
-                          catColors[annonce.categorie] || catColors["Général"]
+                          catColors[actualite.categorie] || catColors["Général"]
                         ).color,
                       }}
                     >
-                      {annonce.categorie || "Général"}
+                      {actualite.categorie || "Général"}
                     </span>
                     <div
                       style={{
@@ -185,8 +189,8 @@ export default function AnnonceDetailPage() {
                       }}
                     >
                       <MdCalendarToday size={13} />
-                      {annonce.date_publication
-                        ? formatDate(annonce.date_publication)
+                      {actualite.date_publication
+                        ? formatDate(actualite.date_publication)
                         : ""}
                     </div>
                   </div>
@@ -203,7 +207,7 @@ export default function AnnonceDetailPage() {
                       letterSpacing: -0.5,
                     }}
                   >
-                    {annonce.titre}
+                    {actualite.titre}
                   </h1>
 
                   <div
@@ -223,7 +227,7 @@ export default function AnnonceDetailPage() {
                       whiteSpace: "pre-wrap",
                     }}
                   >
-                    {annonce.contenu}
+                    {actualite.contenu}
                   </p>
 
                   {/* Footer */}
@@ -260,7 +264,7 @@ export default function AnnonceDetailPage() {
                     marginBottom: 16,
                   }}
                 >
-                  Autres annonces
+                  Autres actualités
                 </p>
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 12 }}
@@ -269,8 +273,10 @@ export default function AnnonceDetailPage() {
                     const cat = catColors[a.categorie] || catColors["Général"];
                     return (
                       <div
-                        key={a.id_annonce}
-                        onClick={() => navigate(`/annonces/${a.id_annonce}`)}
+                        key={a.id_actualite}
+                        onClick={() =>
+                          navigate(`/actualites/${a.id_actualite}`)
+                        }
                         style={{
                           background: "#fff",
                           borderRadius: 12,
@@ -336,7 +342,7 @@ export default function AnnonceDetailPage() {
                 </div>
 
                 <button
-                  onClick={() => navigate("/annonces")}
+                  onClick={() => navigate("/actualites")}
                   style={{
                     marginTop: 16,
                     width: "100%",
@@ -351,7 +357,7 @@ export default function AnnonceDetailPage() {
                     cursor: "pointer",
                   }}
                 >
-                  Voir toutes les annonces
+                  Voir toutes les actualités
                 </button>
               </div>
             )}

@@ -7,7 +7,6 @@ const createAdmin = async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ Connecté à la base de données");
-
     await Admin.sync({ alter: true });
 
     const email = "admin@iut.cm";
@@ -26,15 +25,15 @@ const createAdmin = async () => {
       mot_de_passe: hashed,
     });
 
-    console.log("\n  Admin créé avec succès !");
-    console.log("─────────────────────────────");
+    console.log("\n Admin créé !");
+    console.log("─────────────────────────");
     console.log(` Email    : ${email}`);
     console.log(` Password : ${password}`);
     console.log(` ID       : ${admin.id_admin}`);
-    console.log("─────────────────────────────\n");
+    console.log("─────────────────────────\n");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Erreur :", err.message);
+    console.error(" Erreur :", err.message);
     process.exit(1);
   }
 };

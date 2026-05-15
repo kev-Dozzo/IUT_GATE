@@ -1,28 +1,13 @@
 const Departement = require("../models/Departement");
 const StaffEnseignant = require("../models/Enseignant");
 const Filiere = require("../models/Filiere");
-const sequelize = require("../config/db");
 
 exports.getAll = async (req, res) => {
   try {
-    const depts = await Departement.findAll({
-      order: [["nom", "ASC"]],
-      attributes: {
-        include: [
-          [
-            sequelize.fn("COUNT", sequelize.col("Enseignants.id_enseignant")),
-            "enseignants_count",
-          ],
-          [
-            sequelize.fn("COUNT", sequelize.col("Filieres.id_filiere")),
-            "filieres_count",
-          ],
-        ],
-      },
-    });
+    const depts = await Departement.findAll({ order: [["nom", "ASC"]] });
     res.json(depts);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -46,28 +31,22 @@ exports.getById = async (req, res) => {
       return res.status(404).json({ message: "Département non trouvé" });
     res.json(dept);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
-  }
-};
-
-exports.count = async (req, res) => {
-  try {
-    const count = await Departement.count();
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
 exports.create = async (req, res) => {
   try {
+    const { nom, description } = req.body;
+    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
     const dept = await Departement.create({
-      ...req.body,
+      nom,
+      description,
       id_admin: req.admin.id_admin,
     });
     res.status(201).json(dept);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -79,7 +58,7 @@ exports.update = async (req, res) => {
     await dept.update(req.body);
     res.json(dept);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -91,6 +70,6 @@ exports.delete = async (req, res) => {
     await dept.destroy();
     res.json({ message: "Département supprimé" });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

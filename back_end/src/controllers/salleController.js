@@ -11,7 +11,7 @@ exports.getAll = async (req, res) => {
     });
     res.json(salles);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -23,25 +23,18 @@ exports.getById = async (req, res) => {
     if (!salle) return res.status(404).json({ message: "Salle non trouvée" });
     res.json(salle);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
-  }
-};
-
-exports.count = async (req, res) => {
-  try {
-    const count = await Salle.count();
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
 exports.create = async (req, res) => {
   try {
-    const salle = await Salle.create(req.body);
+    const { nom, capacite, type, id_batiment } = req.body;
+    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    const salle = await Salle.create({ nom, capacite, type, id_batiment });
     res.status(201).json(salle);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -52,7 +45,7 @@ exports.update = async (req, res) => {
     await salle.update(req.body);
     res.json(salle);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -63,6 +56,6 @@ exports.delete = async (req, res) => {
     await salle.destroy();
     res.json({ message: "Salle supprimée" });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

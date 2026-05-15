@@ -16,7 +16,7 @@ exports.getAll = async (req, res) => {
     });
     res.json(enseignants);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -39,7 +39,7 @@ exports.getById = async (req, res) => {
     if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
     res.json(ens);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -48,20 +48,39 @@ exports.count = async (req, res) => {
     const count = await StaffEnseignant.count();
     res.json({ count });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
 exports.create = async (req, res) => {
   try {
+    const {
+      nom,
+      email,
+      telephone,
+      role,
+      poste,
+      bureau,
+      id_departement,
+      id_batiment,
+    } = req.body;
+    if (!nom || !email)
+      return res.status(400).json({ message: "Nom et email obligatoires" });
     const ens = await StaffEnseignant.create({
-      ...req.body,
+      nom,
+      email,
+      telephone,
+      role,
+      poste,
+      bureau,
+      id_departement,
+      id_batiment,
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       created_by_admin: req.admin.id_admin,
     });
     res.status(201).json(ens);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -74,7 +93,7 @@ exports.update = async (req, res) => {
     await ens.update(updates);
     res.json(ens);
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
@@ -85,6 +104,6 @@ exports.delete = async (req, res) => {
     await ens.destroy();
     res.json({ message: "Enseignant supprimé" });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err });
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

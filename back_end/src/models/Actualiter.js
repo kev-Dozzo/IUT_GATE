@@ -1,10 +1,10 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
+const sequelize = require("../config/database");
 
-const Annonce = sequelize.define(
-  "Annonce",
+const Actualite = sequelize.define(
+  "Actualite",
   {
-    id_annonce: {
+    id_actualite: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -12,11 +12,11 @@ const Annonce = sequelize.define(
     titre: { type: DataTypes.STRING, allowNull: false },
     contenu: { type: DataTypes.TEXT, allowNull: false },
     categorie: { type: DataTypes.STRING, defaultValue: "Général" },
-    photo_url: { type: DataTypes.STRING, allowNull: true },
+    photo_url: { type: DataTypes.STRING },
     date_publication: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    id_admin: { type: DataTypes.INTEGER, allowNull: true },
+    id_admin: { type: DataTypes.INTEGER },
   },
-  { tableName: "annonces", timestamps: true },
+  { tableName: "actualites", timestamps: true },
 );
 
-module.exports = Annonce;
+module.exports = Actualite;

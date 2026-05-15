@@ -1,36 +1,93 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
-const sequelize = require("./config/db");
+const sequelize = require("./config/database");
 
-// Charger les associations AVANT la sync
-require("./models/associations");
+// ── MODÈLES ──
+const Admin = require("./models/Admin");
+const Actualite = require("./models/Actualiter");
+const Departement = require("./models/Departement");
+const Filiere = require("./models/Filiere");
+const StaffEnseignant = require("./models/Enseignant");
+const Batiment = require("./models/Batiment");
+const Salle = require("./models/Salle");
+const ServiceAdministratif = require("./models/ServiceAdmin");
 
-// Routes
+// ── ASSOCIATIONS ──
+Departement.hasMany(Filiere, { foreignKey: "id_departement", as: "filieres" });
+Filiere.belongsTo(Departement, {
+  foreignKey: "id_departement",
+  as: "departement",
+});
+
+Departement.hasMany(StaffEnseignant, {
+  foreignKey: "id_departement",
+  as: "enseignants",
+});
+StaffEnseignant.belongsTo(Departement, {
+  foreignKey: "id_departement",
+  as: "departement",
+});
+
+Batiment.hasMany(Salle, { foreignKey: "id_batiment", as: "salles" });
+Salle.belongsTo(Batiment, { foreignKey: "id_batiment", as: "batiment" });
+
+Batiment.hasMany(StaffEnseignant, {
+  foreignKey: "id_batiment",
+  as: "enseignants_batiment",
+});
+StaffEnseignant.belongsTo(Batiment, {
+  foreignKey: "id_batiment",
+  as: "batiment",
+});
+
+Batiment.hasMany(ServiceAdministratif, {
+  foreignKey: "id_batiment",
+  as: "services",
+});
+ServiceAdministratif.belongsTo(Batiment, {
+  foreignKey: "id_batiment",
+  as: "batiment",
+});
+
+Admin.hasMany(Actualite, { foreignKey: "id_admin", as: "actualites" });
+Actualite.belongsTo(Admin, { foreignKey: "id_admin", as: "admin" });
+
+Filiere.belongsToMany(StaffEnseignant, {
+  through: "filiere_enseignants",
+  foreignKey: "id_filiere",
+  otherKey: "id_enseignant",
+  as: "enseignants",
+});
+StaffEnseignant.belongsToMany(Filiere, {
+  through: "filiere_enseignants",
+  foreignKey: "id_enseignant",
+  otherKey: "id_filiere",
+  as: "filieres",
+});
+
+// ── ROUTES ──
 const authRoutes = require("./routes/authRoutes");
-const annonceRoutes = require("./routes/actualiterRoute");
-const departementRoutes = require("./routes/departementRoute");
-const filiereRoutes = require("./routes/filiereRoute");
-const enseignantRoutes = require("./routes/enseignantRoute");
-const batimentRoutes = require("./routes/batimentRoute");
-const salleRoutes = require("./routes/salleRoute");
-const serviceRoutes = require("./routes/serviceAdminRoute");
+const actualiteRoutes = require("./routes/actualiterRoutes");
+const departementRoutes = require("./routes/departementRoutes");
+const filiereRoutes = require("./routes/filiereRoutes");
+const enseignantRoutes = require("./routes/enseignantRoutes");
+const batimentRoutes = require("./routes/batimentRoutes");
+const salleRoutes = require("./routes/salleRoutes");
+const serviceRoutes = require("./routes/serviceRoutes");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Servir les images uploadées
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// Routes API
+// ── API ROUTES ──
 app.use("/api/auth", authRoutes);
-app.use("/api/annonces", annonceRoutes);
+app.use("/api/actualites", actualiteRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/filieres", filiereRoutes);
 app.use("/api/enseignants", enseignantRoutes);
@@ -38,19 +95,14 @@ app.use("/api/batiments", batimentRoutes);
 app.use("/api/salles", salleRoutes);
 app.use("/api/services", serviceRoutes);
 
-// Route test
-app.get("/", (req, res) => {
-  res.json({ message: "🚀 IUTGate API is running !" });
-});
+app.get("/", (req, res) => res.json({ message: "🚀 IUTGate API running !" }));
 
-// Sync BDD + démarrage
+// ── SYNC BDD ──
 sequelize
   .sync({ alter: true })
   .then(() => {
     console.log("✅ Base de données synchronisée");
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
+    app.listen(PORT, () => console.log(`🚀 Server → http://localhost:${PORT}`));
   })
   .catch((err) => console.error("❌ Erreur BDD:", err));

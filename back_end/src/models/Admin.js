@@ -1,23 +1,19 @@
-const db = require("../config/db");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
-exports.findByEmail = async (email) => {
-  const [rows] = await db.query("SELECT * FROM admin WHERE email = ?", [email]);
-  return rows[0] ?? null;
-};
+const Admin = sequelize.define(
+  "Admin",
+  {
+    id_admin: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nom: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false, unique: true },
+    mot_de_passe: { type: DataTypes.STRING, allowNull: false },
+  },
+  { tableName: "admins", timestamps: true },
+);
 
-exports.createAdmin = async (admin) => {
-  const { nom, email, password } = admin;
-  const [result] = await db.query(
-    "INSERT INTO admin (nom, email, password) VALUES (?, ?, ?)",
-    [nom, email, password],
-  );
-  return { id: result.insertId, nom, email, password };
-};
-
-exports.updatePasswordById = async (id, password) => {
-  const [result] = await db.query(
-    "UPDATE admin SET password = ? WHERE id = ?",
-    [password, id],
-  );
-  return result;
-};
+module.exports = Admin;
