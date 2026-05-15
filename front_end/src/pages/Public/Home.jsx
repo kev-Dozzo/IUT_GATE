@@ -12,7 +12,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getActualites } from "../../services/actualiteService";
 import { getServices } from "../../services/serviceAdminService";
-import CoreService from "../../components/layout/CoreService";
+// import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
 // import Actualite from "../../../../back_end/src/models/Actualiter";
 
@@ -310,7 +310,7 @@ export default function HomePage() {
       </section>
       {/* Services RÉCENTES */}
 
-      <CoreService />
+      {/* <CoreService /> */}
       {/* ANNONCES RÉCENTES */}
       <section className="page-container" style={{ marginTop: 56 }}>
         <div
