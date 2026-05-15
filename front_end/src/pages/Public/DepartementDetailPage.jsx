@@ -7,10 +7,31 @@ import {
   MdBook,
   MdArrowForward,
   MdAccountBalance,
+  MdLocationOn,
+  MdDirections,
 } from "react-icons/md";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
+import Avatar from "../../components/ui/Avatar";
 import { getDepartementById } from "../../services/departementService";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+const markerIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:36px;height:36px;background:#06B6D4;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 14px rgba(6,182,212,.5);"></div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+});
 
 export default function DepartementDetailPage() {
   const { id } = useParams();
@@ -26,6 +47,13 @@ export default function DepartementDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const openItineraire = (lat, lng) => {
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+      "_blank",
+    );
+  };
+
   return (
     <div>
       <Navbar />
@@ -34,7 +62,7 @@ export default function DepartementDetailPage() {
         style={{
           background:
             "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)",
-          padding: "40px 32px",
+          padding: "clamp(32px, 6vw, 56px) 24px",
         }}
       >
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
@@ -51,83 +79,100 @@ export default function DepartementDetailPage() {
               fontFamily: "var(--font-head)",
               fontWeight: 600,
               fontSize: 13,
-              marginBottom: 20,
+              marginBottom: 24,
               padding: 0,
             }}
           >
             <MdArrowBack size={16} /> Retour aux départements
           </button>
-          {dept && (
-            <>
-              <p
+
+          {!loading && dept && (
+            <div
+              style={{
+                display: "flex",
+                gap: 20,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <div
                 style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "var(--cyan)",
-                  fontFamily: "var(--font-head)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  marginBottom: 8,
+                  width: 70,
+                  height: 70,
+                  borderRadius: 18,
+                  background: "rgba(6,182,212,.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                Département
-              </p>
-              <h1
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: 32,
-                  fontWeight: 800,
-                  color: "#fff",
-                  letterSpacing: -0.8,
-                  marginBottom: 16,
-                }}
-              >
-                {dept.nom}
-              </h1>
-              <div style={{ display: "flex", gap: 12 }}>
-                {dept.enseignants_count !== undefined && (
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 5,
-                      padding: "5px 14px",
-                      borderRadius: 999,
-                      background: "rgba(255,255,255,.15)",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      fontFamily: "var(--font-head)",
-                      color: "#fff",
-                    }}
-                  >
-                    <MdPeople size={13} /> {dept.enseignants_count} enseignants
-                  </span>
-                )}
-                {dept.filieres_count !== undefined && (
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 5,
-                      padding: "5px 14px",
-                      borderRadius: 999,
-                      background: "var(--cyan-light)",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      fontFamily: "var(--font-head)",
-                      color: "var(--cyan-dark)",
-                    }}
-                  >
-                    <MdBook size={13} /> {dept.filieres_count} filières
-                  </span>
-                )}
+                <MdAccountBalance size={34} color="var(--cyan)" />
               </div>
-            </>
+              <div>
+                <h1
+                  style={{
+                    fontFamily: "var(--font-head)",
+                    fontSize: "clamp(22px, 4vw, 34px)",
+                    fontWeight: 800,
+                    color: "#fff",
+                    marginBottom: 12,
+                  }}
+                >
+                  {dept.nom}
+                </h1>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {dept.enseignants_count !== undefined && (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                        padding: "4px 14px",
+                        borderRadius: 999,
+                        background: "rgba(255,255,255,.15)",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-head)",
+                        color: "#fff",
+                      }}
+                    >
+                      <MdPeople size={13} /> {dept.enseignants_count}{" "}
+                      enseignants
+                    </span>
+                  )}
+                  {dept.filieres_count !== undefined && (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                        padding: "4px 14px",
+                        borderRadius: 999,
+                        background: "var(--cyan-light)",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-head)",
+                        color: "var(--cyan-dark)",
+                      }}
+                    >
+                      <MdBook size={13} /> {dept.filieres_count} filières
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </section>
 
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 32px" }}>
+      <div
+        style={{
+          maxWidth: 1000,
+          margin: "0 auto",
+          padding: "clamp(20px, 4vw, 40px) 24px",
+        }}
+      >
         {loading && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div
@@ -158,12 +203,12 @@ export default function DepartementDetailPage() {
         )}
 
         {!loading && dept && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Description */}
             <div
               style={{
                 background: "#fff",
-                borderRadius: 14,
+                borderRadius: 16,
                 border: "1px solid var(--border)",
                 padding: "28px",
               }}
@@ -191,8 +236,8 @@ export default function DepartementDetailPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 24,
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 20,
               }}
             >
               {/* Filières */}
@@ -200,7 +245,7 @@ export default function DepartementDetailPage() {
                 <div
                   style={{
                     background: "#fff",
-                    borderRadius: 14,
+                    borderRadius: 16,
                     border: "1px solid var(--border)",
                     padding: "24px",
                   }}
@@ -282,7 +327,7 @@ export default function DepartementDetailPage() {
                 <div
                   style={{
                     background: "#fff",
-                    borderRadius: 14,
+                    borderRadius: 16,
                     border: "1px solid var(--border)",
                     padding: "24px",
                   }}
@@ -303,7 +348,7 @@ export default function DepartementDetailPage() {
                   <div
                     style={{ display: "flex", flexDirection: "column", gap: 8 }}
                   >
-                    {dept.enseignants.map((e) => (
+                    {dept.enseignants.map((e, i) => (
                       <div
                         key={e.id_enseignant}
                         onClick={() =>
@@ -313,7 +358,7 @@ export default function DepartementDetailPage() {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          padding: "12px 14px",
+                          padding: "10px 14px",
                           background: "#f8fafc",
                           borderRadius: 10,
                           border: "1px solid var(--border)",
@@ -337,7 +382,13 @@ export default function DepartementDetailPage() {
                             gap: 10,
                           }}
                         >
-                          <MdPeople size={16} color="var(--cyan-dark)" />
+                          <Avatar
+                            nom={e.nom}
+                            photoUrl={e.photo_url}
+                            size={36}
+                            index={i}
+                            shape="rounded"
+                          />
                           <div>
                             <p
                               style={{
@@ -361,6 +412,136 @@ export default function DepartementDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Carte bâtiment principal */}
+            {dept.batiment?.latitude && dept.batiment?.longitude && (
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 16,
+                  border: "1px solid var(--border)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "18px 20px",
+                    borderBottom: "1px solid var(--border)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 10,
+                  }}
+                >
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        color: "#0f172a",
+                      }}
+                    >
+                      📍 Localisation
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "var(--muted)",
+                        marginTop: 2,
+                      }}
+                    >
+                      {dept.batiment.nom}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() =>
+                        openItineraire(
+                          dept.batiment.latitude,
+                          dept.batiment.longitude,
+                        )
+                      }
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        padding: "7px 14px",
+                        background: "var(--cyan)",
+                        color: "var(--cyan-text)",
+                        border: "none",
+                        borderRadius: 8,
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <MdDirections size={16} /> Itinéraire
+                    </button>
+                    <button
+                      onClick={() => navigate("/carte")}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        padding: "7px 14px",
+                        background: "var(--cyan-light)",
+                        color: "var(--cyan-dark)",
+                        border: "none",
+                        borderRadius: 8,
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <MdLocationOn size={16} /> Carte campus
+                    </button>
+                  </div>
+                </div>
+                <div style={{ height: 320 }}>
+                  <MapContainer
+                    center={[
+                      parseFloat(dept.batiment.latitude),
+                      parseFloat(dept.batiment.longitude),
+                    ]}
+                    zoom={17}
+                    style={{ height: "100%", width: "100%" }}
+                    scrollWheelZoom={false}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution="© OpenStreetMap"
+                      maxZoom={22}
+                      maxNativeZoom={19}
+                    />
+                    <Marker
+                      position={[
+                        parseFloat(dept.batiment.latitude),
+                        parseFloat(dept.batiment.longitude),
+                      ]}
+                      icon={markerIcon}
+                    >
+                      <Popup>
+                        <p
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {dept.batiment.nom}
+                        </p>
+                        <p style={{ fontSize: 12, color: "#64748b" }}>
+                          {dept.nom}
+                        </p>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

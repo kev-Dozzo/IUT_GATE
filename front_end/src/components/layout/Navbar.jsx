@@ -5,7 +5,7 @@ import campusLogo from "../../assets/public/logo.png";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
-  { label: "Annonces", path: "/annonces" },
+  { label: "Actualites", path: "/actualites" },
   { label: "Filières", path: "/filieres" },
   { label: "Enseignants", path: "/enseignants" },
   { label: "Départements", path: "/departements" },

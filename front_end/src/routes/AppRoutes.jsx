@@ -2,8 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // Public
 import HomePage from "../pages/Public/Home";
-import AnnoncesPage from "../pages/Public/AnnoncesPage";
-import AnnonceDetailPage from "../pages/Public/AnnonceDetailPage";
+import ActualitesPage from "../pages/Public/ActualitesPage";
+import ActualiteDetailPage from "../pages/Public/ActualiteDetailPage";
 import FilieresPage from "../pages/Public/FilieresPage";
 import FiliereDetailPage from "../pages/Public/FiliereDetailPage";
 import EnseignantsPage from "../pages/Public/EnseignantsPage";
@@ -14,14 +14,14 @@ import ServicesPage from "../pages/Public/ServicesPage";
 import ServiceDetailPage from "../pages/Public/ServiceDetailPage";
 import CartePage from "../pages/Public/CartePage";
 import NotFoundPage from "../pages/Public/NotFoundPage";
-import AproposPage from "../pages/Public/about";  
+import AproposPage from "../pages/Public/about";
 
 // Admin
 import LoginPage from "../pages/admin/LoginPage";
 import ForgotPasswordPage from "../pages/admin/ForgetPassWord";
 import ResetPasswordPage from "../pages/admin/ResetPassWord";
 import DashboardPage from "../pages/admin/Dashboard";
-import AnnoncesAdmin from "../pages/admin/AnnoncesAdmin";
+import ActualitesAdmin from "../pages/admin/ActualitesAdmin";
 import EnseignantsAdmin from "../pages/admin/EnseignantsAdmin";
 import FilieresAdmin from "../pages/admin/FilieresAdmin";
 import DepartementsAdmin from "../pages/admin/DepartementsAdmin";
@@ -35,8 +35,8 @@ export default function AppRoutes() {
     <Routes>
       {/* ── PUBLIC ── */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/annonces" element={<AnnoncesPage />} />
-      <Route path="/annonces/:id" element={<AnnonceDetailPage />} />
+      <Route path="/actualites" element={<ActualitesPage />} />
+      <Route path="/actualies/:id" element={<ActualiteDetailPage />} />
       <Route path="/filieres" element={<FilieresPage />} />
       <Route path="/filieres/:id" element={<FiliereDetailPage />} />
       <Route path="/enseignants" element={<EnseignantsPage />} />
@@ -46,7 +46,7 @@ export default function AppRoutes() {
       <Route path="/services" element={<ServicesPage />} />
       <Route path="/services/:id" element={<ServiceDetailPage />} />
       <Route path="/carte" element={<CartePage />} />
-      <Route path="/apropos" element={<AproposPage />} /> 
+      <Route path="/apropos" element={<AproposPage />} />
 
       {/* ── ADMIN AUTH ── */}
       <Route path="/admin/login" element={<LoginPage />} />
@@ -63,10 +63,10 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/admin/annonces"
+        path="/admin/actualites"
         element={
           <PrivateRoute>
-            <AnnoncesAdmin />
+            <ActualitesAdmin />
           </PrivateRoute>
         }
       />

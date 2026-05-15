@@ -1,129 +1,109 @@
-import db from "../config/db.js";
+const StaffEnseignant = require("../models/Enseignant");
+const Departement = require("../models/Departement");
+const Batiment = require("../models/Batiment");
 
-export const getAllEnseignant = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT enseignants.*, filieres.nom AS filiere_nom FROM enseignants LEFT JOIN filieres ON enseignants.filiere_id = filieres.id ORDER BY enseignants.id DESC",
-    );
-    res.status(200).json(rows);
-  } catch (err) {
-    console.error("Error fetching enseignants:", err.message);
-    next(err);
-  }
-};
-
-export const getSingleEnseignant = async (req, res, next) => {
-  try {
-    const id = Number(req.params.id);
-    const [rows] = await db.query("SELECT * FROM enseignants WHERE id = ?", [
-      id,
-    ]);
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "enseignant introuvable" });
-    }
-
-    res.status(200).json(rows[0]);
-  } catch (err) {
-    console.error("Error fetching enseignants:", err.message);
-    next(err);
-  }
-};
-
-export const addEnseignant = async (req, res, next) => {
-  try {
-    const { nom, prenom, email, telephone, bureau, matiere, filiere_id } =
-      req.body;
-
-    if (!nom || !prenom || !email || !matiere) {
-      return res.status(400).json({ message: "champ Obligatoires" });
-    }
-
-    const [result] = await db.query(
-      "INSERT INTO enseignants (nom, prenom, email, telephone, bureau, matiere, filiere_id) VALUES(?,?,?,?,?,?,?)",
-      [
-        nom,
-        prenom,
-        email,
-        telephone || null,
-        bureau || null,
-        matiere || null,
-        filiere_id || null,
+    const enseignants = await StaffEnseignant.findAll({
+      order: [["nom", "ASC"]],
+      include: [
+        {
+          model: Departement,
+          as: "departement",
+          attributes: ["id_departement", "nom"],
+        },
       ],
-    );
-
-    res.status(201).json({
-      id: result.insertId,
-      nom,
-      prenom,
-      email,
-      telephone: telephone || null,
-      bureau: bureau || null,
-      matiere: matiere || null,
-      filiere_id: filiere_id || null,
     });
+    res.json(enseignants);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const updateEnseignant = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, prenom, email, telephone, bureau, matiere, filiere_id } =
-      req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (!nom || !prenom || !email || !matiere) {
-      return res
-        .status(400)
-        .json({ message: "Remplisez tout les Champ disponible" });
-    }
-
-    const [result] = await db.query(
-      "UPDATE enseignants SET nom =?, prenom=?, email=?, telephone=?,bureau=?, matiere=?, filiere_id=? WHERE id =?",
-      [nom, prenom, email, telephone, bureau, matiere, filiere_id, id],
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Enseignant introuvable" });
-    }
-
-    res.status(200).json({
-      id,
-      nom,
-      prenom,
-      email,
-      telephone: telephone || null,
-      bureau: bureau || null,
-      matiere: matiere || null,
-      filiere_id: filiere_id || null,
+    const ens = await StaffEnseignant.findByPk(req.params.id, {
+      include: [
+        {
+          model: Departement,
+          as: "departement",
+          attributes: ["id_departement", "nom"],
+        },
+        {
+          model: Batiment,
+          as: "batiment",
+          attributes: ["id_batiment", "nom", "latitude", "longitude"],
+        },
+      ],
     });
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    res.json(ens);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const deleteEnseignant = async (req, res, next) => {
+exports.count = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const [result] = await db.query("DELETE FROM enseignants WHERE id=?", [id]);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Enseignant  introuvable" });
-    }
-    res.status(204).send();
+    const count = await StaffEnseignant.count();
+    res.json({ count });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
+  }
+};
+
+exports.create = async (req, res) => {
+  try {
+    const {
+      nom,
+      email,
+      telephone,
+      role,
+      poste,
+      bureau,
+      id_departement,
+      id_batiment,
+    } = req.body;
+    if (!nom || !email)
+      return res.status(400).json({ message: "Nom et email obligatoires" });
+    const ens = await StaffEnseignant.create({
+      nom,
+      email,
+      telephone,
+      role,
+      poste,
+      bureau,
+      id_departement,
+      id_batiment,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
+      created_by_admin: req.admin.id_admin,
+    });
+    res.status(201).json(ens);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const ens = await StaffEnseignant.findByPk(req.params.id);
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await ens.update(updates);
+    res.json(ens);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const ens = await StaffEnseignant.findByPk(req.params.id);
+    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    await ens.destroy();
+    res.json({ message: "Enseignant supprimé" });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

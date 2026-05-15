@@ -12,6 +12,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getFilieres } from "../../services/filiereService";
 
+
 const dureeColors = {
   "2 ans": { bg: "#d1fae5", color: "#065f46" },
   "3 ans": { bg: "#cffafe", color: "#164e63" },
@@ -214,7 +215,7 @@ export default function FilieresPage() {
               return (
                 <div
                   key={filiere.id_filiere}
-                  onClick={() => setSelected(filiere)}
+                  onClick={() => navigate(`/filieres/${filiere.id_filiere}`)}
                   style={{
                     background: "#fff",
                     borderRadius: 16,
