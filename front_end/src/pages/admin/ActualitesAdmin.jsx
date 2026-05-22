@@ -88,21 +88,20 @@ export default function ActualitesAdmin() {
   };
 
   useEffect(() => {
-    fetchActualites();
-  }, [fetchActualites]);
+    const fetchActualites = async () => {
+      setLoading(true);
+      try {
+        const data = await getActualites();
+        setActualites(data);
+      } catch {
+        showToast("Erreur lors du chargement.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchActualites = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getActualites();
-      setActualites(data);
-    } catch {
-      showToast("Erreur lors du chargement.", "error");
-    } finally {
-      setLoading(false);
-    }
-  });
+    fetchActualites();
+  }, []);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
