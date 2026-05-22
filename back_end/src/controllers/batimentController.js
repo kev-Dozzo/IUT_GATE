@@ -1,108 +1,74 @@
-import {
-  getAllBatiments,
-  getBatimentById,
-  createBatiment,
-  updateBatiment,
-  deleteBatiment,
-} from "../models/Batiment.js";
+const Batiment = require("../models/Batiment");
+const Salle = require("../models/Salle");
 
-export const getAllBatiment = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await getAllBatiments();
-    res.status(200).json(rows);
+    const batiments = await Batiment.findAll({
+      order: [["nom", "ASC"]],
+      include: [
+        {
+          model: Salle,
+          as: "salles",
+          attributes: ["id_salle", "nom", "type", "capacite"],
+        },
+      ],
+    });
+    res.json(batiments);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const getSingleBatiment = async (req, res, next) => {
+exports.getById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const batiment = await getBatimentById(id);
-    if (!batiment) {
-      return res.status(404).json({ message: "Bâtiment introuvable" });
-    }
-
-    res.status(200).json(batiment);
+    const bat = await Batiment.findByPk(req.params.id, {
+      include: [{ model: Salle, as: "salles" }],
+    });
+    if (!bat) return res.status(404).json({ message: "Bâtiment non trouvé" });
+    res.json(bat);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const addBatiment = async (req, res, next) => {
+exports.create = async (req, res) => {
   try {
     const { nom, description, latitude, longitude } = req.body;
-
-    if (!nom) {
-      return res.status(400).json({ message: "Le nom est obligatoire" });
-    }
-
-    const batiment = await createBatiment({
+    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    const bat = await Batiment.create({
       nom,
       description,
       latitude,
       longitude,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
+      id_admin: req.admin.id_admin,
     });
-    res.status(201).json(batiment);
+    res.status(201).json(bat);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const updateBatimentController = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const { nom, description, latitude, longitude } = req.body;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-    if (!nom) {
-      return res.status(400).json({ message: "Le nom est obligatoire" });
-    }
-
-    const result = await updateBatiment(id, {
-      nom,
-      description,
-      latitude,
-      longitude,
-    });
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Bâtiment introuvable" });
-    }
-
-    res.status(200).json({
-      id,
-      nom,
-      description: description || null,
-      latitude: latitude || null,
-      longitude: longitude || null,
-    });
+    const bat = await Batiment.findByPk(req.params.id);
+    if (!bat) return res.status(404).json({ message: "Bâtiment non trouvé" });
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await bat.update(updates);
+    res.json(bat);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };
 
-export const deleteBatimentController = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid ID" });
-    }
-
-    const result = await deleteBatiment(id);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Bâtiment introuvable" });
-    }
-
-    res.status(204).send();
+    const bat = await Batiment.findByPk(req.params.id);
+    if (!bat) return res.status(404).json({ message: "Bâtiment non trouvé" });
+    await bat.destroy();
+    res.json({ message: "Bâtiment supprimé" });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

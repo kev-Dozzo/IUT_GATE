@@ -13,7 +13,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignants } from "../../services/enseignantService";
 import Avatar from "../../components/ui/Avatar";
-import {useNavigate } from "react-router-dom";  
+import { useNavigate } from "react-router-dom";
 
 const AVATAR_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -234,7 +234,7 @@ export default function EnseignantsPage() {
                 marginBottom: 8,
               }}
             >
-              {error}
+              Erreur de chargement
             </p>
             <p style={{ fontSize: 13, color: "#164e63" }}>
               Un Problem est survenu.

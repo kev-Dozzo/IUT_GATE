@@ -1,10 +1,10 @@
-const StaffEnseignant = require("../models/Enseignant");
+const Filiere = require("../models/Filiere");
 const Departement = require("../models/Departement");
-const Batiment = require("../models/Batiment");
+const StaffEnseignant = require("../models/Enseignant");
 
 exports.getAll = async (req, res) => {
   try {
-    const enseignants = await StaffEnseignant.findAll({
+    const filieres = await Filiere.findAll({
       order: [["nom", "ASC"]],
       include: [
         {
@@ -14,7 +14,7 @@ exports.getAll = async (req, res) => {
         },
       ],
     });
-    res.json(enseignants);
+    res.json(filieres);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -22,7 +22,7 @@ exports.getAll = async (req, res) => {
 
 exports.getById = async (req, res) => {
   try {
-    const ens = await StaffEnseignant.findByPk(req.params.id, {
+    const filiere = await Filiere.findByPk(req.params.id, {
       include: [
         {
           model: Departement,
@@ -30,14 +30,15 @@ exports.getById = async (req, res) => {
           attributes: ["id_departement", "nom"],
         },
         {
-          model: Batiment,
-          as: "batiment",
-          attributes: ["id_batiment", "nom", "latitude", "longitude"],
+          model: StaffEnseignant,
+          as: "enseignants",
+          attributes: ["id_enseignant", "nom", "role", "poste", "photo_url"],
         },
       ],
     });
-    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
-    res.json(ens);
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
+    res.json(filiere);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -45,7 +46,7 @@ exports.getById = async (req, res) => {
 
 exports.count = async (req, res) => {
   try {
-    const count = await StaffEnseignant.count();
+    const count = await Filiere.count();
     res.json({ count });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -56,29 +57,24 @@ exports.create = async (req, res) => {
   try {
     const {
       nom,
-      email,
-      telephone,
-      role,
-      poste,
-      bureau,
+      description,
+      duree,
+      condition_admission,
+      places,
       id_departement,
-      id_batiment,
     } = req.body;
-    if (!nom || !email)
-      return res.status(400).json({ message: "Nom et email obligatoires" });
-    const ens = await StaffEnseignant.create({
+    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    const filiere = await Filiere.create({
       nom,
-      email,
-      telephone,
-      role,
-      poste,
-      bureau,
+      description,
+      duree,
+      condition_admission,
+      places,
       id_departement,
-      id_batiment,
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
-      created_by_admin: req.admin.id_admin,
+      id_admin: req.admin.id_admin,
     });
-    res.status(201).json(ens);
+    res.status(201).json(filiere);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -86,12 +82,13 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const ens = await StaffEnseignant.findByPk(req.params.id);
-    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
+    const filiere = await Filiere.findByPk(req.params.id);
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
     const updates = { ...req.body };
     if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
-    await ens.update(updates);
-    res.json(ens);
+    await filiere.update(updates);
+    res.json(filiere);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -99,10 +96,11 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const ens = await StaffEnseignant.findByPk(req.params.id);
-    if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
-    await ens.destroy();
-    res.json({ message: "Enseignant supprimé" });
+    const filiere = await Filiere.findByPk(req.params.id);
+    if (!filiere)
+      return res.status(404).json({ message: "Filière non trouvée" });
+    await filiere.destroy();
+    res.json({ message: "Filière supprimée" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }

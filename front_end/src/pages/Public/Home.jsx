@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MdSearch,
@@ -10,10 +10,11 @@ import {
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-import { getAnnonces } from "../../services/annonceService";
+import { getActualites } from "../../services/actualiteService";
 import { getServices } from "../../services/serviceAdminService";
-import CoreService from "../../components/layout/CoreService";
+// import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
+// import Actualite from "../../../../back_end/src/models/Actualiter";
 
 const quickLinks = [
   {
@@ -42,9 +43,9 @@ const quickLinks = [
   },
   {
     icon: MdCampaign,
-    label: "Annonces",
+    label: "Acttualites",
     sub: "Actualités campus",
-    path: "/annonces",
+    path: "/actualite",
     bg: "#fef3c7",
     color: "#92400e",
   },
@@ -64,7 +65,7 @@ export default function HomePage() {
   const [services, setServices] = useState([]);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [annonces, setAnnonces] = useState([]);
+  const [actualite, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,14 +73,14 @@ export default function HomePage() {
       .then((data) => setServices(data))
       .catch(() => setError("Impossible de charger les services."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setError, setServices]);
 
   useEffect(() => {
-    getAnnonces()
-      .then((data) => setAnnonces(data.slice(0, 3)))
+    getActualites()
+      .then((data) => setActualites(data.slice(0, 3)))
       .catch(() => setError("Impossible de charger les annonces."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setError]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -117,7 +118,7 @@ export default function HomePage() {
               marginBottom: 22,
             }}
           >
-            ✦ Portail Numérique du Campus
+            Portail Numérique du Campus
           </span>
 
           <h1
@@ -245,7 +246,7 @@ export default function HomePage() {
         style={{ maxWidth: 1100, margin: "-24px auto 0", padding: "0 24px" }}
       >
         <div className="grid-4">
-          {quickLinks.map(({ icon: Icon, label, sub, path, bg, color }) => (
+          {quickLinks.map(({ icon, label, sub, path, bg, color }) => (
             <div
               key={label}
               onClick={() => navigate(path)}
@@ -284,7 +285,7 @@ export default function HomePage() {
                   flexShrink: 0,
                 }}
               >
-                <Icon size={22} color={color} />
+                {React.createElement(icon, { size: 22, color })}
               </div>
               <div>
                 <p
@@ -309,7 +310,7 @@ export default function HomePage() {
       </section>
       {/* Services RÉCENTES */}
 
-      <CoreService />
+      {/* <CoreService /> */}
       {/* ANNONCES RÉCENTES */}
       <section className="page-container" style={{ marginTop: 56 }}>
         <div
@@ -379,7 +380,7 @@ export default function HomePage() {
           >
             Chargement des annonces...
           </div>
-        ) : annonces.length === 0 ? (
+        ) : actualite.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -391,12 +392,15 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid-3">
-            {annonces.map((annonce) => {
-              const cat = catColors[annonce.categorie] || catColors["Général"];
+            {actualite.map((actualite) => {
+              const cat =
+                catColors[actualite.categorie] || catColors["Général"];
               return (
                 <div
-                  key={annonce.id_annonce}
-                  onClick={() => navigate(`/actualites/${annonce.id_annonce}`)}
+                  key={actualite.id_actualite}
+                  onClick={() =>
+                    navigate(`/actualites/${actualite.id_actualite}`)
+                  }
                   style={{
                     background: "#fff",
                     borderRadius: 14,
@@ -439,14 +443,17 @@ export default function HomePage() {
                         color: cat.color,
                       }}
                     >
-                      {annonce.categorie || "Général"}
+                      {actualite.categorie || "Général"}
                     </span>
                     <span style={{ fontSize: 11, color: "var(--subtle)" }}>
-                      {annonce.date_publication
-                        ? new Date(annonce.date_publication).toLocaleDateString(
-                            "fr-FR",
-                            { day: "numeric", month: "long", year: "numeric" },
-                          )
+                      {actualite.date_publication
+                        ? new Date(
+                            actualite.date_publication,
+                          ).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
                         : ""}
                     </span>
                   </div>
@@ -459,7 +466,7 @@ export default function HomePage() {
                       lineHeight: 1.4,
                     }}
                   >
-                    {annonce.titre}
+                    {actualite.titre}
                   </h3>
                   <p
                     style={{
@@ -469,7 +476,7 @@ export default function HomePage() {
                       flex: 1,
                     }}
                   >
-                    {annonce.contenu?.slice(0, 100)}...
+                    {actualite.contenu?.slice(0, 100)}...
                   </p>
                   <span
                     style={{

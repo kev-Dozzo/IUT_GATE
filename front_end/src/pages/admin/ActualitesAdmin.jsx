@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   MdAdd,
   MdEdit,
@@ -12,11 +12,11 @@ import {
 } from "react-icons/md";
 import AdminLayout from "../../components/layout/AdminLayout";
 import {
-  getAnnonces,
-  createAnnonce,
-  updateAnnonce,
-  deleteAnnonce,
-} from "../../services/annonceService";
+  getActualites,
+  createActualite,
+  updateActualite,
+  deleteActualite,
+} from "../../services/actualiteService";
 import { FiPaperclip } from "react-icons/fi";
 
 const CATEGORIES = [
@@ -44,8 +44,8 @@ const emptyForm = {
   image_url: "",
 };
 
-export default function AnnoncesAdmin() {
-  const [annonces, setAnnonces] = useState([]);
+export default function ActualitesAdmin() {
+  const [actualites, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(null); // 'add' | 'edit' | 'delete'
@@ -88,20 +88,20 @@ export default function AnnoncesAdmin() {
   };
 
   useEffect(() => {
-    fetchAnnonces();
-  }, []);
+    const fetchActualites = async () => {
+      setLoading(true);
+      try {
+        const data = await getActualites();
+        setActualites(data);
+      } catch {
+        showToast("Erreur lors du chargement.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchAnnonces = async () => {
-    setLoading(true);
-    try {
-      const data = await getAnnonces();
-      setAnnonces(data);
-    } catch {
-      showToast("Erreur lors du chargement.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchActualites();
+  }, []);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -115,20 +115,20 @@ export default function AnnoncesAdmin() {
     setModal("add");
   };
 
-  const openEdit = (annonce) => {
+  const openEdit = (actualite) => {
     setForm({
-      titre: annonce.titre,
-      contenu: annonce.contenu,
-      categorie: annonce.categorie || "Général",
-      image_url: annonce.image_url || "",
+      titre: actualite.titre,
+      contenu: actualite.contenu,
+      categorie: actualite.categorie || "Général",
+      image_url: actualite.image_url || "",
     });
     setFiles([]);
-    setSelected(annonce);
+    setSelected(actualite);
     setModal("edit");
   };
 
-  const openDelete = (annonce) => {
-    setSelected(annonce);
+  const openDelete = (actualite) => {
+    setSelected(actualite);
     setModal("delete");
   };
 
@@ -146,13 +146,13 @@ export default function AnnoncesAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createAnnonce(form);
-        showToast("Annonce créée avec succès !");
+        await createActualite(form, files[0]); // Pass the file
+        showToast("Actualité créée avec succès !");
       } else {
-        await updateAnnonce(selected.id_annonce, form);
-        showToast("Annonce modifiée avec succès !");
+        await updateActualite(selected.id_actualite, form, files[0]); // Pass the file
+        showToast("Actualité modifiée avec succès !");
       }
-      await fetchAnnonces();
+      await fetchActualites();
       closeModal();
     } catch {
       showToast("Une erreur est survenue.", "error");
@@ -164,9 +164,9 @@ export default function AnnoncesAdmin() {
   const handleDelete = async () => {
     setSaving(true);
     try {
-      await deleteAnnonce(selected.id_annonce);
-      showToast("Annonce supprimée.");
-      await fetchAnnonces();
+      await deleteActualite(selected.id_actualite);
+      showToast("Actualité supprimée.");
+      await fetchActualites();
       closeModal();
     } catch {
       showToast("Erreur lors de la suppression.", "error");
@@ -175,7 +175,7 @@ export default function AnnoncesAdmin() {
     }
   };
 
-  const filtered = annonces.filter(
+  const filtered = actualites.filter(
     (a) =>
       a.titre?.toLowerCase().includes(search.toLowerCase()) ||
       a.categorie?.toLowerCase().includes(search.toLowerCase()),
@@ -253,10 +253,11 @@ export default function AnnoncesAdmin() {
               letterSpacing: -0.5,
             }}
           >
-            Gestion des Annonces
+            Gestion des Actualités
           </h1>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
-            {annonces.length} annonce{annonces.length > 1 ? "s" : ""} au total
+            {actualites.length} actualite{actualites.length > 1 ? "s" : ""} au
+            total
           </p>
         </div>
         <button
@@ -398,11 +399,11 @@ export default function AnnoncesAdmin() {
 
         {/* Lignes */}
         {!loading &&
-          filtered.map((annonce, i) => {
-            const cat = catColors[annonce.categorie] || catColors["Général"];
+          filtered.map((actualite, i) => {
+            const cat = catColors[actualite.categorie] || catColors["Général"];
             return (
               <div
-                key={annonce.id_annonce}
+                key={actualite.id_actualite}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "2fr 1fr 1fr 120px",
@@ -449,7 +450,7 @@ export default function AnnoncesAdmin() {
                         maxWidth: 260,
                       }}
                     >
-                      {annonce.titre}
+                      {actualite.titre}
                     </p>
                     <p
                       style={{
@@ -461,7 +462,7 @@ export default function AnnoncesAdmin() {
                         maxWidth: 260,
                       }}
                     >
-                      {annonce.contenu?.slice(0, 60)}...
+                      {actualite.contenu?.slice(0, 60)}...
                     </p>
                   </div>
                 </div>
@@ -479,7 +480,7 @@ export default function AnnoncesAdmin() {
                     color: cat.color,
                   }}
                 >
-                  {annonce.categorie || "Général"}
+                  {actualite.categorie || "Général"}
                 </span>
 
                 {/* Date */}
@@ -493,8 +494,8 @@ export default function AnnoncesAdmin() {
                 >
                   <MdCalendarToday size={13} />
                   <span style={{ fontSize: 12 }}>
-                    {annonce.date_publication
-                      ? formatDate(annonce.date_publication)
+                    {actualite.date_publication
+                      ? formatDate(actualite.date_publication)
                       : "—"}
                   </span>
                 </div>
@@ -502,7 +503,7 @@ export default function AnnoncesAdmin() {
                 {/* Actions */}
                 <div style={{ display: "flex", gap: 6 }}>
                   <button
-                    onClick={() => openEdit(annonce)}
+                    onClick={() => openEdit(actualite)}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -528,7 +529,7 @@ export default function AnnoncesAdmin() {
                     <MdEdit size={15} color="var(--cyan-dark)" />
                   </button>
                   <button
-                    onClick={() => openDelete(annonce)}
+                    onClick={() => openDelete(actualite)}
                     style={{
                       display: "flex",
                       alignItems: "center",

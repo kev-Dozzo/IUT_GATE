@@ -18,7 +18,7 @@ import Logo from "../../components/ui/logo";
 
 const navItems = [
   { Icon: MdDashboard, label: "Dashboard", path: "/admin/dashboard" },
-  { Icon: MdCampaign, label: "Annonces", path: "/admin/annonces" },
+  { Icon: MdCampaign, label: "Actualités", path: "/admin/actualites" },
   { Icon: MdPeople, label: "Enseignants", path: "/admin/enseignants" },
   { Icon: MdSchool, label: "Filières", path: "/admin/filieres" },
   {

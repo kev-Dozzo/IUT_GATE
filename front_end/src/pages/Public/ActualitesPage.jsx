@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 //import { useNavigate } from "react-router-dom";
 import {
   MdSearch,
@@ -8,7 +8,7 @@ import {
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-import { getAnnonces } from "../../services/annonceService";
+import { getActualites } from "../../services/actualiteService";
 
 const catColors = {
   Examens: { bg: "#fee2e2", color: "#991b1b" },
@@ -28,9 +28,9 @@ const CATEGORIES = [
   "Stage",
 ];
 
-export default function AnnoncesPage() {
+export default function ActualitesPage() {
   //const navigate = useNavigate();
-  const [annonces, setAnnonces] = useState([]);
+  const [actualites, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
@@ -38,13 +38,13 @@ export default function AnnoncesPage() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    getAnnonces()
-      .then((data) => setAnnonces(data))
-      .catch(() => setError("Impossible de charger les annonces."))
+    getActualites()
+      .then((data) => setActualites(data))
+      .catch(() => setError("Impossible de charger les actualités."))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = annonces.filter((a) => {
+  const filtered = actualites.filter((a) => {
     const matchCat = filtre === "Tous" || a.categorie === filtre;
     const matchSearch =
       a.titre?.toLowerCase().includes(search.toLowerCase()) ||
@@ -204,8 +204,7 @@ export default function AnnoncesPage() {
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
         )}
-
-        {/* {error && (
+        {error && (
           <div
             style={{
               textAlign: "center",
@@ -220,10 +219,11 @@ export default function AnnoncesPage() {
               {error}
             </p>
             <p style={{ fontSize: 13, marginTop: 8 }}>
-              Vérifiez que le serveur backend est bien démarré.
+              Vérifiez que le serveur backend est bien démarré ou réessayez plus
+              tard.
             </p>
           </div>
-        )} */}
+        )}
 
         {!loading && !error && filtered.length === 0 && (
           <div
@@ -252,12 +252,12 @@ export default function AnnoncesPage() {
         {/* Grille annonces */}
         {!loading && !error && filtered.length > 0 && (
           <div className="grid-auto">
-            {filtered.map((annonce) => {
-              const cat = catColors[annonce.categorie] || catColors["Général"];
+            {filtered.map((actualite) => {
+              const cat = catColors[actualite.categorie] || catColors["Général"];
               return (
                 <div
-                  key={annonce.id_annonce}
-                  onClick={() => setSelected(annonce)}
+                  key={actualite.id_actualite}
+                  onClick={() => setSelected(actualite)}
                   style={{
                     background: "#fff",
                     borderRadius: 14,
@@ -300,7 +300,7 @@ export default function AnnoncesPage() {
                         color: cat.color,
                       }}
                     >
-                      {annonce.categorie || "Général"}
+                      {actualite.categorie || "Général"}
                     </span>
                     <div
                       style={{
@@ -312,7 +312,7 @@ export default function AnnoncesPage() {
                     >
                       <MdCalendarToday size={12} />
                       <span style={{ fontSize: 11 }}>
-                        {formatDate(annonce.date_publication)}
+                        {formatDate(actualite.date_publication)}
                       </span>
                     </div>
                   </div>
@@ -327,7 +327,7 @@ export default function AnnoncesPage() {
                       lineHeight: 1.4,
                     }}
                   >
-                    {annonce.titre}
+                    {actualites.titre}
                   </h3>
 
                   {/* Contenu */}
@@ -339,8 +339,8 @@ export default function AnnoncesPage() {
                       flex: 1,
                     }}
                   >
-                    {annonce.contenu?.slice(0, 120)}
-                    {annonce.contenu?.length > 120 ? "..." : ""}
+                    {actualite.contenu?.slice(0, 120)}
+                    {actualite.contenu?.length > 120 ? "..." : ""}
                   </p>
 
                   {/* Lire la suite */}
