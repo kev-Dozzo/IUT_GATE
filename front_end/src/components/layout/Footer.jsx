@@ -5,9 +5,9 @@ const cols = [
     title: "Navigation",
     links: [
       { label: "Accueil", path: "/" },
-      { label: "Annonces", path: "/annonces" },
-      { label: "Filières", path: "/filieres" },
+      { label: "Actualités", path: "/actualites" },
       { label: "À propos", path: "/apropos" },
+      { label: "Aide", path: "/aide" }, 
     ],
   },
   {

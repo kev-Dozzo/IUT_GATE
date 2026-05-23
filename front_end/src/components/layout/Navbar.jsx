@@ -5,13 +5,13 @@ import campusLogo from "../../assets/public/logo.png";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
-  { label: "Actualites", path: "/actualites" },
+  { label: "Actualités", path: "/actualites" },
   { label: "Filières", path: "/filieres" },
   { label: "Enseignants", path: "/enseignants" },
   { label: "Départements", path: "/departements" },
   { label: "Services", path: "/services" },
   { label: "Carte", path: "/carte" },
-  { label: "À propos", path: "/apropos" },
+  { label: "Aide", path: "/aide" }, 
 ];
 export default function Navbar() {
   const navigate = useNavigate();
