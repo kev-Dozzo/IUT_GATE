@@ -242,7 +242,7 @@ export default function EnseignantDetailPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
               gap: 20,
             }}
           >
@@ -426,7 +426,7 @@ export default function EnseignantDetailPage() {
                         color: "#0f172a",
                       }}
                     >
-                      📍 Localisation du bureau
+                      Localisation du bureau
                     </p>
                     {ens.bureau && (
                       <p

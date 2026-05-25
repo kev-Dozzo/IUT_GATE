@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Départements", path: "/departements" },
   { label: "Services", path: "/services" },
   { label: "Carte", path: "/carte" },
+  { label: "À propos", path: "/apropos" },
   { label: "Aide", path: "/aide" }, 
 ];
 export default function Navbar() {

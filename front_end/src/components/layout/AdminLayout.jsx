@@ -38,18 +38,13 @@ export default function AdminLayout({ children }) {
                 {admin?.nom || "Admin"}
               </strong>
             </span>
-            
           </div>
         </header>
 
         {/* Content */}
         <main
-          style={{
-            flex: 1,
-            padding: "24px",
-            background: "var(--bg)",
-            overflowX: "hidden",
-          }}
+          className="admin-main"
+          style={{ flex: 1, background: "var(--bg)", overflowX: "hidden" }}
         >
           {children}
         </main>

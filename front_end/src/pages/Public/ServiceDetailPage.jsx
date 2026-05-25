@@ -341,7 +341,7 @@ export default function ServiceDetailPage() {
                         color: "#0f172a",
                       }}
                     >
-                      📍 Localisation
+                      Localisation
                     </p>
                     {service.batiment?.nom && (
                       <p
