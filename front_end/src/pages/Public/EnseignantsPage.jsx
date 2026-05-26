@@ -386,20 +386,7 @@ export default function EnseignantsPage() {
                           </span>
                         </div>
                       )}
-                      {ens.telephone && (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                          }}
-                        >
-                          <MdPhone size={12} color="var(--subtle)" />
-                          <span style={{ fontSize: 11, color: "var(--muted)" }}>
-                            {ens.telephone}
-                          </span>
-                        </div>
-                      )}
+                      
                     </div>
 
                     {/* Voir profil */}

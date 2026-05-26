@@ -72,10 +72,18 @@ export default function EnseignantsAdmin() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [photo, setPhoto] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -339,46 +347,9 @@ export default function EnseignantsAdmin() {
         )}
       </div>
 
-      {/* ── TABLE ── */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 14,
-          border: "1px solid var(--border)",
-          overflow: "hidden",
-        }}
-      >
-        {/* En-tête */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
-            padding: "12px 20px",
-            background: "#f8fafc",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          {["Enseignant", "Département", "Rôle", "Contact", "Actions"].map(
-            (h) => (
-              <p
-                key={h}
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontWeight: 700,
-                  fontSize: 11,
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                }}
-              >
-                {h}
-              </p>
-            ),
-          )}
-        </div>
-
-        {/* Loading */}
-        {loading && (
+      {/* ── LISTE RESPONSIVE EN CARDS ── */}
+      <div style={{ marginTop: 6 }}>
+        {loading ? (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div
               style={{
@@ -394,10 +365,7 @@ export default function EnseignantsAdmin() {
             <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
-        )}
-
-        {/* Vide */}
-        {!loading && filtered.length === 0 && (
+        ) : filtered.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -410,201 +378,225 @@ export default function EnseignantsAdmin() {
               Aucun enseignant trouvé
             </p>
           </div>
-        )}
-
-        {/* Lignes */}
-        {!loading &&
-          filtered.map((ens, i) => {
-            const av = AVATAR_COLORS[i % AVATAR_COLORS.length];
-            const dept = departements.find(
-              (d) => d.id_departement === ens.id_departement,
-            );
-            return (
-              <div
-                key={ens.id_enseignant}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
-                  padding: "14px 20px",
-                  alignItems: "center",
-                  borderBottom:
-                    i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                  transition: "background .15s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                {/* Enseignant */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {filtered.map((ens, i) => {
+              const av = AVATAR_COLORS[i % AVATAR_COLORS.length];
+              const dept = departements.find(
+                (d) => d.id_departement === ens.id_departement,
+              );
+              const photoURL = ens.photo_url
+                ? `http://localhost:5000${ens.photo_url}`
+                : null;
+              return (
+                <div
+                  key={ens.id_enseignant}
+                  style={{
+                    background: "#fff",
+                    borderRadius: 18,
+                    border: "1px solid var(--border)",
+                    overflow: "hidden",
+                    boxShadow: "0 18px 40px rgba(15, 23, 42, 0.06)",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   <div
                     style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      background: av.bg,
-                      flexShrink: 0,
+                      width: "100%",
+                      height: 180,
+                      background: "#f8fafc",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      overflow: "hidden",
                     }}
                   >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        fontSize: 13,
-                        fontWeight: 800,
-                        color: av.color,
-                      }}
-                    >
-                      {getInitials(ens.nom)}
-                    </span>
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        fontWeight: 600,
-                        fontSize: 13,
-                        color: "var(--text)",
-                        marginBottom: 2,
-                      }}
-                    >
-                      {ens.nom}
-                    </p>
-                    {ens.bureau && (
-                      <p style={{ fontSize: 11, color: "var(--muted)" }}>
-                        Bureau : {ens.bureau}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Département */}
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "var(--muted)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {dept?.nom || "—"}
-                </span>
-
-                {/* Rôle */}
-                <span
-                  style={{
-                    display: "inline-flex",
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-head)",
-                    background: "var(--cyan-light)",
-                    color: "var(--cyan-dark)",
-                  }}
-                >
-                  {ens.role || ens.poste || "—"}
-                </span>
-
-                {/* Contact */}
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 3 }}
-                >
-                  {ens.email && (
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}
-                    >
-                      <MdEmail size={12} color="var(--subtle)" />
-                      <span
+                    {photoURL ? (
+                      <img
+                        src={photoURL}
+                        alt={ens.nom}
                         style={{
-                          fontSize: 11,
-                          color: "var(--muted)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          maxWidth: 140,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 84,
+                          height: 84,
+                          borderRadius: "50%",
+                          background: av.bg,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        {ens.email}
-                      </span>
-                    </div>
-                  )}
-                  {ens.telephone && (
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}
-                    >
-                      <MdPhone size={12} color="var(--subtle)" />
-                      <span style={{ fontSize: 11, color: "var(--muted)" }}>
-                        {ens.telephone}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                        <span
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontSize: 22,
+                            fontWeight: 800,
+                            color: av.color,
+                          }}
+                        >
+                          {getInitials(ens.nom)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => openEdit(ens)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid var(--border)",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Modifier"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "var(--cyan-light)";
-                      e.currentTarget.style.borderColor = "var(--cyan)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "var(--border)";
-                    }}
-                  >
-                    <MdEdit size={15} color="var(--cyan-dark)" />
-                  </button>
-                  <button
-                    onClick={() => openDelete(ens)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid #fee2e2",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Supprimer"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#fee2e2";
-                      e.currentTarget.style.borderColor = "#fca5a5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#fee2e2";
-                    }}
-                  >
-                    <MdDelete size={15} color="#dc2626" />
-                  </button>
+                  <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: 16,
+                            color: "var(--text)",
+                            marginBottom: 4,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {ens.nom}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 13,
+                            color: "var(--muted)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {dept?.nom || "Département non renseigné"}
+                        </p>
+                      </div>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          padding: "7px 12px",
+                          borderRadius: 999,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          fontFamily: "var(--font-head)",
+                          background: "var(--cyan-light)",
+                          color: "var(--cyan-dark)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {ens.role || ens.poste || "—"}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "grid", gap: 10 }}>
+                      {ens.bureau && (
+                        <div style={{ fontSize: 13, color: "var(--text)" }}>
+                          <strong>Bureau :</strong> {ens.bureau}
+                        </div>
+                      )}
+                      <div style={{ display: "grid", gap: 8 }}>
+                        {ens.email && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              color: "var(--muted)",
+                              fontSize: 13,
+                            }}
+                          >
+                            <MdEmail size={16} />
+                            <span>{ens.email}</span>
+                          </div>
+                        )}
+                        {ens.telephone && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              color: "var(--muted)",
+                              fontSize: 13,
+                            }}
+                          >
+                            <MdPhone size={16} />
+                            <span>{ens.telephone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                      <button
+                        onClick={() => openEdit(ens)}
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 10,
+                          border: "1px solid var(--border)",
+                          background: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                        }}
+                        title="Modifier"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "var(--cyan-light)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                        }}
+                      >
+                        <MdEdit size={16} color="var(--cyan-dark)" /> Modifier
+                      </button>
+                      <button
+                        onClick={() => openDelete(ens)}
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 10,
+                          border: "1px solid #fee2e2",
+                          background: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                        }}
+                        title="Supprimer"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#fee2e2";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                        }}
+                      >
+                        <MdDelete size={16} color="#dc2626" /> Supprimer
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── MODAL ADD / EDIT ── */}

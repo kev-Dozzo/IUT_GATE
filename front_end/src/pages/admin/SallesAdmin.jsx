@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect } from "react";
 import {
   MdAdd,
@@ -12,6 +13,7 @@ import {
   MdApartment,
 } from "react-icons/md";
 import AdminLayout from "../../components/layout/AdminLayout";
+import AdminCard from "../../components/ui/AdminCard";
 import {
   getSalles,
   createSalle,
@@ -52,6 +54,7 @@ const emptyForm = {
 export default function SallesAdmin() {
   const [salles, setSalles] = useState([]);
   const [batiments, setBatiments] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("Tous");
@@ -63,6 +66,10 @@ export default function SallesAdmin() {
 
   useEffect(() => {
     fetchData();
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -345,6 +352,7 @@ export default function SallesAdmin() {
 
       {/* TABLE */}
       <div
+        className="admin-table-wrapper"
         style={{
           background: "#fff",
           borderRadius: 14,
@@ -354,6 +362,7 @@ export default function SallesAdmin() {
       >
         {/* En-tête */}
         <div
+          className="admin-table-header"
           style={{
             display: "grid",
             gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
@@ -419,152 +428,228 @@ export default function SallesAdmin() {
 
         {/* Lignes */}
         {!loading &&
-          filtered.map((salle, i) => {
-            const tc = typeColors[salle.type] || typeColors["Autre"];
-            const bat = batiments.find(
-              (b) => b.id_batiment === salle.id_batiment,
-            );
-            return (
-              <div
-                key={salle.id_salle}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
-                  padding: "14px 20px",
-                  alignItems: "center",
-                  borderBottom:
-                    i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                  transition: "background .15s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                {/* Salle */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          (isMobile
+            ? filtered.map((salle) => {
+                const tc = typeColors[salle.type] || typeColors["Autre"];
+                const bat = batiments.find(
+                  (b) => b.id_batiment === salle.id_batiment,
+                );
+                return (
+                  <AdminCard
+                    key={salle.id_salle}
+                    onEdit={() => openEdit(salle)}
+                    onDelete={() => openDelete(salle)}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 10,
+                          background: tc.bg,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <MdMeetingRoom size={20} color={tc.color} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 700,
+                            fontSize: 15,
+                            color: "var(--text)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {salle.nom}
+                        </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            alignItems: "center",
+                          }}
+                        >
+                          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                            {salle.type}
+                          </span>
+                          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                            {salle.capacite ? `${salle.capacite} places` : "—"}
+                          </span>
+                          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                            {bat?.nom || "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </AdminCard>
+                );
+              })
+            : filtered.map((salle, i) => {
+                const tc = typeColors[salle.type] || typeColors["Autre"];
+                const bat = batiments.find(
+                  (b) => b.id_batiment === salle.id_batiment,
+                );
+                return (
                   <div
+                    className="admin-table-row"
+                    key={salle.id_salle}
                     style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      background: tc.bg,
-                      flexShrink: 0,
-                      display: "flex",
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
+                      padding: "14px 20px",
                       alignItems: "center",
-                      justifyContent: "center",
+                      borderBottom:
+                        i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
+                      transition: "background .15s",
                     }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#f8fafc")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
                   >
-                    <MdMeetingRoom size={20} color={tc.color} />
+                    {/* Salle */}
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
+                      <div
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 10,
+                          background: tc.bg,
+                          flexShrink: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MdMeetingRoom size={20} color={tc.color} />
+                      </div>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 600,
+                          fontSize: 13,
+                          color: "var(--text)",
+                        }}
+                      >
+                        {salle.nom}
+                      </p>
+                    </div>
+
+                    {/* Type */}
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-head)",
+                        background: tc.bg,
+                        color: tc.color,
+                      }}
+                    >
+                      {salle.type || "—"}
+                    </span>
+
+                    {/* Capacité */}
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 5 }}
+                    >
+                      <MdPeople size={14} color="var(--subtle)" />
+                      <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                        {salle.capacite ? `${salle.capacite} places` : "—"}
+                      </span>
+                    </div>
+
+                    {/* Bâtiment */}
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 5 }}
+                    >
+                      <MdApartment size={14} color="var(--subtle)" />
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: "var(--muted)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {bat?.nom || "—"}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() => openEdit(salle)}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          border: "1px solid var(--border)",
+                          background: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background =
+                            "var(--cyan-light)";
+                          e.currentTarget.style.borderColor = "var(--cyan)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                          e.currentTarget.style.borderColor = "var(--border)";
+                        }}
+                      >
+                        <MdEdit size={15} color="var(--cyan-dark)" />
+                      </button>
+                      <button
+                        onClick={() => openDelete(salle)}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          border: "1px solid #fee2e2",
+                          background: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#fee2e2";
+                          e.currentTarget.style.borderColor = "#fca5a5";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                          e.currentTarget.style.borderColor = "#fee2e2";
+                        }}
+                      >
+                        <MdDelete size={15} color="#dc2626" />
+                      </button>
+                    </div>
                   </div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 600,
-                      fontSize: 13,
-                      color: "var(--text)",
-                    }}
-                  >
-                    {salle.nom}
-                  </p>
-                </div>
-
-                {/* Type */}
-                <span
-                  style={{
-                    display: "inline-flex",
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-head)",
-                    background: tc.bg,
-                    color: tc.color,
-                  }}
-                >
-                  {salle.type || "—"}
-                </span>
-
-                {/* Capacité */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <MdPeople size={14} color="var(--subtle)" />
-                  <span style={{ fontSize: 12, color: "var(--muted)" }}>
-                    {salle.capacite ? `${salle.capacite} places` : "—"}
-                  </span>
-                </div>
-
-                {/* Bâtiment */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <MdApartment size={14} color="var(--subtle)" />
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--muted)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {bat?.nom || "—"}
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => openEdit(salle)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid var(--border)",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "var(--cyan-light)";
-                      e.currentTarget.style.borderColor = "var(--cyan)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "var(--border)";
-                    }}
-                  >
-                    <MdEdit size={15} color="var(--cyan-dark)" />
-                  </button>
-                  <button
-                    onClick={() => openDelete(salle)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid #fee2e2",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#fee2e2";
-                      e.currentTarget.style.borderColor = "#fca5a5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#fee2e2";
-                    }}
-                  >
-                    <MdDelete size={15} color="#dc2626" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                );
+              }))}
       </div>
 
       {/* MODAL ADD / EDIT */}

@@ -29,6 +29,7 @@ import DepartementsAdmin from "../pages/admin/DepartementsAdmin";
 import BatimentsAdmin from "../pages/admin/BatimentsAdmin";
 import SallesAdmin from "../pages/admin/SallesAdmin";
 import ServicesAdmin from "../pages/admin/ServicesAdmin";
+import ProfilAdmin from "../pages/admin/ProfilAdmin";
 import PrivateRoute from "./PrivateRoute";
 
 export default function AppRoutes() {
@@ -37,7 +38,7 @@ export default function AppRoutes() {
       {/* ── PUBLIC ── */}
       <Route path="/" element={<HomePage />} />
       <Route path="/actualites" element={<ActualitesPage />} />
-      <Route path="/actualies/:id" element={<ActualiteDetailPage />} />
+      <Route path="/actualites/:id" element={<ActualiteDetailPage />} />
       <Route path="/filieres" element={<FilieresPage />} />
       <Route path="/filieres/:id" element={<FiliereDetailPage />} />
       <Route path="/enseignants" element={<EnseignantsPage />} />
@@ -117,6 +118,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <ServicesAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/profil"
+        element={
+          <PrivateRoute>
+            <ProfilAdmin />
           </PrivateRoute>
         }
       />

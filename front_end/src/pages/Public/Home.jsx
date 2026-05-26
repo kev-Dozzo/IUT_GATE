@@ -7,11 +7,11 @@ import {
   MdAccountBalance,
   MdCampaign,
   MdArrowForward,
+  MdCalendarToday,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getActualites } from "../../services/actualiteService";
-import { getServices } from "../../services/serviceAdminService";
 // import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
 import SearchBar from "../../components/ui/SearchBar";
@@ -61,32 +61,27 @@ const catColors = {
   Général: { bg: "#f1f5f9", color: "#475569" },
 };
 
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
 export default function HomePage() {
   const navigate = useNavigate();
-  const [services, setServices] = useState([]);
   const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const [actualite, setActualites] = useState([]);
+  const [actualites, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getServices()
-      .then((data) => setServices(data))
-      .catch(() => setError("Impossible de charger les services."))
-      .finally(() => setLoading(false));
-  }, [setError, setServices]);
 
   useEffect(() => {
     getActualites()
       .then((data) => setActualites(data.slice(0, 3)))
       .catch(() => setError("Impossible de charger les annonces."))
       .finally(() => setLoading(false));
-  }, [setError]);
+  }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (search.trim()) navigate(`/enseignants?q=${search}`);
-  };
+  const featured = actualites[0];
 
   return (
     <div>
@@ -341,7 +336,17 @@ export default function HomePage() {
           >
             Chargement des annonces...
           </div>
-        ) : actualite.length === 0 ? (
+        ) : error ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "40px 0",
+              color: "var(--muted)",
+            }}
+          >
+            {error}
+          </div>
+        ) : actualites.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -352,110 +357,175 @@ export default function HomePage() {
             Aucune annonce disponible.
           </div>
         ) : (
-          <div className="grid-3">
-            {actualite.map((actualite) => {
-              const cat =
-                catColors[actualite.categorie] || catColors["Général"];
-              return (
+          featured && (
+            <>
+              {/* ── FEATURED — Article principal ── */}
+              <div
+                onClick={() => navigate(`/actualites/${featured.id_actualite}`)}
+                style={{
+                  background: "#fff",
+                  borderRadius: 20,
+                  border: "1px solid var(--border)",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  marginBottom: 32,
+                  display: "grid",
+                  gridTemplateColumns: featured.photo_url ? "1fr 1fr" : "1fr",
+                  minHeight: 300,
+                  transition: "all .25s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 16px 48px rgba(0,0,0,.1)";
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                {/* Photo */}
+                {featured.photo_url ? (
+                  <div style={{ position: "relative", overflow: "hidden" }}>
+                    <img
+                      src={`http://localhost:5000${featured.photo_url}`}
+                      alt={featured.titre}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        minHeight: 280,
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(135deg, rgba(12,26,64,.3), transparent)",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      background: "linear-gradient(135deg, #0c1a40, #0e5f75)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: 200,
+                    }}
+                  >
+                    <span style={{ fontSize: 64, opacity: 0.3 }}>
+                      <MdSearch />
+                    </span>
+                  </div>
+                )}
+
+                {/* Contenu */}
                 <div
-                  key={actualite.id_actualite}
-                  onClick={() =>
-                    navigate(`/actualites/${actualite.id_actualite}`)
-                  }
                   style={{
-                    background: "#fff",
-                    borderRadius: 14,
-                    border: "1px solid var(--border)",
-                    padding: "24px",
-                    cursor: "pointer",
-                    transition: "all .2s",
+                    padding: "clamp(24px, 4vw, 36px)",
                     display: "flex",
                     flexDirection: "column",
-                    gap: 12,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--cyan)";
-                    e.currentTarget.style.transform = "translateY(-3px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 10px 32px rgba(6,182,212,.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--border)";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
+                    justifyContent: "space-between",
                   }}
                 >
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        marginBottom: 16,
+                      }}
+                    >
+                      <span
+                        style={{
+                          padding: "4px 12px",
+                          borderRadius: 999,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          fontFamily: "var(--font-head)",
+                          background: (
+                            catColors[featured.categorie] ||
+                            catColors["Général"]
+                          ).bg,
+                          color: (
+                            catColors[featured.categorie] ||
+                            catColors["Général"]
+                          ).color,
+                        }}
+                      >
+                        À la une · {featured.categorie || "Général"}
+                      </span>
+                    </div>
+                    <h2
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontSize: "clamp(18px, 3vw, 26px)",
+                        fontWeight: 800,
+                        color: "#0f172a",
+                        lineHeight: 1.3,
+                        marginBottom: 14,
+                        letterSpacing: -0.5,
+                      }}
+                    >
+                      {featured.titre}
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        color: "var(--muted)",
+                        lineHeight: 1.8,
+                      }}
+                    >
+                      {featured.contenu?.slice(0, 180)}...
+                    </p>
+                  </div>
+
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      marginTop: 20,
+                      paddingTop: 16,
+                      borderTop: "1px solid #f1f5f9",
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        display: "inline-flex",
-                        padding: "3px 10px",
-                        borderRadius: 999,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        fontFamily: "var(--font-head)",
-                        background: cat.bg,
-                        color: cat.color,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        color: "var(--muted)",
+                        fontSize: 12,
                       }}
                     >
-                      {actualite.categorie || "Général"}
-                    </span>
-                    <span style={{ fontSize: 11, color: "var(--subtle)" }}>
-                      {actualite.date_publication
-                        ? new Date(
-                            actualite.date_publication,
-                          ).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
+                      <MdCalendarToday size={13} />
+                      {featured.date_publication
+                        ? formatDate(featured.date_publication)
                         : ""}
+                    </div>
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        fontSize: 13,
+                        color: "var(--cyan)",
+                        fontWeight: 700,
+                        fontFamily: "var(--font-head)",
+                      }}
+                    >
+                      Lire plus <MdArrowForward size={15} />
                     </span>
                   </div>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontSize: 15,
-                      fontWeight: 700,
-                      color: "var(--text)",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {actualite.titre}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "var(--muted)",
-                      lineHeight: 1.6,
-                      flex: 1,
-                    }}
-                  >
-                    {actualite.contenu?.slice(0, 100)}...
-                  </p>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--cyan)",
-                      fontWeight: 600,
-                      fontFamily: "var(--font-head)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                  >
-                    Lire la suite <MdArrowForward size={14} />
-                  </span>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            </>
+          )
         )}
       </section>
 

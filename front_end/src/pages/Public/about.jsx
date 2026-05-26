@@ -529,7 +529,7 @@ export default function AProposPage() {
                 {
                   icon: MdLocationOn,
                   label: "Adresse",
-                  value: "NGON-BONG, Douala, Cameroun",
+                  value: "NDON-BONG, Douala, Cameroun",
                 },
                 {
                   icon: MdEmail,

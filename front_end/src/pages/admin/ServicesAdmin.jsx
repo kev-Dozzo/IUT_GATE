@@ -44,6 +44,7 @@ export default function ServicesAdmin() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchData();
   }, []);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MdAdd,
   MdEdit,
@@ -19,6 +19,7 @@ import {
   deleteFiliere,
 } from "../../services/filiereService";
 import { getDepartements } from "../../services/departementService";
+import PhotoUpload from "../../components/ui/PhotoUpload";
 
 const DUREES = ["1 an", "2 ans", "3 ans", "4 ans", "5 ans"];
 
@@ -47,12 +48,21 @@ export default function FilieresAdmin() {
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    fetchData();
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const fetchData = async () => {
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [fils, depts] = await Promise.all([
@@ -66,12 +76,12 @@ export default function FilieresAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
-  };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const openAdd = () => {
     setForm({
@@ -114,10 +124,10 @@ export default function FilieresAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createFiliere(form);
+        await createFiliere(form, photo);
         showToast("Filière créée avec succès !");
       } else {
-        await updateFiliere(selected.id_filiere, form);
+        await updateFiliere(selected.id_filiere, form, photo);
         showToast("Filière modifiée avec succès !");
       }
       await fetchData();
@@ -308,44 +318,9 @@ export default function FilieresAdmin() {
         )}
       </div>
 
-      {/* ── TABLE ── */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 14,
-          border: "1px solid var(--border)",
-          overflow: "hidden",
-        }}
-      >
-        {/* En-tête */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
-            padding: "12px 20px",
-            background: "#f8fafc",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          {["Filière", "Département", "Durée", "Places", "Actions"].map((h) => (
-            <p
-              key={h}
-              style={{
-                fontFamily: "var(--font-head)",
-                fontWeight: 700,
-                fontSize: 11,
-                color: "var(--muted)",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              {h}
-            </p>
-          ))}
-        </div>
-
-        {/* Loading */}
-        {loading && (
+      {/* ── LISTE RESPONSIVE EN CARDS ── */}
+      <div style={{ marginTop: 6 }}>
+        {loading ? (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div
               style={{
@@ -361,10 +336,7 @@ export default function FilieresAdmin() {
             <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
-        )}
-
-        {/* Vide */}
-        {!loading && filtered.length === 0 && (
+        ) : filtered.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -377,175 +349,224 @@ export default function FilieresAdmin() {
               Aucune filière trouvée
             </p>
           </div>
-        )}
-
-        {/* Lignes */}
-        {!loading &&
-          filtered.map((filiere, i) => {
-            const duree = dureeColors[filiere.duree] || dureeColors["3 ans"];
-            const dept = departements.find(
-              (d) => d.id_departement === filiere.id_departement,
-            );
-            return (
-              <div
-                key={filiere.id_filiere}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1fr 100px",
-                  padding: "14px 20px",
-                  alignItems: "center",
-                  borderBottom:
-                    i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                  transition: "background .15s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                {/* Filière */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: 18,
+            }}
+          >
+            {filtered.map((filiere) => {
+              const duree = dureeColors[filiere.duree] || dureeColors["3 ans"];
+              const dept = departements.find(
+                (d) => d.id_departement === filiere.id_departement,
+              );
+              const imageUrl = filiere.photo_url
+                ? `http://localhost:5000${filiere.photo_url}`
+                : null;
+              return (
+                <div
+                  key={filiere.id_filiere}
+                  style={{
+                    background: "#fff",
+                    borderRadius: 18,
+                    border: "1px solid var(--border)",
+                    overflow: "hidden",
+                    boxShadow: "0 18px 48px rgba(15, 23, 42, 0.06)",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   <div
                     style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      background: "var(--cyan-light)",
-                      flexShrink: 0,
+                      width: "100%",
+                      minHeight: 140,
+                      background: "#f8fafc",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      overflow: "hidden",
                     }}
                   >
-                    <MdSchool size={20} color="var(--cyan-dark)" />
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={filiere.nom}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) =>
+                          (e.currentTarget.style.display = "none")
+                        }
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 14,
+                          background: "var(--cyan-light)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MdSchool size={28} color="var(--cyan-dark)" />
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p
+                  <div
+                    style={{
+                      padding: 18,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div
                       style={{
-                        fontFamily: "var(--font-head)",
-                        fontWeight: 600,
-                        fontSize: 13,
-                        color: "var(--text)",
-                        marginBottom: 2,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        alignItems: "flex-start",
                       }}
                     >
-                      {filiere.nom}
-                    </p>
-                    <p
+                      <div style={{ minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: 16,
+                            color: "var(--text)",
+                            marginBottom: 4,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {filiere.nom}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 13,
+                            color: "var(--muted)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {filiere.description}
+                        </p>
+                      </div>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          padding: "7px 12px",
+                          borderRadius: 999,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          fontFamily: "var(--font-head)",
+                          background: duree.bg,
+                          color: duree.color,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <MdAccessTime size={14} />
+                        {filiere.duree}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "grid", gap: 10 }}>
+                      <div style={{ fontSize: 13, color: "var(--text)" }}>
+                        <strong>Département :</strong> {dept?.nom || "—"}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          color: "var(--muted)",
+                          fontSize: 13,
+                        }}
+                      >
+                        <MdPeople size={16} />
+                        {filiere.places
+                          ? `${filiere.places} places`
+                          : "Places non définies"}
+                      </div>
+                    </div>
+
+                    <div
                       style={{
-                        fontSize: 11,
-                        color: "var(--muted)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        maxWidth: 220,
+                        display: "flex",
+                        gap: 10,
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
                       }}
                     >
-                      {filiere.description?.slice(0, 50)}...
-                    </p>
+                      <button
+                        onClick={() => openEdit(filiere)}
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 10,
+                          border: "1px solid var(--border)",
+                          background: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                        }}
+                        title="Modifier"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background =
+                            "var(--cyan-light)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                        }}
+                      >
+                        <MdEdit size={16} color="var(--cyan-dark)" /> Modifier
+                      </button>
+                      <button
+                        onClick={() => openDelete(filiere)}
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 10,
+                          border: "1px solid #fee2e2",
+                          background: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                        }}
+                        title="Supprimer"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#fee2e2";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#fff";
+                        }}
+                      >
+                        <MdDelete size={16} color="#dc2626" /> Supprimer
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Département */}
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "var(--muted)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {dept?.nom || "—"}
-                </span>
-
-                {/* Durée */}
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-head)",
-                    background: duree.bg,
-                    color: duree.color,
-                  }}
-                >
-                  <MdAccessTime size={11} />
-                  {filiere.duree}
-                </span>
-
-                {/* Places */}
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <MdPeople size={14} color="var(--subtle)" />
-                  <span style={{ fontSize: 12, color: "var(--muted)" }}>
-                    {filiere.places || "—"} places
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => openEdit(filiere)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid var(--border)",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Modifier"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "var(--cyan-light)";
-                      e.currentTarget.style.borderColor = "var(--cyan)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "var(--border)";
-                    }}
-                  >
-                    <MdEdit size={15} color="var(--cyan-dark)" />
-                  </button>
-                  <button
-                    onClick={() => openDelete(filiere)}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid #fee2e2",
-                      background: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Supprimer"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#fee2e2";
-                      e.currentTarget.style.borderColor = "#fca5a5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#fee2e2";
-                    }}
-                  >
-                    <MdDelete size={15} color="#dc2626" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── MODAL ADD / EDIT ── */}
@@ -619,6 +640,26 @@ export default function FilieresAdmin() {
               >
                 <MdClose size={18} color="var(--muted)" />
               </button>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <PhotoUpload
+                value={
+                  selected?.photo_url
+                    ? `http://localhost:5000${selected.photo_url}`
+                    : null
+                }
+                onChange={setPhoto}
+                size={90}
+                shape="rounded"
+                label="Logo de la filière"
+                placeholder="image"
+              />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

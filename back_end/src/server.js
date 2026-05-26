@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
 
 const sequelize = require("./config/database");
 
@@ -77,6 +77,8 @@ const enseignantRoutes = require("./routes/enseignantRoutes");
 const batimentRoutes = require("./routes/batimentRoutes");
 const salleRoutes = require("./routes/salleRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
+const iaRoutes = require("./routes/iaRoutes");
+const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
 
@@ -94,15 +96,31 @@ app.use("/api/enseignants", enseignantRoutes);
 app.use("/api/batiments", batimentRoutes);
 app.use("/api/salles", salleRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/ia", iaRoutes);
 
 app.get("/", (req, res) => res.json({ message: "🚀 IUTGate API running !" }));
 
+app.use(errorHandler);
+
 // ── SYNC BDD ──
-sequelize
-  .sync({ alter: true })
-  .then(() => {
-    console.log("✅ Base de données synchronisée");
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`🚀 Server → http://localhost:${PORT}`));
-  })
-  .catch((err) => console.error("❌ Erreur BDD:", err));
+(async () => {
+  try {
+    await sequelize.sync({ alter: true });
+    console.log("✅ Base de données synchronisée (alter)");
+  } catch (err) {
+    console.error("❌ Erreur BDD (alter):", err);
+    console.warn(
+      "Tentative de synchronisation sans 'alter' pour démarrer le serveur...",
+    );
+    try {
+      await sequelize.sync();
+      console.log("✅ Base de données synchronisée (no alter)");
+    } catch (err2) {
+      console.error("❌ Erreur BDD (sync):", err2);
+      process.exit(1);
+    }
+  }
+
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`🚀 Server → http://localhost:${PORT}`));
+})();

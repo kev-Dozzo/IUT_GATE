@@ -7,6 +7,13 @@ import {
   MdApartment,
   MdBusiness,
   MdDirections,
+  MdBook,
+  MdPages,
+  MdComputer,
+  MdSchool,
+  MdMoney,
+  MdHandshake,
+  MdLocalHospital,
 } from "react-icons/md";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -30,7 +37,15 @@ const markerIcon = L.divIcon({
   iconAnchor: [18, 36],
 });
 
-const SERVICE_ICONS = ["📋", "📚", "💻", "🏥", "💰", "🤝", "🏢"];
+const SERVICE_ICONS = [
+  <MdBook color="green" />,
+  <MdPages color="blue" />,
+  <MdComputer color="purple" />,
+  <MdSchool color="orange" />,
+  <MdMoney  />,
+  <MdHandshake />,
+  <MdLocalHospital />,
+];
 
 export default function ServiceDetailPage() {
   const { id } = useParams();

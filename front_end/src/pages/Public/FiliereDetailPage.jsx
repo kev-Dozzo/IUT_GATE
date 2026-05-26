@@ -5,11 +5,12 @@ import {
   MdAccessTime,
   MdPeople,
   MdSchool,
-  MdCheckCircle,
   MdArrowForward,
   MdLocationOn,
   MdDirections,
   MdAccountBalance,
+  MdOpenInNew,
+  MdHardware,
 } from "react-icons/md";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -17,6 +18,7 @@ import "leaflet/dist/leaflet.css";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import Avatar from "../../components/ui/Avatar";
+import DebouchesIA from "../../components/ui/DebouchesIA";
 import { getFiliereById } from "../../services/filiereService";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -59,6 +61,7 @@ export default function FiliereDetailPage() {
     <div>
       <Navbar />
 
+      {/* HERO */}
       <section
         style={{
           background:
@@ -86,7 +89,6 @@ export default function FiliereDetailPage() {
           >
             <MdArrowBack size={16} /> Retour aux filières
           </button>
-
           {!loading && filiere && (
             <div
               style={{
@@ -203,13 +205,12 @@ export default function FiliereDetailPage() {
             <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}
-
         {error && (
           <p
             style={{
-              color: "var(--muted)",
               textAlign: "center",
               padding: "60px 0",
+              color: "var(--muted)",
             }}
           >
             {error}
@@ -232,7 +233,7 @@ export default function FiliereDetailPage() {
                   background: "#fff",
                   borderRadius: 16,
                   border: "1px solid var(--border)",
-                  padding: "28px",
+                  padding: "24px",
                 }}
               >
                 <p
@@ -266,7 +267,7 @@ export default function FiliereDetailPage() {
                     background: "var(--cyan-light)",
                     borderRadius: 14,
                     border: "1px solid #67e8f9",
-                    padding: "24px",
+                    padding: "20px",
                   }}
                 >
                   <p
@@ -277,7 +278,7 @@ export default function FiliereDetailPage() {
                       fontFamily: "var(--font-head)",
                       textTransform: "uppercase",
                       letterSpacing: 0.5,
-                      marginBottom: 12,
+                      marginBottom: 10,
                     }}
                   >
                     Conditions d'admission
@@ -294,7 +295,100 @@ export default function FiliereDetailPage() {
                 </div>
               )}
 
-              {/* Infos sidebar */}
+              {/* Enseignants */}
+              {filiere.enseignants?.length > 0 && (
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: 16,
+                    border: "1px solid var(--border)",
+                    padding: "24px",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "var(--cyan)",
+                      fontFamily: "var(--font-head)",
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      marginBottom: 16,
+                    }}
+                  >
+                    Corps enseignant
+                  </p>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
+                    {filiere.enseignants.map((e, i) => (
+                      <div
+                        key={e.id_enseignant}
+                        onClick={() =>
+                          navigate(`/enseignants/${e.id_enseignant}`)
+                        }
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "10px 14px",
+                          background: "#f8fafc",
+                          borderRadius: 10,
+                          border: "1px solid var(--border)",
+                          cursor: "pointer",
+                          transition: "all .2s",
+                        }}
+                        onMouseEnter={(e2) => {
+                          e2.currentTarget.style.borderColor = "var(--cyan)";
+                          e2.currentTarget.style.background =
+                            "var(--cyan-light)";
+                        }}
+                        onMouseLeave={(e2) => {
+                          e2.currentTarget.style.borderColor = "var(--border)";
+                          e2.currentTarget.style.background = "#f8fafc";
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <Avatar
+                            nom={e.nom}
+                            photoUrl={e.photo_url}
+                            size={36}
+                            index={i}
+                            shape="rounded"
+                          />
+                          <div>
+                            <p
+                              style={{
+                                fontFamily: "var(--font-head)",
+                                fontWeight: 600,
+                                fontSize: 13,
+                                color: "var(--text)",
+                              }}
+                            >
+                              {e.nom}
+                            </p>
+                            <p style={{ fontSize: 11, color: "var(--muted)" }}>
+                              {e.role || e.poste}
+                            </p>
+                          </div>
+                        </div>
+                        <MdArrowForward size={15} color="var(--cyan)" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* COLONNE DROITE */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Infos */}
               <div
                 style={{
                   background: "#fff",
@@ -392,247 +486,232 @@ export default function FiliereDetailPage() {
                   </button>
                 )}
               </div>
-            </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 20,
-              }}
-            >
-              {/* COLONNE DROITE */}
+              {/* ── LIEN PRÉINSCRIPTION ── */}
               <div
-                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+                style={{
+                  background: "linear-gradient(135deg, #0c1a40, #0e5f75)",
+                  borderRadius: 16,
+                  padding: "22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                }}
               >
-                {/* Enseignants */}
-                {filiere.enseignants?.length > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div
                     style={{
-                      background: "#fff",
-                      borderRadius: 16,
-                      border: "1px solid var(--border)",
-                      padding: "24px",
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: "rgba(6,182,212,.2)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
+                    <span style={{ fontSize: 22 }}>
+                      <MdSchool color="var(--cyan)" />
+                    </span>
+                  </div>
+                  <div>
                     <p
                       style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: "var(--cyan)",
                         fontFamily: "var(--font-head)",
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                        marginBottom: 16,
+                        fontWeight: 800,
+                        fontSize: 15,
+                        color: "#fff",
+                        marginBottom: 3,
                       }}
                     >
-                      Corps enseignant
+                      Candidater à l'IUT
                     </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                      }}
-                    >
-                      {filiere.enseignants.map((e, i) => (
-                        <div
-                          key={e.id_enseignant}
-                          onClick={() =>
-                            navigate(`/enseignants/${e.id_enseignant}`)
-                          }
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "10px 14px",
-                            background: "#f8fafc",
-                            borderRadius: 10,
-                            border: "1px solid var(--border)",
-                            cursor: "pointer",
-                            transition: "all .2s",
-                          }}
-                          onMouseEnter={(e2) => {
-                            e2.currentTarget.style.borderColor = "var(--cyan)";
-                            e2.currentTarget.style.background =
-                              "var(--cyan-light)";
-                          }}
-                          onMouseLeave={(e2) => {
-                            e2.currentTarget.style.borderColor =
-                              "var(--border)";
-                            e2.currentTarget.style.background = "#f8fafc";
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                            }}
-                          >
-                            <Avatar
-                              nom={e.nom}
-                              photoUrl={e.photo_url}
-                              size={36}
-                              index={i}
-                              shape="rounded"
-                            />
-                            <div>
-                              <p
-                                style={{
-                                  fontFamily: "var(--font-head)",
-                                  fontWeight: 600,
-                                  fontSize: 13,
-                                  color: "var(--text)",
-                                }}
-                              >
-                                {e.nom}
-                              </p>
-                              <p
-                                style={{ fontSize: 11, color: "var(--muted)" }}
-                              >
-                                {e.role || e.poste}
-                              </p>
-                            </div>
-                          </div>
-                          <MdArrowForward size={15} color="var(--cyan)" />
-                        </div>
-                      ))}
-                    </div>
+                    <p style={{ fontSize: 12, color: "#94a3b8" }}>
+                      Concours d'entrée — {filiere.nom}
+                    </p>
                   </div>
-                )}
+                </div>
+                <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7 }}>
+                  Déposez votre dossier de préinscription pour intégrer cette
+                  filière à l'IUT de Douala.
+                </p>
+                <a
+                  href="https://www.iut-dla.cm/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: "12px",
+                    background: "var(--cyan)",
+                    color: "var(--cyan-text)",
+                    borderRadius: 10,
+                    fontFamily: "var(--font-head)",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    textDecoration: "none",
+                    transition: "all .2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "var(--cyan-dark)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "var(--cyan)")
+                  }
+                >
+                  <MdOpenInNew size={16} /> Préinscription en ligne
+                </a>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: "#475569",
+                    textAlign: "center",
+                  }}
+                >
+                  Université de Douala — Site officiel
+                </p>
+              </div>
 
-                {/* Carte département */}
-                {filiere.departement?.batiment?.latitude && (
+              {/* Carte localisation */}
+              {filiere.departement?.batiment?.latitude && (
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: 16,
+                    border: "1px solid var(--border)",
+                    overflow: "hidden",
+                  }}
+                >
                   <div
                     style={{
-                      background: "#fff",
-                      borderRadius: 16,
-                      border: "1px solid var(--border)",
-                      overflow: "hidden",
+                      padding: "16px 20px",
+                      borderBottom: "1px solid var(--border)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 8,
                     }}
                   >
-                    <div
-                      style={{
-                        padding: "16px 20px",
-                        borderBottom: "1px solid var(--border)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: 8,
-                      }}
-                    >
-                      <div>
-                        <p
-                          style={{
-                            fontFamily: "var(--font-head)",
-                            fontWeight: 700,
-                            fontSize: 14,
-                            color: "#0f172a",
-                          }}
-                        >
-                          Localisation
-                        </p>
-                        <p
-                          style={{
-                            fontSize: 12,
-                            color: "var(--muted)",
-                            marginTop: 2,
-                          }}
-                        >
-                          {filiere.departement.batiment.nom}
-                        </p>
-                      </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          onClick={() =>
-                            openItineraire(
-                              filiere.departement.batiment.latitude,
-                              filiere.departement.batiment.longitude,
-                            )
-                          }
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                            padding: "7px 12px",
-                            background: "var(--cyan)",
-                            color: "var(--cyan-text)",
-                            border: "none",
-                            borderRadius: 8,
-                            fontFamily: "var(--font-head)",
-                            fontWeight: 700,
-                            fontSize: 11,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <MdDirections size={14} /> Itinéraire
-                        </button>
-                        <button
-                          onClick={() => navigate("/carte")}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                            padding: "7px 12px",
-                            background: "var(--cyan-light)",
-                            color: "var(--cyan-dark)",
-                            border: "none",
-                            borderRadius: 8,
-                            fontFamily: "var(--font-head)",
-                            fontWeight: 700,
-                            fontSize: 11,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <MdLocationOn size={14} /> Campus
-                        </button>
-                      </div>
+                    <div>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          color: "#0f172a",
+                        }}
+                      >
+                        📍 Localisation
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--muted)",
+                          marginTop: 2,
+                        }}
+                      >
+                        {filiere.departement.batiment.nom}
+                      </p>
                     </div>
-                    <div style={{ height: 260 }}>
-                      <MapContainer
-                        center={[
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={() =>
+                          openItineraire(
+                            filiere.departement.batiment.latitude,
+                            filiere.departement.batiment.longitude,
+                          )
+                        }
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          padding: "7px 12px",
+                          background: "var(--cyan)",
+                          color: "var(--cyan-text)",
+                          border: "none",
+                          borderRadius: 8,
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 11,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <MdDirections size={14} /> Itinéraire
+                      </button>
+                      <button
+                        onClick={() => navigate("/carte")}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          padding: "7px 12px",
+                          background: "var(--cyan-light)",
+                          color: "var(--cyan-dark)",
+                          border: "none",
+                          borderRadius: 8,
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 11,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <MdLocationOn size={14} /> Campus
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ height: 220 }}>
+                    <MapContainer
+                      center={[
+                        parseFloat(filiere.departement.batiment.latitude),
+                        parseFloat(filiere.departement.batiment.longitude),
+                      ]}
+                      zoom={17}
+                      style={{ height: "100%", width: "100%" }}
+                      scrollWheelZoom={false}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution="© OpenStreetMap"
+                        maxZoom={22}
+                        maxNativeZoom={19}
+                      />
+                      <Marker
+                        position={[
                           parseFloat(filiere.departement.batiment.latitude),
                           parseFloat(filiere.departement.batiment.longitude),
                         ]}
-                        zoom={17}
-                        style={{ height: "100%", width: "100%" }}
-                        scrollWheelZoom={false}
+                        icon={markerIcon}
                       >
-                        <TileLayer
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution="© OpenStreetMap"
-                          maxZoom={22}
-                          maxNativeZoom={19}
-                        />
-                        <Marker
-                          position={[
-                            parseFloat(filiere.departement.batiment.latitude),
-                            parseFloat(filiere.departement.batiment.longitude),
-                          ]}
-                          icon={markerIcon}
-                        >
-                          <Popup>
-                            <p
-                              style={{
-                                fontFamily: "var(--font-head)",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {filiere.departement.batiment.nom}
-                            </p>
-                            <p style={{ fontSize: 12, color: "#64748b" }}>
-                              {filiere.nom}
-                            </p>
-                          </Popup>
-                        </Marker>
-                      </MapContainer>
-                    </div>
+                        <Popup>
+                          <p
+                            style={{
+                              fontFamily: "var(--font-head)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {filiere.departement.batiment.nom}
+                          </p>
+                          <p style={{ fontSize: 12, color: "#64748b" }}>
+                            {filiere.nom}
+                          </p>
+                        </Popup>
+                      </Marker>
+                    </MapContainer>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* ── DÉBOUCHÉS IA ── */}
+        {!loading && filiere && (
+          <div style={{ marginTop: 32 }}>
+            <DebouchesIA filiere={filiere} />
           </div>
         )}
       </div>

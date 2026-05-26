@@ -42,6 +42,7 @@ exports.create = async (req, res) => {
     const dept = await Departement.create({
       nom,
       description,
+      photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       id_admin: req.admin.id_admin,
     });
     res.status(201).json(dept);
@@ -55,7 +56,9 @@ exports.update = async (req, res) => {
     const dept = await Departement.findByPk(req.params.id);
     if (!dept)
       return res.status(404).json({ message: "Département non trouvé" });
-    await dept.update(req.body);
+    const updates = { ...req.body };
+    if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
+    await dept.update(updates);
     res.json(dept);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

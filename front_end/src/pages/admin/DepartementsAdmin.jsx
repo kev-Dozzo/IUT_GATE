@@ -12,6 +12,7 @@ import {
   MdBook,
 } from "react-icons/md";
 import AdminLayout from "../../components/layout/AdminLayout";
+import PhotoUpload from "../../components/ui/PhotoUpload";
 import {
   getDepartements,
   createDepartement,
@@ -39,9 +40,12 @@ export default function DepartementsAdmin() {
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [photo, setPhoto] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -64,12 +68,14 @@ export default function DepartementsAdmin() {
   const openAdd = () => {
     setForm(emptyForm);
     setSelected(null);
+    setPhoto(null);
     setModal("add");
   };
 
   const openEdit = (dept) => {
     setForm({ nom: dept.nom || "", description: dept.description || "" });
     setSelected(dept);
+    setPhoto(null);
     setModal("edit");
   };
 
@@ -82,6 +88,7 @@ export default function DepartementsAdmin() {
     setModal(null);
     setSelected(null);
     setForm(emptyForm);
+    setPhoto(null);
   };
 
   const handleSave = async () => {
@@ -92,10 +99,10 @@ export default function DepartementsAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createDepartement(form);
+        await createDepartement(form, photo);
         showToast("Département créé avec succès !");
       } else {
-        await updateDepartement(selected.id_departement, form);
+        await updateDepartement(selected.id_departement, form, photo);
         showToast("Département modifié avec succès !");
       }
       await fetchData();
@@ -334,155 +341,206 @@ export default function DepartementsAdmin() {
         >
           {filtered.map((dept, i) => {
             const col = DEPT_COLORS[i % DEPT_COLORS.length];
+            const imageUrl = dept.photo_url
+              ? `http://localhost:5000${dept.photo_url}`
+              : null;
             return (
               <div
                 key={dept.id_departement}
                 style={{
                   background: "#fff",
-                  borderRadius: 14,
+                  borderRadius: 22,
                   border: "1px solid var(--border)",
-                  padding: "22px",
-                  transition: "all .2s",
+                  overflow: "hidden",
+                  boxShadow: "0 18px 60px rgba(15, 23, 42, 0.08)",
+                  transition: "transform .2s, box-shadow .2s",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = col.color;
-                  e.currentTarget.style.boxShadow = `0 8px 24px ${col.bg}`;
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 24px 80px rgba(15, 23, 42, 0.12)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--border)";
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 18px 60px rgba(15, 23, 42, 0.08)";
                 }}
               >
-                {/* Card header */}
                 <div
                   style={{
+                    width: "100%",
+                    minHeight: 150,
+                    background: "#f8fafc",
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: 14,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
                   }}
                 >
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 13,
-                      background: col.bg,
-                      flexShrink: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <MdAccountBalance size={24} color={col.color} />
-                  </div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => openEdit(dept)}
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={dept.nom}
                       style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "#fff",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      onError={(e) => (e.currentTarget.style.display = "none")}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 18,
+                        background: col.bg,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all .2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "var(--cyan-light)";
-                        e.currentTarget.style.borderColor = "var(--cyan)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#fff";
-                        e.currentTarget.style.borderColor = "var(--border)";
                       }}
                     >
-                      <MdEdit size={15} color="var(--cyan-dark)" />
-                    </button>
-                    <button
-                      onClick={() => openDelete(dept)}
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        border: "1px solid #fee2e2",
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all .2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#fee2e2";
-                        e.currentTarget.style.borderColor = "#fca5a5";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#fff";
-                        e.currentTarget.style.borderColor = "#fee2e2";
-                      }}
-                    >
-                      <MdDelete size={15} color="#dc2626" />
-                    </button>
-                  </div>
+                      <MdAccountBalance size={32} color={col.color} />
+                    </div>
+                  )}
                 </div>
-
-                {/* Nom */}
-                <h3
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontWeight: 700,
-                    fontSize: 15,
-                    color: "var(--text)",
-                    marginBottom: 8,
-                  }}
-                >
-                  {dept.nom}
-                </h3>
-
-                {/* Description */}
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: "var(--muted)",
-                    lineHeight: 1.6,
-                    marginBottom: 14,
-                    minHeight: 36,
-                  }}
-                >
-                  {dept.description?.slice(0, 90) || "Aucune description."}
-                  {dept.description?.length > 90 ? "..." : ""}
-                </p>
-
-                {/* Stats */}
                 <div
                   style={{
-                    borderTop: "1px solid #f1f5f9",
-                    paddingTop: 12,
+                    padding: 22,
                     display: "flex",
+                    flexDirection: "column",
                     gap: 16,
                   }}
                 >
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 5 }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      alignItems: "flex-start",
+                    }}
                   >
-                    <MdPeople size={14} color={col.color} />
-                    <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 800,
+                          fontSize: 18,
+                          color: "var(--text)",
+                          margin: 0,
+                        }}
+                      >
+                        {dept.nom}
+                      </p>
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        marginTop: 8,
+                        padding: "6px 12px",
+                        borderRadius: 999,
+                        background: col.bg,
+                        color: col.color,
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    >
+                      Département
+                    </span>
+                  </div>
+
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "var(--muted)",
+                      lineHeight: 1.8,
+                      minHeight: 54,
+                      margin: 0,
+                    }}
+                  >
+                    {dept.description?.slice(0, 120) ||
+                      "Aucune description disponible."}
+                    {dept.description?.length > 120 ? "..." : ""}
+                  </p>
+
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "8px 12px",
+                        borderRadius: 12,
+                        background: "#f8fafc",
+                        color: "var(--text)",
+                        fontSize: 12,
+                      }}
+                    >
+                      <MdPeople size={14} color={col.color} />
                       {dept.enseignants_count ?? 0} enseignant
                       {(dept.enseignants_count ?? 0) > 1 ? "s" : ""}
                     </span>
-                  </div>
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 5 }}
-                  >
-                    <MdBook size={14} color={col.color} />
-                    <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "8px 12px",
+                        borderRadius: 12,
+                        background: "#f8fafc",
+                        color: "var(--text)",
+                        fontSize: 12,
+                      }}
+                    >
+                      <MdBook size={14} color={col.color} />
                       {dept.filieres_count ?? 0} filière
                       {(dept.filieres_count ?? 0) > 1 ? "s" : ""}
                     </span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button
+                      onClick={() => openEdit(dept)}
+                      style={{
+                        flex: 1,
+                        minWidth: 120,
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        border: "1px solid var(--cyan)",
+                        background: "var(--cyan)",
+                        color: "var(--cyan-text)",
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        cursor: "pointer",
+                        transition: "all .2s",
+                      }}
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => openDelete(dept)}
+                      style={{
+                        flex: 1,
+                        minWidth: 120,
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        border: "1px solid #fee2e2",
+                        background: "#fff",
+                        color: "#dc2626",
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        cursor: "pointer",
+                        transition: "all .2s",
+                      }}
+                    >
+                      Supprimer
+                    </button>
                   </div>
                 </div>
               </div>
@@ -564,6 +622,21 @@ export default function DepartementsAdmin() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <PhotoUpload
+                  value={
+                    selected?.photo_url
+                      ? `http://localhost:5000${selected.photo_url}`
+                      : null
+                  }
+                  onChange={setPhoto}
+                  size={96}
+                  shape="rounded"
+                  label="Logo du département"
+                  placeholder="image"
+                />
+              </div>
+
               {/* Nom */}
               <div>
                 <label style={labelStyle}>

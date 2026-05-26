@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MdAdd,
   MdEdit,
@@ -9,6 +9,12 @@ import {
   MdCheckCircle,
   MdWarning,
   MdCalendarToday,
+  MdUpload,
+  MdImage,
+  MdPictureAsPdf,
+  MdVideoFile,
+  MdInsertDriveFile,
+  MdAudioFile,
 } from "react-icons/md";
 import AdminLayout from "../../components/layout/AdminLayout";
 import {
@@ -17,7 +23,6 @@ import {
   updateActualite,
   deleteActualite,
 } from "../../services/actualiteService";
-import { FiPaperclip } from "react-icons/fi";
 
 const CATEGORIES = [
   "Examens",
@@ -37,98 +42,148 @@ const catColors = {
   Général: { bg: "#f1f5f9", color: "#475569" },
 };
 
-const emptyForm = {
-  titre: "",
-  contenu: "",
-  categorie: "Général",
-  image_url: "",
+const emptyForm = { titre: "", contenu: "", categorie: "Général" };
+
+// ── Icône selon type de fichier ──
+const FileIcon = ({ type }) => {
+  if (type?.startsWith("image/")) return <MdImage size={18} color="#0e7490" />;
+  if (type?.startsWith("video/"))
+    return <MdVideoFile size={18} color="#5b21b6" />;
+  if (type?.startsWith("audio/"))
+    return <MdAudioFile size={18} color="#92400e" />;
+  if (type === "application/pdf")
+    return <MdPictureAsPdf size={18} color="#991b1b" />;
+  return <MdInsertDriveFile size={18} color="#475569" />;
+};
+
+const formatSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 };
 
 export default function ActualitesAdmin() {
   const [actualites, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [modal, setModal] = useState(null); // 'add' | 'edit' | 'delete'
+  const [modal, setModal] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
-  const fileInputRef = useRef();
-  const [files, setFiles] = useState([]);
 
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const readFileAsDataURL = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-  const handleFileChange = async (event) => {
-    const selectedFiles = event.target.files;
-    if (!selectedFiles) return;
-
-    const fileArray = Array.from(selectedFiles);
-    setFiles(fileArray);
-
-    const imageFile = fileArray.find((file) => file.type.startsWith("image/"));
-    if (imageFile) {
-      const dataUrl = await readFileAsDataURL(imageFile);
-      setForm((prevForm) => ({ ...prevForm, image_url: dataUrl }));
-    }
-  };
-
-  const removeSelectedFile = () => {
-    setFiles([]);
-    setForm((prevForm) => ({ ...prevForm, image_url: "" }));
-  };
+  // Fichiers
+  const [fichiers, setFichiers] = useState([]); // File[] — nouveaux
+  const [previews, setPreviews] = useState([]); // {url, nom, type, taille}[]
+  const [dragOver, setDragOver] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const fetchActualites = async () => {
-      setLoading(true);
-      try {
-        const data = await getActualites();
-        setActualites(data);
-      } catch {
-        showToast("Erreur lors du chargement.", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActualites();
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const showToast = (message, type = "success") => {
+  const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await getActualites();
+      setActualites(data);
+    } catch {
+      showToast("Erreur lors du chargement.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
+
+  // ── Gestion fichiers ──
+  const addFichiers = (files) => {
+    const arr = Array.from(files);
+    const restant = 5 - fichiers.length;
+    if (restant <= 0) {
+      showToast("Maximum 5 fichiers atteint.", "error");
+      return;
+    }
+    const toAdd = arr.slice(0, restant);
+    if (toAdd.length < arr.length)
+      showToast(`Seulement ${restant} fichier(s) ajouté(s) — max 5.`, "error");
+
+    setFichiers((prev) => [...prev, ...toAdd]);
+
+    // Générer previews
+    toAdd.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviews((prev) => [
+          ...prev,
+          {
+            url: file.type.startsWith("image/") ? e.target.result : null,
+            nom: file.originalname || file.name,
+            type: file.type,
+            taille: file.size,
+            local: true,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeFichier = (index) => {
+    setFichiers((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    addFichiers(e.dataTransfer.files);
   };
 
   const openAdd = () => {
     setForm(emptyForm);
-    setFiles([]);
+    setFichiers([]);
+    setPreviews([]);
     setSelected(null);
     setModal("add");
   };
 
-  const openEdit = (actualite) => {
+  const openEdit = (a) => {
     setForm({
-      titre: actualite.titre,
-      contenu: actualite.contenu,
-      categorie: actualite.categorie || "Général",
-      image_url: actualite.image_url || "",
+      titre: a.titre,
+      contenu: a.contenu,
+      categorie: a.categorie || "Général",
     });
-    setFiles([]);
-    setSelected(actualite);
+    setFichiers([]);
+    // Charger fichiers existants en preview
+    const existants = a.fichiers ? JSON.parse(a.fichiers) : [];
+    setPreviews(
+      existants.map((f) => ({
+        url: f.type?.startsWith("image/")
+          ? `http://localhost:5000${f.url}`
+          : null,
+        nom: f.nom,
+        type: f.type,
+        taille: f.taille,
+        local: false,
+        url_serveur: `http://localhost:5000${f.url}`,
+      })),
+    );
+    setSelected(a);
     setModal("edit");
   };
 
-  const openDelete = (actualite) => {
-    setSelected(actualite);
+  const openDelete = (a) => {
+    setSelected(a);
     setModal("delete");
   };
 
@@ -136,6 +191,8 @@ export default function ActualitesAdmin() {
     setModal(null);
     setSelected(null);
     setForm(emptyForm);
+    setFichiers([]);
+    setPreviews([]);
   };
 
   const handleSave = async () => {
@@ -146,13 +203,13 @@ export default function ActualitesAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createActualite(form, files[0]); // Pass the file
+        await createActualite(form, fichiers);
         showToast("Actualité créée avec succès !");
       } else {
-        await updateActualite(selected.id_actualite, form, files[0]); // Pass the file
+        await updateActualite(selected.id_actualite, form, fichiers);
         showToast("Actualité modifiée avec succès !");
       }
-      await fetchActualites();
+      await fetchData();
       closeModal();
     } catch {
       showToast("Une erreur est survenue.", "error");
@@ -166,7 +223,7 @@ export default function ActualitesAdmin() {
     try {
       await deleteActualite(selected.id_actualite);
       showToast("Actualité supprimée.");
-      await fetchActualites();
+      await fetchData();
       closeModal();
     } catch {
       showToast("Erreur lors de la suppression.", "error");
@@ -188,16 +245,38 @@ export default function ActualitesAdmin() {
       year: "numeric",
     });
 
+  const inp = {
+    width: "100%",
+    padding: "11px 14px",
+    border: "1.5px solid var(--border)",
+    borderRadius: 10,
+    fontSize: 13,
+    fontFamily: "var(--font-body)",
+    outline: "none",
+    color: "var(--text)",
+    transition: "border .2s",
+    background: "#fff",
+  };
+
+  const lbl = {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#374151",
+    fontFamily: "var(--font-head)",
+    display: "block",
+    marginBottom: 6,
+  };
+
   return (
     <AdminLayout>
-      {/* ── TOAST ── */}
+      {/* TOAST */}
       {toast && (
         <div
           style={{
             position: "fixed",
             top: 24,
             right: 24,
-            zIndex: 999,
+            zIndex: 9999,
             background: toast.type === "error" ? "#fee2e2" : "#d1fae5",
             border: `1px solid ${toast.type === "error" ? "#fca5a5" : "#6ee7b7"}`,
             borderRadius: 10,
@@ -221,7 +300,7 @@ export default function ActualitesAdmin() {
         </div>
       )}
 
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
@@ -256,7 +335,7 @@ export default function ActualitesAdmin() {
             Gestion des Actualités
           </h1>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
-            {actualites.length} actualite{actualites.length > 1 ? "s" : ""} au
+            {actualites.length} actualité{actualites.length > 1 ? "s" : ""} au
             total
           </p>
         </div>
@@ -275,7 +354,6 @@ export default function ActualitesAdmin() {
             fontWeight: 700,
             fontSize: 13,
             cursor: "pointer",
-            transition: "all .2s",
           }}
           onMouseEnter={(e) =>
             (e.currentTarget.style.background = "var(--cyan-dark)")
@@ -284,11 +362,11 @@ export default function ActualitesAdmin() {
             (e.currentTarget.style.background = "var(--cyan)")
           }
         >
-          <MdAdd size={18} /> Nouvelle annonce
+          <MdAdd size={18} /> Nouvelle actualité
         </button>
       </div>
 
-      {/* ── SEARCH ── */}
+      {/* SEARCH */}
       <div
         style={{
           display: "flex",
@@ -306,7 +384,7 @@ export default function ActualitesAdmin() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher une annonce..."
+          placeholder="Rechercher une actualité..."
           style={{
             flex: 1,
             border: "none",
@@ -326,44 +404,9 @@ export default function ActualitesAdmin() {
         )}
       </div>
 
-      {/* ── TABLE ── */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 14,
-          border: "1px solid var(--border)",
-          overflow: "hidden",
-        }}
-      >
-        {/* En-tête */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 120px",
-            padding: "12px 20px",
-            background: "#f8fafc",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          {["Titre", "Catégorie", "Date", "Actions"].map((h) => (
-            <p
-              key={h}
-              style={{
-                fontFamily: "var(--font-head)",
-                fontWeight: 700,
-                fontSize: 11,
-                color: "var(--muted)",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              {h}
-            </p>
-          ))}
-        </div>
-
-        {/* Loading */}
-        {loading && (
+      {/* LISTE - Cartes responsive */}
+      <div style={{ marginTop: 6 }}>
+        {loading ? (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div
               style={{
@@ -379,185 +422,68 @@ export default function ActualitesAdmin() {
             <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
-        )}
-
-        {/* Vide */}
-        {!loading && filtered.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "60px 0",
-              color: "var(--muted)",
-            }}
-          >
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
             <MdCampaign size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
-              Aucune annonce trouvée
-            </p>
+            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>Aucune actualité trouvée</p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+            {filtered.map((a) => {
+              const cat = catColors[a.categorie] || catColors["Général"];
+              const fics = a.fichiers ? JSON.parse(a.fichiers) : [];
+              const img = a.photo_url
+                ? `http://localhost:5000${a.photo_url}`
+                : fics[0] && fics[0].type?.startsWith("image/")
+                ? `http://localhost:5000${fics[0].url}`
+                : null;
+              return (
+                <div
+                  key={a.id_actualite}
+                  style={{
+                    background: "#fff",
+                    borderRadius: 12,
+                    border: "1px solid var(--border)",
+                    padding: 12,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  {img ? (
+                    <div style={{ width: "100%", height: 160, overflow: "hidden", borderRadius: 10 }}>
+                      <img src={img} alt={a.titre} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e)=>e.currentTarget.style.display='none'} />
+                    </div>
+                  ) : (
+                    <div style={{ width: "100%", height: 120, borderRadius: 10, background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <MdCampaign size={34} color="var(--cyan-dark)" />
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.titre}</div>
+                      <div style={{ fontSize: 13, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>{a.contenu}</div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+                      <span style={{ display: "inline-flex", padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-head)", background: cat.bg, color: cat.color }}>{a.categorie || "Général"}</span>
+                      <div style={{ fontSize: 12, color: "var(--muted)" }}>{a.date_publication ? formatDate(a.date_publication) : "—"}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                    <button onClick={() => openEdit(a)} style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--border)", background: "#fff", cursor: "pointer", fontWeight:700 }} onMouseEnter={(e)=>e.currentTarget.style.background='var(--cyan-light)'} onMouseLeave={(e)=>e.currentTarget.style.background='#fff'}>
+                      <MdEdit size={16} color="var(--cyan-dark)" />
+                    </button>
+                    <button onClick={() => openDelete(a)} style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #fee2e2", background: "#fff", cursor: "pointer" }} onMouseEnter={(e)=>e.currentTarget.style.background='#fee2e2'} onMouseLeave={(e)=>e.currentTarget.style.background='#fff'}>
+                      <MdDelete size={16} color="#dc2626" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
-
-        {/* Lignes */}
-        {!loading &&
-          filtered.map((actualite, i) => {
-            const cat = catColors[actualite.categorie] || catColors["Général"];
-            return (
-              <div
-                key={actualite.id_actualite}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 120px",
-                  padding: "14px 20px",
-                  alignItems: "center",
-                  borderBottom:
-                    i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                  transition: "background .15s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                {/* Titre */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 9,
-                      flexShrink: 0,
-                      background: "var(--cyan-light)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <MdCampaign size={18} color="var(--cyan-dark)" />
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        fontWeight: 600,
-                        fontSize: 13,
-                        color: "var(--text)",
-                        marginBottom: 2,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        maxWidth: 260,
-                      }}
-                    >
-                      {actualite.titre}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: "var(--muted)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        maxWidth: 260,
-                      }}
-                    >
-                      {actualite.contenu?.slice(0, 60)}...
-                    </p>
-                  </div>
-                </div>
-
-                {/* Catégorie */}
-                <span
-                  style={{
-                    display: "inline-flex",
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-head)",
-                    background: cat.bg,
-                    color: cat.color,
-                  }}
-                >
-                  {actualite.categorie || "Général"}
-                </span>
-
-                {/* Date */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    color: "var(--muted)",
-                  }}
-                >
-                  <MdCalendarToday size={13} />
-                  <span style={{ fontSize: 12 }}>
-                    {actualite.date_publication
-                      ? formatDate(actualite.date_publication)
-                      : "—"}
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => openEdit(actualite)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid var(--border)",
-                      background: "#fff",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Modifier"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "var(--cyan-light)";
-                      e.currentTarget.style.borderColor = "var(--cyan)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "var(--border)";
-                    }}
-                  >
-                    <MdEdit size={15} color="var(--cyan-dark)" />
-                  </button>
-                  <button
-                    onClick={() => openDelete(actualite)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      border: "1px solid #fee2e2",
-                      background: "#fff",
-                      cursor: "pointer",
-                      transition: "all .2s",
-                    }}
-                    title="Supprimer"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#fee2e2";
-                      e.currentTarget.style.borderColor = "#fca5a5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#fee2e2";
-                    }}
-                  >
-                    <MdDelete size={15} color="#dc2626" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
       </div>
 
       {/* ── MODAL ADD / EDIT ── */}
@@ -583,11 +509,13 @@ export default function ActualitesAdmin() {
               borderRadius: 18,
               padding: "36px",
               width: "100%",
-              maxWidth: 520,
+              maxWidth: 580,
+              maxHeight: "90vh",
+              overflow: "auto",
               boxShadow: "0 24px 64px rgba(0,0,0,.2)",
             }}
           >
-            {/* Header modal */}
+            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -605,14 +533,14 @@ export default function ActualitesAdmin() {
                     color: "#0f172a",
                   }}
                 >
-                  {modal === "add" ? "Nouvelle annonce" : "Modifier l'annonce"}
+                  {modal === "add"
+                    ? "Nouvelle actualité"
+                    : "Modifier l'actualité"}
                 </h2>
                 <p
                   style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}
                 >
-                  {modal === "add"
-                    ? "Remplissez les champs ci-dessous."
-                    : "Modifiez les informations de l'annonce."}
+                  Remplissez les informations et ajoutez jusqu'à 5 fichiers.
                 </p>
               </div>
               <button
@@ -633,37 +561,17 @@ export default function ActualitesAdmin() {
               </button>
             </div>
 
-            {/* Champs */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {/* Titre */}
               <div>
-                <label
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#374151",
-                    fontFamily: "var(--font-head)",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
+                <label style={lbl}>
                   Titre <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   value={form.titre}
                   onChange={(e) => setForm({ ...form, titre: e.target.value })}
-                  placeholder="Titre de l'annonce"
-                  style={{
-                    width: "100%",
-                    padding: "11px 14px",
-                    border: "1.5px solid var(--border)",
-                    borderRadius: 10,
-                    fontSize: 13,
-                    fontFamily: "var(--font-body)",
-                    outline: "none",
-                    transition: "border .2s",
-                    color: "var(--text)",
-                  }}
+                  placeholder="Titre de l'actualité"
+                  style={inp}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
@@ -671,35 +579,13 @@ export default function ActualitesAdmin() {
 
               {/* Catégorie */}
               <div>
-                <label
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#374151",
-                    fontFamily: "var(--font-head)",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  Catégorie
-                </label>
+                <label style={lbl}>Catégorie</label>
                 <select
                   value={form.categorie}
                   onChange={(e) =>
                     setForm({ ...form, categorie: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "11px 14px",
-                    border: "1.5px solid var(--border)",
-                    borderRadius: 10,
-                    fontSize: 13,
-                    fontFamily: "var(--font-body)",
-                    outline: "none",
-                    background: "#fff",
-                    color: "var(--text)",
-                    cursor: "pointer",
-                  }}
+                  style={{ ...inp, cursor: "pointer" }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 >
@@ -713,16 +599,7 @@ export default function ActualitesAdmin() {
 
               {/* Contenu */}
               <div>
-                <label
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#374151",
-                    fontFamily: "var(--font-head)",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
+                <label style={lbl}>
                   Contenu <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <textarea
@@ -730,131 +607,259 @@ export default function ActualitesAdmin() {
                   onChange={(e) =>
                     setForm({ ...form, contenu: e.target.value })
                   }
-                  placeholder="Rédigez le contenu de l'annonce..."
+                  placeholder="Rédigez le contenu de l'actualité..."
                   rows={5}
-                  style={{
-                    width: "100%",
-                    padding: "11px 14px",
-                    border: "1.5px solid var(--border)",
-                    borderRadius: 10,
-                    fontSize: 13,
-                    fontFamily: "var(--font-body)",
-                    outline: "none",
-                    resize: "vertical",
-                    transition: "border .2s",
-                    color: "var(--text)",
-                  }}
+                  style={{ ...inp, resize: "vertical" }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <button
-                    onClick={handleClick}
-                    type="button"
+              </div>
+
+              {/* ── ZONE UPLOAD ── */}
+              <div>
+                <label style={lbl}>
+                  Fichiers joints
+                  <span
                     style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                      padding: "10px 14px",
-                      background: "#f8fafc",
-                      border: "1px solid var(--border)",
-                      borderRadius: 10,
-                      cursor: "pointer",
-                      color: "#0f172a",
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 700,
+                      fontWeight: 400,
+                      color: "var(--muted)",
+                      marginLeft: 8,
                     }}
                   >
-                    <FiPaperclip size={18} /> Choisir une image
-                  </button>
-
-                  <span style={{ color: "var(--muted)", fontSize: 13 }}>
-                    Fichier image uniquement. Une seule image sera enregistrée.
+                    {fichiers.length}/5 — photos, vidéos, documents
                   </span>
+                </label>
 
+                {/* Drop zone */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  onClick={() =>
+                    fichiers.length < 5 &&
+                    document.getElementById("file-input-actualite").click()
+                  }
+                  style={{
+                    border: `2px dashed ${dragOver ? "var(--cyan)" : fichiers.length >= 5 ? "#e2e8f0" : "#67e8f9"}`,
+                    borderRadius: 12,
+                    padding: "24px",
+                    textAlign: "center",
+                    background: dragOver
+                      ? "var(--cyan-light)"
+                      : fichiers.length >= 5
+                        ? "#f8fafc"
+                        : "#f0fdfe",
+                    cursor: fichiers.length >= 5 ? "not-allowed" : "pointer",
+                    transition: "all .2s",
+                  }}
+                >
                   <input
+                    id="file-input-actualite"
                     type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    hidden
+                    multiple
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      addFichiers(e.target.files);
+                      e.target.value = "";
+                    }}
                   />
+                  <MdUpload
+                    size={32}
+                    color={
+                      fichiers.length >= 5
+                        ? "var(--subtle)"
+                        : "var(--cyan-dark)"
+                    }
+                    style={{ marginBottom: 8 }}
+                  />
+                  <p
+                    style={{
+                      fontFamily: "var(--font-head)",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      color:
+                        fichiers.length >= 5
+                          ? "var(--subtle)"
+                          : "var(--cyan-dark)",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {fichiers.length >= 5
+                      ? "Maximum atteint (5/5)"
+                      : "Glissez vos fichiers ici"}
+                  </p>
+                  {fichiers.length < 5 && (
+                    <p style={{ fontSize: 12, color: "var(--muted)" }}>
+                      ou cliquez pour sélectionner • Images, Vidéos, PDF,
+                      Documents
+                    </p>
+                  )}
                 </div>
 
-                {form.image_url && (
-                  <div style={{ marginTop: 16, maxWidth: 320 }}>
-                    <div
-                      style={{
-                        position: "relative",
-                        overflow: "hidden",
-                        borderRadius: 14,
-                        border: "1px solid var(--border)",
-                      }}
-                    >
-                      <img
-                        src={form.image_url}
-                        alt="Prévisualisation"
+                {/* Previews fichiers */}
+                {previews.length > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      marginTop: 12,
+                    }}
+                  >
+                    {previews.map((f, i) => (
+                      <div
+                        key={i}
                         style={{
-                          display: "block",
-                          width: "100%",
-                          height: 180,
-                          objectFit: "cover",
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={removeSelectedFile}
-                        style={{
-                          position: "absolute",
-                          top: 10,
-                          right: 10,
-                          background: "rgba(15,23,42,.9)",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: 999,
-                          width: 32,
-                          height: 32,
-                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "10px 14px",
+                          background: "#f8fafc",
+                          borderRadius: 10,
+                          border: "1px solid var(--border)",
                         }}
                       >
-                        ✕
-                      </button>
-                    </div>
+                        {/* Thumbnail ou icône */}
+                        {f.url ? (
+                          <img
+                            src={f.url}
+                            alt=""
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 8,
+                              objectFit: "cover",
+                              flexShrink: 0,
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 8,
+                              background: "#fff",
+                              border: "1px solid var(--border)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <FileIcon type={f.type} />
+                          </div>
+                        )}
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p
+                            style={{
+                              fontFamily: "var(--font-head)",
+                              fontWeight: 600,
+                              fontSize: 12,
+                              color: "var(--text)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              marginBottom: 2,
+                            }}
+                          >
+                            {f.nom}
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 8,
+                              alignItems: "center",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: 10,
+                                padding: "1px 7px",
+                                borderRadius: 999,
+                                background: "#f1f5f9",
+                                color: "var(--muted)",
+                                fontFamily: "var(--font-head)",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {f.type?.split("/")[1]?.toUpperCase() ||
+                                "FICHIER"}
+                            </span>
+                            {f.taille && (
+                              <span
+                                style={{ fontSize: 10, color: "var(--subtle)" }}
+                              >
+                                {formatSize(f.taille)}
+                              </span>
+                            )}
+                            {!f.local && (
+                              <span
+                                style={{
+                                  fontSize: 10,
+                                  color: "#065f46",
+                                  fontWeight: 600,
+                                  fontFamily: "var(--font-head)",
+                                }}
+                              >
+                                ✓ Enregistré
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Supprimer */}
+                        {f.local && (
+                          <button
+                            onClick={() => removeFichier(i)}
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 7,
+                              background: "#fee2e2",
+                              border: "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <MdClose size={14} color="#dc2626" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
               {/* Boutons */}
-              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                 <button
                   onClick={handleSave}
                   disabled={saving}
                   style={{
                     flex: 1,
                     padding: "12px",
-                    background: saving ? "var(--subtle)" : "var(--cyan)",
-                    color: saving ? "#fff" : "var(--cyan-text)",
                     border: "none",
                     borderRadius: 10,
+                    background: saving ? "var(--subtle)" : "var(--cyan)",
+                    color: saving ? "#fff" : "var(--cyan-text)",
                     fontFamily: "var(--font-head)",
                     fontWeight: 700,
                     fontSize: 13,
                     cursor: saving ? "not-allowed" : "pointer",
-                    transition: "all .2s",
                   }}
                 >
                   {saving
                     ? "Enregistrement..."
                     : modal === "add"
-                      ? "Publier l'annonce"
+                      ? "Publier l'actualité"
                       : "Enregistrer"}
                 </button>
                 <button
@@ -880,7 +885,7 @@ export default function ActualitesAdmin() {
         </div>
       )}
 
-      {/* ── MODAL DELETE ── */}
+      {/* MODAL DELETE */}
       {modal === "delete" && (
         <div
           onClick={closeModal}
@@ -931,16 +936,9 @@ export default function ActualitesAdmin() {
                 marginBottom: 8,
               }}
             >
-              Supprimer l'annonce ?
+              Supprimer l'actualité ?
             </h2>
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--muted)",
-                marginBottom: 6,
-                lineHeight: 1.6,
-              }}
-            >
+            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 6 }}>
               Vous allez supprimer
             </p>
             <p
@@ -953,9 +951,6 @@ export default function ActualitesAdmin() {
               }}
             >
               "{selected?.titre}"
-            </p>
-            <p style={{ fontSize: 12, color: "#ef4444", marginBottom: 24 }}>
-              Cette action est irréversible.
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
