@@ -1,6 +1,13 @@
 import "leaflet/dist/leaflet.css";
 import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  Circle,
+} from "react-leaflet";
 import L from "leaflet";
 import {
   MdSearch,
@@ -13,11 +20,14 @@ import {
   MdInfo,
   MdPeople,
   MdMenu,
+  MdDirections,
+  MdNavigation,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import { getBatiments } from "../../services/batimentService";
 import { getSalles } from "../../services/salleService";
 
+// ── Fix icônes Leaflet ──
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -26,7 +36,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const createCustomIcon = (isSelected) =>
+// ── Icône bâtiment ──
+const createBatimentIcon = (isSelected) =>
   L.divIcon({
     className: "",
     html: `<div style="
@@ -37,15 +48,50 @@ const createCustomIcon = (isSelected) =>
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     box-shadow: 0 4px 14px rgba(6,182,212,.5);
+    transition: all .3s;
   "></div>`,
     iconSize: [isSelected ? 44 : 36, isSelected ? 44 : 36],
     iconAnchor: [isSelected ? 22 : 18, isSelected ? 44 : 36],
   });
 
-function FlyTo({ coords }) {
+// ── Icône salle ──
+const createSalleIcon = (isSelected) =>
+  L.divIcon({
+    className: "",
+    html: `<div style="
+    width: ${isSelected ? 32 : 24}px;
+    height: ${isSelected ? 32 : 24}px;
+    background: ${isSelected ? "#5b21b6" : "#8b5cf6"};
+    border: 2px solid #fff;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(139,92,246,.5);
+    display: flex; align-items: center; justify-content: center;
+  ">
+    <div style="width:8px;height:8px;background:#fff;border-radius:2px;"></div>
+  </div>`,
+    iconSize: [isSelected ? 32 : 24, isSelected ? 32 : 24],
+    iconAnchor: [isSelected ? 16 : 12, isSelected ? 16 : 12],
+  });
+
+// ── Icône utilisateur ──
+const userIcon = L.divIcon({
+  className: "",
+  html: `<div style="
+    width: 20px; height: 20px;
+    background: #3B82F6;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(59,130,246,.3);
+  "></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+// ── FlyTo ──
+function FlyTo({ coords, zoom = 18 }) {
   const map = useMap();
   useEffect(() => {
-    if (coords) map.flyTo(coords, 18, { animate: true, duration: 1.2 });
+    if (coords) map.flyTo(coords, zoom, { animate: true, duration: 1.2 });
   }, [coords, map]);
   return null;
 }
@@ -76,11 +122,16 @@ export default function CartePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
+  const [selectedSalle, setSelectedSalle] = useState(null);
   const [activeTab, setActiveTab] = useState("batiments");
   const [mapStyle, setMapStyle] = useState(0);
   const [showStyleMenu, setShowStyleMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [userPos, setUserPos] = useState(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [flyCoords, setFlyCoords] = useState(null);
+  const [flyZoom, setFlyZoom] = useState(18);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -93,11 +144,80 @@ export default function CartePage() {
       .then(([bats, sals]) => {
         setBatiments(bats);
         setSalles(sals);
-        if (bats.length > 0) setSelected(bats[0]);
+        if (bats.length > 0) {
+          setSelected(bats[0]);
+          if (bats[0].latitude && bats[0].longitude) {
+            setFlyCoords([
+              parseFloat(bats[0].latitude),
+              parseFloat(bats[0].longitude),
+            ]);
+          }
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  // ── Localisation GPS ──
+  const getUserLocation = () => {
+    setGpsLoading(true);
+    if (!navigator.geolocation) {
+      alert("La géolocalisation n'est pas supportée par votre navigateur.");
+      setGpsLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = [pos.coords.latitude, pos.coords.longitude];
+        setUserPos(coords);
+        setFlyCoords(coords);
+        setFlyZoom(16);
+        setGpsLoading(false);
+      },
+      () => {
+        alert("Impossible d'obtenir votre position. Vérifiez les permissions.");
+        setGpsLoading(false);
+      },
+    );
+  };
+
+  // ── Itinéraire Google Maps ──
+  const openItineraire = (lat, lng, nom) => {
+    if (userPos) {
+      window.open(
+        `https://www.google.com/maps/dir/${userPos[0]},${userPos[1]}/${lat},${lng}`,
+        "_blank",
+      );
+    } else {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`,
+        "_blank",
+      );
+    }
+  };
+
+  // ── Sélectionner un bâtiment ──
+  const selectBatiment = (bat) => {
+    setSelected(bat);
+    setSelectedSalle(null);
+    if (bat.latitude && bat.longitude) {
+      setFlyCoords([parseFloat(bat.latitude), parseFloat(bat.longitude)]);
+      setFlyZoom(18);
+    }
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  // ── Sélectionner une salle ──
+  const selectSalle = (salle) => {
+    setSelectedSalle(salle);
+    const bat = batiments.find((b) => b.id_batiment === salle.id_batiment);
+    if (bat?.latitude && bat?.longitude) {
+      setSelected(bat);
+      setFlyCoords([parseFloat(bat.latitude), parseFloat(bat.longitude)]);
+      setFlyZoom(19);
+    }
+    if (isMobile) setSidebarOpen(false);
+  };
 
   const filteredBatiments = batiments.filter(
     (b) =>
@@ -108,17 +228,20 @@ export default function CartePage() {
   const filteredSalles = salles.filter(
     (s) =>
       s.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      s.type?.toLowerCase().includes(search.toLowerCase()),
+      s.type?.toLowerCase().includes(search.toLowerCase()) ||
+      s.batiment?.nom?.toLowerCase().includes(search.toLowerCase()),
   );
 
+  // ── Sidebar Content ──
   const SidebarContent = () => (
     <>
-      {/* Header sidebar */}
+      {/* Header */}
       <div
         style={{
           padding: "16px",
           background: "var(--navy)",
           borderBottom: "1px solid rgba(255,255,255,.1)",
+          flexShrink: 0,
         }}
       >
         <div
@@ -137,7 +260,7 @@ export default function CartePage() {
               color: "#fff",
             }}
           >
-            Carte du Campus
+            🗺️ Carte du Campus
           </p>
           {isMobile && (
             <button
@@ -147,12 +270,15 @@ export default function CartePage() {
                 border: "none",
                 cursor: "pointer",
                 color: "#fff",
+                padding: 4,
               }}
             >
               <MdClose size={20} />
             </button>
           )}
         </div>
+
+        {/* Search */}
         <div
           style={{
             display: "flex",
@@ -164,11 +290,11 @@ export default function CartePage() {
             border: "1px solid rgba(255,255,255,.15)",
           }}
         >
-          <MdSearch size={16} style={{ color: "#94a3b8" }} />
+          <MdSearch size={16} style={{ color: "#94a3b8", flexShrink: 0 }} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher..."
+            placeholder="Rechercher bâtiment ou salle..."
             style={{
               flex: 1,
               border: "none",
@@ -190,7 +316,13 @@ export default function CartePage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", borderBottom: "1px solid var(--border)" }}>
+      <div
+        style={{
+          display: "flex",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+        }}
+      >
         {[
           { key: "batiments", label: "Bâtiments", icon: MdApartment },
           { key: "salles", label: "Salles", icon: MdMeetingRoom },
@@ -250,10 +382,7 @@ export default function CartePage() {
             return (
               <div
                 key={bat.id_batiment}
-                onClick={() => {
-                  setSelected(bat);
-                  if (isMobile) setSidebarOpen(false);
-                }}
+                onClick={() => selectBatiment(bat)}
                 style={{
                   padding: "12px",
                   borderRadius: 10,
@@ -271,7 +400,9 @@ export default function CartePage() {
                     e.currentTarget.style.background = "transparent";
                 }}
               >
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div
+                  style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
+                >
                   <div
                     style={{
                       width: 36,
@@ -301,12 +432,26 @@ export default function CartePage() {
                     >
                       {bat.nom}
                     </p>
+                    {bat.description && (
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: "var(--muted)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {bat.description}
+                      </p>
+                    )}
                     {bat.latitude && bat.longitude && (
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: 3,
+                          marginTop: 4,
                         }}
                       >
                         <MdLocationOn size={11} color="var(--cyan)" />
@@ -322,6 +467,32 @@ export default function CartePage() {
                         </span>
                       </div>
                     )}
+                    {/* Bouton itinéraire inline */}
+                    {isActive && bat.latitude && bat.longitude && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openItineraire(bat.latitude, bat.longitude, bat.nom);
+                        }}
+                        style={{
+                          marginTop: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          padding: "5px 10px",
+                          background: "var(--cyan)",
+                          color: "var(--cyan-text)",
+                          border: "none",
+                          borderRadius: 6,
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 10,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <MdDirections size={13} /> Itinéraire
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -331,89 +502,140 @@ export default function CartePage() {
         {/* Salles */}
         {!loading &&
           activeTab === "salles" &&
-          filteredSalles.map((salle) => (
-            <div
-              key={salle.id_salle}
-              style={{
-                padding: "12px",
-                borderRadius: 10,
-                marginBottom: 6,
-                cursor: "pointer",
-                border: "1px solid var(--border)",
-                transition: "all .2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--cyan)";
-                e.currentTarget.style.background = "#f0fdfe";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border)";
-                e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          filteredSalles.map((salle) => {
+            const isActive = selectedSalle?.id_salle === salle.id_salle;
+            const bat = batiments.find(
+              (b) => b.id_batiment === salle.id_batiment,
+            );
+            return (
+              <div
+                key={salle.id_salle}
+                onClick={() => selectSalle(salle)}
+                style={{
+                  padding: "12px",
+                  borderRadius: 10,
+                  marginBottom: 6,
+                  cursor: "pointer",
+                  background: isActive ? "#ede9fe" : "transparent",
+                  border: `1px solid ${isActive ? "#8b5cf6" : "var(--border)"}`,
+                  transition: "all .2s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = "#f5f3ff";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = "transparent";
+                }}
+              >
                 <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 9,
-                    flexShrink: 0,
-                    background: "#f1f5f9",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
                 >
-                  <MdMeetingRoom size={18} color="var(--muted)" />
-                </div>
-                <div>
-                  <p
+                  <div
                     style={{
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 700,
-                      fontSize: 13,
-                      color: "var(--text)",
-                      marginBottom: 3,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 9,
+                      flexShrink: 0,
+                      background: isActive ? "#8b5cf6" : "#f1f5f9",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {salle.nom}
-                  </p>
-                  <div
-                    style={{ display: "flex", gap: 6, alignItems: "center" }}
-                  >
-                    {salle.type && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: "1px 7px",
-                          borderRadius: 999,
-                          background: "var(--cyan-light)",
-                          color: "var(--cyan-dark)",
-                          fontFamily: "var(--font-head)",
-                        }}
-                      >
-                        {salle.type}
-                      </span>
-                    )}
-                    {salle.capacite && (
-                      <span
+                    <MdMeetingRoom
+                      size={18}
+                      color={isActive ? "#fff" : "var(--muted)"}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        color: isActive ? "#5b21b6" : "var(--text)",
+                        marginBottom: 3,
+                      }}
+                    >
+                      {salle.nom}
+                    </p>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {salle.type && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "1px 7px",
+                            borderRadius: 999,
+                            background: "#ede9fe",
+                            color: "#5b21b6",
+                            fontFamily: "var(--font-head)",
+                          }}
+                        >
+                          {salle.type}
+                        </span>
+                      )}
+                      {salle.capacite && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: "var(--muted)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 2,
+                          }}
+                        >
+                          <MdPeople size={11} /> {salle.capacite} places
+                        </span>
+                      )}
+                    </div>
+                    {bat && (
+                      <p
                         style={{
                           fontSize: 10,
                           color: "var(--muted)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 2,
+                          marginTop: 3,
                         }}
                       >
-                        <MdPeople size={11} /> {salle.capacite} places
-                      </span>
+                        📍 {bat.nom}
+                      </p>
+                    )}
+                    {/* Bouton itinéraire salle */}
+                    {isActive && bat?.latitude && bat?.longitude && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openItineraire(
+                            bat.latitude,
+                            bat.longitude,
+                            salle.nom,
+                          );
+                        }}
+                        style={{
+                          marginTop: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          padding: "5px 10px",
+                          background: "#8b5cf6",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 6,
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 10,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <MdDirections size={13} /> Itinéraire vers {bat.nom}
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
         {/* Aucun résultat */}
         {!loading &&
@@ -436,12 +658,13 @@ export default function CartePage() {
       </div>
 
       {/* Info sélectionné */}
-      {selected && (
+      {(selected || selectedSalle) && (
         <div
           style={{
             borderTop: "1px solid var(--border)",
             padding: "12px 14px",
-            background: "#f0fdfe",
+            background: selectedSalle ? "#f5f3ff" : "#f0fdfe",
+            flexShrink: 0,
           }}
         >
           <div
@@ -452,16 +675,19 @@ export default function CartePage() {
               marginBottom: 4,
             }}
           >
-            <MdInfo size={13} color="var(--cyan-dark)" />
+            <MdInfo
+              size={13}
+              color={selectedSalle ? "#5b21b6" : "var(--cyan-dark)"}
+            />
             <p
               style={{
                 fontFamily: "var(--font-head)",
                 fontWeight: 700,
                 fontSize: 11,
-                color: "var(--cyan-dark)",
+                color: selectedSalle ? "#5b21b6" : "var(--cyan-dark)",
               }}
             >
-              Sélectionné
+              {selectedSalle ? "Salle sélectionnée" : "Bâtiment sélectionné"}
             </p>
           </div>
           <p
@@ -472,8 +698,18 @@ export default function CartePage() {
               color: "var(--text)",
             }}
           >
-            {selected.nom}
+            {selectedSalle ? selectedSalle.nom : selected?.nom}
           </p>
+          {selectedSalle && (
+            <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
+              dans{" "}
+              {
+                batiments.find(
+                  (b) => b.id_batiment === selectedSalle.id_batiment,
+                )?.nom
+              }
+            </p>
+          )}
         </div>
       )}
     </>
@@ -491,7 +727,7 @@ export default function CartePage() {
           position: "relative",
         }}
       >
-        {/* ── SIDEBAR DESKTOP ── */}
+        {/* Sidebar desktop */}
         {!isMobile && (
           <aside
             style={{
@@ -508,160 +744,8 @@ export default function CartePage() {
           </aside>
         )}
 
-        {/* ── DRAWER SIDEBAR MOBILE ── */}
-        {isMobile && sidebarOpen && (
-          <div
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,.5)",
-              zIndex: 9999,
-            }}
-          >
-            <aside
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "85vw",
-                maxWidth: 320,
-                height: "100vh",
-                background: "#fff",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                zIndex: 9999,
-                boxShadow: "4px 0 24px rgba(0,0,0,.2)",
-              }}
-            >
-              <SidebarContent />
-            </aside>
-          </div>
-        )}
-
-        {/* ── MAP ── */}
+        {/* MAP */}
         <div style={{ flex: 1, position: "relative" }}>
-          {/* Bouton ouvrir sidebar mobile */}
-          {isMobile && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              style={{
-                position: "absolute",
-                top: 14,
-                left: 14,
-                zIndex: 1000,
-                background: "#fff",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                padding: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontFamily: "var(--font-head)",
-                fontWeight: 600,
-                fontSize: 12,
-                cursor: "pointer",
-                color: "var(--text)",
-                boxShadow: "0 2px 12px rgba(0,0,0,.1)",
-              }}
-            >
-              <MdMenu size={18} color="var(--cyan)" />
-              {selected ? selected.nom : "Bâtiments"}
-            </button>
-          )}
-
-          {/* Style switcher */}
-          <div
-            style={{ position: "absolute", top: 14, right: 14, zIndex: 1000 }}
-          >
-            <button
-              onClick={() => setShowStyleMenu(!showStyleMenu)}
-              style={{
-                background: "#fff",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                padding: "8px 12px",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontFamily: "var(--font-head)",
-                fontWeight: 600,
-                fontSize: 12,
-                cursor: "pointer",
-                color: "var(--text)",
-                boxShadow: "0 2px 12px rgba(0,0,0,.1)",
-              }}
-            >
-              <MdLayers size={16} color="var(--cyan)" />
-              {MAP_STYLES[mapStyle].label}
-            </button>
-
-            {showStyleMenu && (
-              <div
-                style={{
-                  position: "fixed", // ← fixed au lieu de absolute
-                  top: "auto",
-                  right: 14,
-                  marginTop: 6,
-                  background: "#fff",
-                  borderRadius: 10,
-                  border: "1px solid var(--border)",
-                  overflow: "hidden",
-                  boxShadow: "0 8px 24px rgba(0,0,0,.12)",
-                  zIndex: 9998, // ← très haut z-index
-                }}
-              >
-                {MAP_STYLES.map((style, idx) => (
-                  <div
-                    key={style.label}
-                    onClick={() => {
-                      setMapStyle(idx);
-                      setShowStyleMenu(false);
-                    }}
-                    style={{
-                      padding: "10px 16px",
-                      cursor: "pointer",
-                      fontSize: 12,
-                      fontFamily: "var(--font-head)",
-                      fontWeight: mapStyle === idx ? 700 : 500,
-                      color:
-                        mapStyle === idx ? "var(--cyan-dark)" : "var(--text)",
-                      background:
-                        mapStyle === idx ? "var(--cyan-light)" : "#fff",
-                    }}
-                  >
-                    {style.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recentrer */}
-          <button
-            onClick={() => batiments.length > 0 && setSelected(batiments[0])}
-            style={{
-              position: "absolute",
-              bottom: 24,
-              right: 14,
-              zIndex: 1000,
-              background: "#fff",
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              padding: "10px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 2px 12px rgba(0,0,0,.1)",
-            }}
-          >
-            <MdMyLocation size={20} color="var(--cyan)" />
-          </button>
-
-          {/* Map */}
           <MapContainer
             center={IUT_CENTER}
             zoom={15}
@@ -677,15 +761,45 @@ export default function CartePage() {
               maxNativeZoom={19}
             />
 
-            {selected?.latitude && selected?.longitude && (
-              <FlyTo
-                coords={[
-                  parseFloat(selected.latitude),
-                  parseFloat(selected.longitude),
-                ]}
-              />
+            {/* FlyTo */}
+            {flyCoords && <FlyTo coords={flyCoords} zoom={flyZoom} />}
+
+            {/* Position utilisateur */}
+            {userPos && (
+              <>
+                <Marker position={userPos} icon={userIcon}>
+                  <Popup>
+                    <div style={{ fontFamily: "var(--font-body)" }}>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          marginBottom: 4,
+                        }}
+                      >
+                        📍 Votre position
+                      </p>
+                      <p style={{ fontSize: 12, color: "#64748b" }}>
+                        Vous êtes ici
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+                <Circle
+                  center={userPos}
+                  radius={30}
+                  pathOptions={{
+                    color: "#3B82F6",
+                    fillColor: "#3B82F6",
+                    fillOpacity: 0.15,
+                    weight: 1,
+                  }}
+                />
+              </>
             )}
 
+            {/* Marqueurs bâtiments */}
             {batiments.map((bat) => {
               if (!bat.latitude || !bat.longitude) return null;
               const isActive = selected?.id_batiment === bat.id_batiment;
@@ -696,12 +810,12 @@ export default function CartePage() {
                     parseFloat(bat.latitude),
                     parseFloat(bat.longitude),
                   ]}
-                  icon={createCustomIcon(isActive)}
-                  eventHandlers={{ click: () => setSelected(bat) }}
+                  icon={createBatimentIcon(isActive)}
+                  eventHandlers={{ click: () => selectBatiment(bat) }}
                 >
                   <Popup>
                     <div
-                      style={{ fontFamily: "var(--font-body)", minWidth: 150 }}
+                      style={{ fontFamily: "var(--font-body)", minWidth: 180 }}
                     >
                       <p
                         style={{
@@ -712,7 +826,7 @@ export default function CartePage() {
                           marginBottom: 4,
                         }}
                       >
-                        {bat.nom}
+                        🏢 {bat.nom}
                       </p>
                       {bat.description && (
                         <p
@@ -720,17 +834,452 @@ export default function CartePage() {
                             fontSize: 12,
                             color: "#64748b",
                             lineHeight: 1.5,
+                            marginBottom: 8,
                           }}
                         >
                           {bat.description}
                         </p>
                       )}
+                      {/* Salles du bâtiment */}
+                      {salles.filter((s) => s.id_batiment === bat.id_batiment)
+                        .length > 0 && (
+                        <p
+                          style={{
+                            fontSize: 11,
+                            color: "#5b21b6",
+                            fontWeight: 600,
+                            marginBottom: 8,
+                          }}
+                        >
+                          🚪{" "}
+                          {
+                            salles.filter(
+                              (s) => s.id_batiment === bat.id_batiment,
+                            ).length
+                          }{" "}
+                          salle(s)
+                        </p>
+                      )}
+                      <button
+                        onClick={() =>
+                          openItineraire(bat.latitude, bat.longitude, bat.nom)
+                        }
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          width: "100%",
+                          padding: "7px 12px",
+                          background: "var(--cyan)",
+                          color: "var(--cyan-text)",
+                          border: "none",
+                          borderRadius: 6,
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: "pointer",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MdDirections size={14} /> Itinéraire
+                      </button>
                     </div>
                   </Popup>
                 </Marker>
               );
             })}
+
+            {/* Marqueurs salles */}
+            {activeTab === "salles" &&
+              salles.map((salle) => {
+                const bat = batiments.find(
+                  (b) => b.id_batiment === salle.id_batiment,
+                );
+                if (!bat?.latitude || !bat?.longitude) return null;
+                const isActive = selectedSalle?.id_salle === salle.id_salle;
+                // Offset léger pour différencier des bâtiments
+                const offset = 0.0001 + salle.id_salle * 0.00005;
+                return (
+                  <Marker
+                    key={`salle-${salle.id_salle}`}
+                    position={[
+                      parseFloat(bat.latitude) + offset,
+                      parseFloat(bat.longitude) + offset,
+                    ]}
+                    icon={createSalleIcon(isActive)}
+                    eventHandlers={{ click: () => selectSalle(salle) }}
+                  >
+                    <Popup>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-body)",
+                          minWidth: 180,
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 700,
+                            fontSize: 13,
+                            color: "#0f172a",
+                            marginBottom: 4,
+                          }}
+                        >
+                          🚪 {salle.nom}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: "#64748b",
+                            marginBottom: 4,
+                          }}
+                        >
+                          📍 {bat.nom}
+                        </p>
+                        {salle.type && (
+                          <p
+                            style={{
+                              fontSize: 11,
+                              color: "#5b21b6",
+                              fontWeight: 600,
+                              marginBottom: 4,
+                            }}
+                          >
+                            Type : {salle.type}
+                          </p>
+                        )}
+                        {salle.capacite && (
+                          <p
+                            style={{
+                              fontSize: 11,
+                              color: "#64748b",
+                              marginBottom: 8,
+                            }}
+                          >
+                            Capacité : {salle.capacite} places
+                          </p>
+                        )}
+                        <button
+                          onClick={() =>
+                            openItineraire(
+                              bat.latitude,
+                              bat.longitude,
+                              salle.nom,
+                            )
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                            width: "100%",
+                            padding: "7px 12px",
+                            background: "#8b5cf6",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: 6,
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 700,
+                            fontSize: 12,
+                            cursor: "pointer",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <MdDirections size={14} /> Itinéraire vers {bat.nom}
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
           </MapContainer>
+        </div>
+
+        {/* ══ CONTRÔLES FLOTTANTS ══ */}
+
+        {/* Drawer mobile */}
+        {isMobile && (
+          <>
+            {sidebarOpen && (
+              <div
+                onClick={() => setSidebarOpen(false)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(0,0,0,.5)",
+                  zIndex: 9998,
+                }}
+              />
+            )}
+            <aside
+              style={{
+                position: "fixed",
+                top: 60,
+                left: 0,
+                width: "85vw",
+                maxWidth: 320,
+                height: "calc(100vh - 60px)",
+                background: "#fff",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                zIndex: 9999,
+                boxShadow: "4px 0 24px rgba(0,0,0,.2)",
+                transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+                transition: "transform .3s ease",
+              }}
+            >
+              <SidebarContent />
+            </aside>
+          </>
+        )}
+
+        {/* Bouton ouvrir sidebar mobile */}
+        {isMobile && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              position: "fixed",
+              bottom: 90,
+              left: 16,
+              zIndex: 9000,
+              background: "#fff",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              padding: "10px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--font-head)",
+              fontWeight: 600,
+              fontSize: 12,
+              cursor: "pointer",
+              color: "var(--text)",
+              boxShadow: "0 4px 16px rgba(0,0,0,.15)",
+            }}
+          >
+            <MdMenu size={18} color="var(--cyan)" />
+            {selectedSalle
+              ? selectedSalle.nom
+              : selected
+                ? selected.nom
+                : "Bâtiments"}
+          </button>
+        )}
+
+        {/* Bouton GPS — Ma position */}
+        <button
+          onClick={getUserLocation}
+          disabled={gpsLoading}
+          title="Ma position"
+          style={{
+            position: "fixed",
+            bottom: 30,
+            right: 60,
+            zIndex: 9000,
+            background: userPos ? "#3B82F6" : "#fff",
+            border: "1px solid var(--border)",
+            borderRadius: 8,
+            padding: "10px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 12px rgba(0,0,0,.1)",
+            transition: "all .2s",
+          }}
+        >
+          {gpsLoading ? (
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: "50%",
+                border: "2px solid #94a3b8",
+                borderTop: "2px solid var(--cyan)",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+          ) : (
+            <MdNavigation size={20} color={userPos ? "#fff" : "var(--cyan)"} />
+          )}
+        </button>
+
+        {/* Bouton recentrer campus */}
+        <button
+          onClick={() => {
+            setFlyCoords(IUT_CENTER);
+            setFlyZoom(15);
+          }}
+          title="Recentrer sur le campus"
+          style={{
+            position: "fixed",
+            bottom: 30,
+            right: 16,
+            zIndex: 9000,
+            background: "#fff",
+            border: "1px solid var(--border)",
+            borderRadius: 8,
+            padding: "10px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 12px rgba(0,0,0,.1)",
+          }}
+        >
+          <MdMyLocation size={20} color="var(--cyan)" />
+        </button>
+
+        {/* Style switcher */}
+        <div style={{ position: "fixed", top: 74, right: 16, zIndex: 9000 }}>
+          <button
+            onClick={() => setShowStyleMenu(!showStyleMenu)}
+            style={{
+              background: "#fff",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontFamily: "var(--font-head)",
+              fontWeight: 600,
+              fontSize: 12,
+              cursor: "pointer",
+              color: "var(--text)",
+              boxShadow: "0 2px 12px rgba(0,0,0,.1)",
+            }}
+          >
+            <MdLayers size={16} color="var(--cyan)" />
+            {MAP_STYLES[mapStyle].label}
+          </button>
+          {showStyleMenu && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                right: 0,
+                background: "#fff",
+                borderRadius: 10,
+                border: "1px solid var(--border)",
+                overflow: "hidden",
+                minWidth: 140,
+                boxShadow: "0 8px 24px rgba(0,0,0,.15)",
+              }}
+            >
+              {MAP_STYLES.map((style, idx) => (
+                <div
+                  key={style.label}
+                  onClick={() => {
+                    setMapStyle(idx);
+                    setShowStyleMenu(false);
+                  }}
+                  style={{
+                    padding: "10px 16px",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontFamily: "var(--font-head)",
+                    fontWeight: mapStyle === idx ? 700 : 500,
+                    color:
+                      mapStyle === idx ? "var(--cyan-dark)" : "var(--text)",
+                    background: mapStyle === idx ? "var(--cyan-light)" : "#fff",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (mapStyle !== idx)
+                      e.currentTarget.style.background = "#f8fafc";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (mapStyle !== idx)
+                      e.currentTarget.style.background = "#fff";
+                  }}
+                >
+                  {style.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Légende */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: 30,
+            left: isMobile ? 16 : 320,
+            zIndex: 9000,
+            background: "#fff",
+            borderRadius: 10,
+            padding: "10px 14px",
+            border: "1px solid var(--border)",
+            boxShadow: "0 2px 12px rgba(0,0,0,.1)",
+            display: "flex",
+            gap: 14,
+            alignItems: "center",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                background: "#06B6D4",
+                borderRadius: "50% 50% 50% 0",
+                transform: "rotate(-45deg)",
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--muted)",
+                fontFamily: "var(--font-head)",
+                fontWeight: 500,
+              }}
+            >
+              Bâtiment
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div
+              style={{
+                width: 12,
+                height: 12,
+                background: "#8b5cf6",
+                borderRadius: 3,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--muted)",
+                fontFamily: "var(--font-head)",
+                fontWeight: 500,
+              }}
+            >
+              Salle
+            </span>
+          </div>
+          {userPos && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  background: "#3B82F6",
+                  borderRadius: "50%",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "var(--muted)",
+                  fontFamily: "var(--font-head)",
+                  fontWeight: 500,
+                }}
+              >
+                Vous
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

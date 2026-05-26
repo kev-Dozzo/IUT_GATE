@@ -14,6 +14,7 @@ import { getActualites } from "../../services/actualiteService";
 import { getServices } from "../../services/serviceAdminService";
 // import CoreService from "../../components/layout/CoreService";
 import iutCampus1 from "../../assets/public/image3.jpg";
+import SearchBar from "../../components/ui/SearchBar";
 // import Actualite from "../../../../back_end/src/models/Actualiter";
 
 const quickLinks = [
@@ -100,7 +101,8 @@ export default function HomePage() {
           backgroundRepeat: "no-repeat",
           /* background:
             "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)", */
-          padding: "clamp(40px, 8vw, 72px) 24px 80px",
+          padding:
+            "clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(60px, 8vw, 100px)",
         }}
       >
         <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
@@ -111,7 +113,7 @@ export default function HomePage() {
               padding: "4px 14px",
               borderRadius: 999,
               background: "var(--cyan-light)",
-              color: "var(--cyan-text)",
+              color: "var(--text)",
               fontFamily: "var(--font-head)",
               fontSize: 11,
               fontWeight: 700,
@@ -152,56 +154,15 @@ export default function HomePage() {
           </p>
 
           {/* Search bar */}
-          <form
-            onSubmit={handleSearch}
+          <div
             style={{
-              background: "rgba(255,255,255,.96)",
-              borderRadius: 12,
-              padding: "10px 10px 10px 18px",
               display: "flex",
-              gap: 8,
-              maxWidth: 560,
-              margin: "0 auto 40px",
-              boxShadow: "0 4px 24px rgba(0,0,0,.2)",
+              justifyContent: "center",
+              marginBottom: 40,
             }}
           >
-            <MdSearch
-              size={40}
-              style={{ color: "#94a3b8", flexShrink: 0, marginTop: 2 }}
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher une Filière,un enseignant, un Batiment..."
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                fontSize: 14,
-                fontFamily: "var(--font-body)",
-                background: "transparent",
-                color: "var(--text)",
-                minWidth: 0,
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                background: "var(--cyan)",
-                color: "var(--cyan-text)",
-                border: "none",
-                borderRadius: 8,
-                padding: "9px 16px",
-                fontFamily: "var(--font-head)",
-                fontWeight: 700,
-                fontSize: 13,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Rechercher
-            </button>
-          </form>
+            <SearchBar size="large" />
+          </div>
 
           {/* Stats */}
           <div

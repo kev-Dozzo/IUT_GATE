@@ -32,7 +32,9 @@ export default function BatimentsAdmin() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -305,234 +307,263 @@ export default function BatimentsAdmin() {
         )}
       </div>
 
-      {/* TABLE */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 14,
-          border: "1px solid var(--border)",
-          overflow: "hidden",
-        }}
-      >
-        {/* En-tête */}
+      <div className="table-responsive">
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 2fr 1fr 1fr 100px",
-            padding: "12px 20px",
-            background: "#f8fafc",
-            borderBottom: "1px solid var(--border)",
+            background: "#fff",
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            overflow: "hidden",
+            minWidth: 600,
           }}
         >
-          {["Bâtiment", "Description", "Latitude", "Longitude", "Actions"].map(
-            (h) => (
-              <p
-                key={h}
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontWeight: 700,
-                  fontSize: 11,
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                }}
-              >
-                {h}
-              </p>
-            ),
-          )}
-        </div>
-
-        {/* Loading */}
-        {loading && (
-          <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                border: "3px solid var(--cyan-light)",
-                borderTop: "3px solid var(--cyan)",
-                margin: "0 auto 12px",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-            <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
-            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-          </div>
-        )}
-
-        {/* Vide */}
-        {!loading && filtered.length === 0 && (
+          {/* TABLE */}
           <div
             style={{
-              textAlign: "center",
-              padding: "60px 0",
-              color: "var(--muted)",
+              background: "#fff",
+              borderRadius: 14,
+              border: "1px solid var(--border)",
+              overflow: "hidden",
             }}
           >
-            <MdApartment size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
-              Aucun bâtiment trouvé
-            </p>
-          </div>
-        )}
-
-        {/* Lignes */}
-        {!loading &&
-          filtered.map((bat, i) => (
+            {/* En-tête */}
             <div
-              key={bat.id_batiment}
               style={{
                 display: "grid",
                 gridTemplateColumns: "2fr 2fr 1fr 1fr 100px",
-                padding: "14px 20px",
-                alignItems: "center",
-                borderBottom:
-                  i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                transition: "background .15s",
+                padding: "12px 20px",
+                background: "#f8fafc",
+                borderBottom: "1px solid var(--border)",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#f8fafc")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "transparent")
-              }
             >
-              {/* Bâtiment */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {[
+                "Bâtiment",
+                "Description",
+                "Latitude",
+                "Longitude",
+                "Actions",
+              ].map((h) => (
+                <p
+                  key={h}
+                  style={{
+                    fontFamily: "var(--font-head)",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    color: "var(--muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {h}
+                </p>
+              ))}
+            </div>
+
+            {/* Loading */}
+            {loading && (
+              <div style={{ textAlign: "center", padding: "48px 0" }}>
                 <div
                   style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 10,
-                    background: "var(--cyan-light)",
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    border: "3px solid var(--cyan-light)",
+                    borderTop: "3px solid var(--cyan)",
+                    margin: "0 auto 12px",
+                    animation: "spin 1s linear infinite",
                   }}
+                />
+                <p style={{ color: "var(--muted)", fontSize: 13 }}>
+                  Chargement...
+                </p>
+                <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+              </div>
+            )}
+
+            {/* Vide */}
+            {!loading && filtered.length === 0 && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: "var(--muted)",
+                }}
+              >
+                <MdApartment
+                  size={40}
+                  style={{ opacity: 0.3, marginBottom: 12 }}
+                />
+                <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
+                  Aucun bâtiment trouvé
+                </p>
+              </div>
+            )}
+
+            {/* Lignes */}
+            {!loading &&
+              filtered.map((bat, i) => (
+                <div
+                  key={bat.id_batiment}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 2fr 1fr 1fr 100px",
+                    padding: "14px 20px",
+                    alignItems: "center",
+                    borderBottom:
+                      i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
+                    transition: "background .15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#f8fafc")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
                 >
-                  <MdApartment size={20} color="var(--cyan-dark)" />
-                </div>
-                <div>
+                  {/* Bâtiment */}
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                  >
+                    <div
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: 10,
+                        background: "var(--cyan-light)",
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <MdApartment size={20} color="var(--cyan-dark)" />
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 600,
+                          fontSize: 13,
+                          color: "var(--text)",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {bat.nom}
+                      </p>
+                      {bat.salles?.length > 0 && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <MdMeetingRoom size={11} color="var(--subtle)" />
+                          <span style={{ fontSize: 11, color: "var(--muted)" }}>
+                            {bat.salles.length} salle
+                            {bat.salles.length > 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
                   <p
                     style={{
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 600,
-                      fontSize: 13,
-                      color: "var(--text)",
-                      marginBottom: 2,
+                      fontSize: 12,
+                      color: "var(--muted)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 200,
                     }}
                   >
-                    {bat.nom}
+                    {bat.description || "—"}
                   </p>
-                  {bat.salles?.length > 0 && (
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}
+
+                  {/* Latitude */}
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 4 }}
+                  >
+                    <MdLocationOn size={13} color="var(--cyan)" />
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: "var(--muted)",
+                        fontFamily: "monospace",
+                      }}
                     >
-                      <MdMeetingRoom size={11} color="var(--subtle)" />
-                      <span style={{ fontSize: 11, color: "var(--muted)" }}>
-                        {bat.salles.length} salle
-                        {bat.salles.length > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                  )}
+                      {bat.latitude ? parseFloat(bat.latitude).toFixed(4) : "—"}
+                    </span>
+                  </div>
+
+                  {/* Longitude */}
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: "var(--muted)",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {bat.longitude ? parseFloat(bat.longitude).toFixed(4) : "—"}
+                  </span>
+
+                  {/* Actions */}
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => openEdit(bat)}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "var(--cyan-light)";
+                        e.currentTarget.style.borderColor = "var(--cyan)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "#fff";
+                        e.currentTarget.style.borderColor = "var(--border)";
+                      }}
+                    >
+                      <MdEdit size={15} color="var(--cyan-dark)" />
+                    </button>
+                    <button
+                      onClick={() => openDelete(bat)}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        border: "1px solid #fee2e2",
+                        background: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "#fee2e2";
+                        e.currentTarget.style.borderColor = "#fca5a5";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "#fff";
+                        e.currentTarget.style.borderColor = "#fee2e2";
+                      }}
+                    >
+                      <MdDelete size={15} color="#dc2626" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Description */}
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--muted)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: 200,
-                }}
-              >
-                {bat.description || "—"}
-              </p>
-
-              {/* Latitude */}
-              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <MdLocationOn size={13} color="var(--cyan)" />
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "var(--muted)",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  {bat.latitude ? parseFloat(bat.latitude).toFixed(4) : "—"}
-                </span>
-              </div>
-
-              {/* Longitude */}
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "var(--muted)",
-                  fontFamily: "monospace",
-                }}
-              >
-                {bat.longitude ? parseFloat(bat.longitude).toFixed(4) : "—"}
-              </span>
-
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 6 }}>
-                <button
-                  onClick={() => openEdit(bat)}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                    background: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "var(--cyan-light)";
-                    e.currentTarget.style.borderColor = "var(--cyan)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "#fff";
-                    e.currentTarget.style.borderColor = "var(--border)";
-                  }}
-                >
-                  <MdEdit size={15} color="var(--cyan-dark)" />
-                </button>
-                <button
-                  onClick={() => openDelete(bat)}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    border: "1px solid #fee2e2",
-                    background: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#fee2e2";
-                    e.currentTarget.style.borderColor = "#fca5a5";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "#fff";
-                    e.currentTarget.style.borderColor = "#fee2e2";
-                  }}
-                >
-                  <MdDelete size={15} color="#dc2626" />
-                </button>
-              </div>
-            </div>
-          ))}
+              ))}
+          </div>
+        </div>
       </div>
 
       {/* MODAL ADD / EDIT */}

@@ -9,7 +9,7 @@ const createAdmin = async () => {
     console.log("✅ Connecté à la base de données");
     await Admin.sync({ alter: true });
 
-    const email = "admin@iut.cm";
+    const email = "yobs@iut.cm";
     const password = "Admin@2026";
 
     const existing = await Admin.findOne({ where: { email } });
