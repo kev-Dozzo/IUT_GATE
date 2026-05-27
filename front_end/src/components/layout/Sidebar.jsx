@@ -29,7 +29,7 @@ const navItems = [
   { Icon: MdApartment, label: "Bâtiments", path: "/admin/batiments" },
   { Icon: MdMeetingRoom, label: "Salles", path: "/admin/salles" },
   { Icon: MdSettings, label: "Services", path: "/admin/services" },
-  { Icon: MdPerson, label: "Profile", path: "/admin/profile" },
+  { Icon: MdPerson, label: "Mon Profil", path: "/admin/profil" },
 ];
 
 function SidebarContent({ navigate, location, closeSidebar }) {

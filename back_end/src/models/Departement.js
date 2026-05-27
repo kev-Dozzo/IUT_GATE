@@ -11,6 +11,7 @@ const Departement = sequelize.define(
     },
     nom: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
+    photo_url: { type: DataTypes.STRING }, 
     id_admin: { type: DataTypes.INTEGER },
   },
   { tableName: "departements", timestamps: true },

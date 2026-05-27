@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MdSearch,
@@ -11,7 +11,6 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getFilieres } from "../../services/filiereService";
-
 
 const dureeColors = {
   "2 ans": { bg: "#d1fae5", color: "#065f46" },
@@ -247,20 +246,38 @@ export default function FilieresPage() {
                       alignItems: "flex-start",
                     }}
                   >
-                    <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 13,
-                        background: "var(--cyan-light)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <MdSchool size={24} color="var(--cyan-dark)" />
-                    </div>
+                    {filiere.photo_url ? (
+                      <img
+                        src={`http://localhost:5000${filiere.photo_url}`}
+                        alt={filiere.nom}
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 14,
+                          objectFit: "cover",
+                          border: "2px solid var(--cyan-light)",
+                          flexShrink: 0,
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 14,
+                          background: "var(--cyan-light)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <MdSchool size={28} color="var(--cyan-dark)" />
+                      </div>
+                    )}
                     <div
                       style={{
                         display: "flex",

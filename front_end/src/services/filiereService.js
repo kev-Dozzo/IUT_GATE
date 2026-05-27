@@ -10,13 +10,23 @@ export const getFiliereById = async (id) => {
   return res.data;
 };
 
-export const createFiliere = async (data) => {
-  const res = await api.post("/filieres", data);
+export const createFiliere = async (data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([k, v]) => {
+    if (v != null) formData.append(k, v);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.post("/filieres", formData);
   return res.data;
 };
 
-export const updateFiliere = async (id, data) => {
-  const res = await api.put(`/filieres/${id}`, data);
+export const updateFiliere = async (id, data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([k, v]) => {
+    if (v != null) formData.append(k, v);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.put(`/filieres/${id}`, formData);
   return res.data;
 };
 

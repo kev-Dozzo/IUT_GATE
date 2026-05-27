@@ -51,6 +51,12 @@ export default function ActualiteDetailPage() {
       year: "numeric",
     });
 
+  const fichiers = actualite?.fichiers
+    ? typeof actualite.fichiers === "string"
+      ? JSON.parse(actualite.fichiers)
+      : actualite.fichiers
+    : [];
+
   return (
     <div>
       <Navbar />
@@ -135,7 +141,7 @@ export default function ActualiteDetailPage() {
                   <img
                     src={`http://localhost:5000${actualite.photo_url}`}
                     alt={actualite.titre}
-                    style={{ width: "100%", height: 280, objectFit: "cover" }}
+                    style={{ width: "100%", height: 300, objectFit: "cover" }}
                   />
                 )}
 
@@ -229,6 +235,136 @@ export default function ActualiteDetailPage() {
                   >
                     {actualite.contenu}
                   </p>
+                  {/* Fichiers joints */}
+                  {fichiers.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 28,
+                        padding: "20px 24px",
+                        background: "#f8fafc",
+                        borderRadius: 12,
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          color: "#0f172a",
+                          marginBottom: 14,
+                        }}
+                      >
+                        📎 Fichiers joints ({fichiers.length})
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
+                      >
+                        {fichiers.map((f, i) => (
+                          <a
+                            key={i}
+                            href={`http://localhost:5000${f.url}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 12,
+                              padding: "10px 14px",
+                              background: "#fff",
+                              borderRadius: 10,
+                              border: "1px solid var(--border)",
+                              textDecoration: "none",
+                              transition: "all .2s",
+                              color: "inherit",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = "var(--cyan)";
+                              e.currentTarget.style.background =
+                                "var(--cyan-light)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor =
+                                "var(--border)";
+                              e.currentTarget.style.background = "#fff";
+                            }}
+                          >
+                            {f.type?.startsWith("image/") ? (
+                              <img
+                                src={`http://localhost:5000${f.url}`}
+                                alt={f.nom || "Fichier joint"}
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 6,
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 6,
+                                  background: "#f1f5f9",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {f.type === "application/pdf"
+                                  ? "📄"
+                                  : f.type?.startsWith("video/")
+                                    ? "🎬"
+                                    : f.type?.startsWith("audio/")
+                                      ? "🎵"
+                                      : "📁"}
+                              </div>
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <p
+                                style={{
+                                  fontFamily: "var(--font-head)",
+                                  fontWeight: 600,
+                                  fontSize: 13,
+                                  color: "var(--text)",
+                                  margin: 0,
+                                }}
+                              >
+                                {f.nom || "Fichier"}
+                              </p>
+                              <p
+                                style={{
+                                  fontSize: 11,
+                                  color: "var(--muted)",
+                                  margin: 0,
+                                }}
+                              >
+                                {f.type} ·{" "}
+                                {f.taille
+                                  ? `${(f.taille / 1024).toFixed(0)} Ko`
+                                  : ""}
+                              </p>
+                            </div>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--cyan)",
+                                fontWeight: 600,
+                                fontFamily: "var(--font-head)",
+                              }}
+                            >
+                              Ouvrir →
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Footer */}
                   <div

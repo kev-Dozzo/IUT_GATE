@@ -443,7 +443,7 @@ export default function DepartementDetailPage() {
                         color: "#0f172a",
                       }}
                     >
-                      📍 Localisation
+                       Localisation
                     </p>
                     <p
                       style={{

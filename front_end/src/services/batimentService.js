@@ -15,13 +15,23 @@ export const getBatimentCount = async () => {
   return res.data.count;
 };
 
-export const createBatiment = async (data) => {
-  const res = await api.post("/batiments", data);
+export const createBatiment = async (data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([k, v]) => {
+    if (v != null) formData.append(k, v);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.post("/batiments", formData);
   return res.data;
 };
 
-export const updateBatiment = async (id, data) => {
-  const res = await api.put(`/batiments/${id}`, data);
+export const updateBatiment = async (id, data, photo) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([k, v]) => {
+    if (v != null) formData.append(k, v);
+  });
+  if (photo) formData.append("photo", photo);
+  const res = await api.put(`/batiments/${id}`, formData);
   return res.data;
 };
 

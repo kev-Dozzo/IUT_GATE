@@ -12,7 +12,8 @@ const Actualite = sequelize.define(
     titre: { type: DataTypes.STRING, allowNull: false },
     contenu: { type: DataTypes.TEXT, allowNull: false },
     categorie: { type: DataTypes.STRING, defaultValue: "Général" },
-    photo_url: { type: DataTypes.STRING },
+    photo_url: { type: DataTypes.STRING }, // image principale
+    fichiers: { type: DataTypes.TEXT }, // JSON array de fichiers
     date_publication: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     id_admin: { type: DataTypes.INTEGER },
   },

@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
-import { MdCameraAlt, MdClose, MdPerson } from "react-icons/md";
+import { MdCameraAlt, MdClose, MdImage, MdPerson } from "react-icons/md";
 
 export default function PhotoUpload({
-  value, // URL photo existante
-  onChange, // callback(file) quand photo choisie
-  size = 80, // taille en px
-  shape = "rounded", // 'rounded' | 'circle'
+  value,
+  onChange,
+  size = 80,
+  shape = "rounded",
   label = "Photo",
+  placeholder = "person", // 'person' | 'image'
 }) {
   const [preview, setPreview] = useState(value || null);
   const inputRef = useRef(null);
@@ -14,23 +15,17 @@ export default function PhotoUpload({
   const handleChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Vérif type
     if (!file.type.startsWith("image/")) {
-      alert("Veuillez choisir une image.");
+      alert("Veuillez choisir une image (JPG, PNG, WEBP).");
       return;
     }
-
-    // Vérif taille max 5MB
     if (file.size > 5 * 1024 * 1024) {
       alert("La photo ne doit pas dépasser 5 MB.");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(file);
-
     onChange(file);
   };
 
@@ -41,7 +36,9 @@ export default function PhotoUpload({
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const radius = shape === "circle" ? "50%" : 14;
+  const radius = shape === "circle" ? "50%" : shape === "square" ? 0 : 14;
+
+  const PlaceholderIcon = placeholder === "person" ? MdPerson : MdImage;
 
   return (
     <div
@@ -52,20 +49,21 @@ export default function PhotoUpload({
         gap: 8,
       }}
     >
-      <label
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: "#374151",
-          fontFamily: "var(--font-head)",
-          alignSelf: "flex-start",
-        }}
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#374151",
+            fontFamily: "var(--font-head)",
+            alignSelf: "flex-start",
+          }}
+        >
+          {label}
+        </label>
+      )}
 
       <div style={{ position: "relative", width: size, height: size }}>
-        {/* Photo ou placeholder */}
         <div
           onClick={() => inputRef.current?.click()}
           style={{
@@ -81,19 +79,18 @@ export default function PhotoUpload({
             overflow: "hidden",
             transition: "all .2s",
           }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.borderColor = "var(--cyan-dark)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.borderColor = preview
-              ? "var(--cyan)"
-              : "#67e8f9")
-          }
+          onMouseEnter={(e) => {
+            if (!preview)
+              e.currentTarget.style.borderColor = "var(--cyan-dark)";
+          }}
+          onMouseLeave={(e) => {
+            if (!preview) e.currentTarget.style.borderColor = "#67e8f9";
+          }}
         >
           {preview ? (
             <img
               src={preview}
-              alt="Photo"
+              alt="preview"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
@@ -105,8 +102,8 @@ export default function PhotoUpload({
                 gap: 4,
               }}
             >
-              <MdPerson
-                size={size * 0.35}
+              <PlaceholderIcon
+                size={size * 0.32}
                 color="var(--cyan-dark)"
                 style={{ opacity: 0.5 }}
               />
@@ -139,7 +136,7 @@ export default function PhotoUpload({
           </button>
         )}
 
-        {/* Bouton caméra sur la photo */}
+        {/* Bouton caméra */}
         {preview && (
           <button
             onClick={() => inputRef.current?.click()}
@@ -163,7 +160,6 @@ export default function PhotoUpload({
           </button>
         )}
 
-        {/* Input caché */}
         <input
           ref={inputRef}
           type="file"
@@ -174,7 +170,7 @@ export default function PhotoUpload({
       </div>
 
       <p style={{ fontSize: 10, color: "var(--subtle)", textAlign: "center" }}>
-        Cliquez pour {preview ? "changer" : "ajouter"} la photo
+        Cliquez pour {preview ? "changer" : "ajouter"}
         <br />
         JPG, PNG · Max 5MB
       </p>

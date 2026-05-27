@@ -18,6 +18,7 @@ import {
   updateBatiment,
   deleteBatiment,
 } from "../../services/batimentService";
+import PhotoUpload from "../../components/ui/PhotoUpload";
 
 const emptyForm = { nom: "", description: "", latitude: "", longitude: "" };
 
@@ -30,6 +31,13 @@ export default function BatimentsAdmin() {
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -58,6 +66,7 @@ export default function BatimentsAdmin() {
     setForm(emptyForm);
     setSelected(null);
     setModal("add");
+    setPhoto(null);
   };
 
   const openEdit = (bat) => {
@@ -69,6 +78,7 @@ export default function BatimentsAdmin() {
     });
     setSelected(bat);
     setModal("edit");
+    setPhoto(null);
   };
 
   const openDelete = (bat) => {
@@ -90,10 +100,10 @@ export default function BatimentsAdmin() {
     setSaving(true);
     try {
       if (modal === "add") {
-        await createBatiment(form);
+        await createBatiment(form, photo);
         showToast("Bâtiment créé avec succès !");
       } else {
-        await updateBatiment(selected.id_batiment, form);
+        await updateBatiment(selected.id_batiment, form, photo);
         showToast("Bâtiment modifié avec succès !");
       }
       await fetchData();
@@ -310,259 +320,231 @@ export default function BatimentsAdmin() {
       <div className="table-responsive">
         <div
           style={{
-            background: "#fff",
-            borderRadius: 14,
-            border: "1px solid var(--border)",
-            overflow: "hidden",
-            minWidth: 600,
+            display: "grid",
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: 18,
           }}
         >
-          {/* TABLE */}
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: 14,
-              border: "1px solid var(--border)",
-              overflow: "hidden",
-            }}
-          >
-            {/* En-tête */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "2fr 2fr 1fr 1fr 100px",
-                padding: "12px 20px",
-                background: "#f8fafc",
-                borderBottom: "1px solid var(--border)",
-              }}
-            >
-              {[
-                "Bâtiment",
-                "Description",
-                "Latitude",
-                "Longitude",
-                "Actions",
-              ].map((h) => (
-                <p
-                  key={h}
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontWeight: 700,
-                    fontSize: 11,
-                    color: "var(--muted)",
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  {h}
-                </p>
-              ))}
-            </div>
-
-            {/* Loading */}
-            {loading && (
-              <div style={{ textAlign: "center", padding: "48px 0" }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: "50%",
-                    border: "3px solid var(--cyan-light)",
-                    borderTop: "3px solid var(--cyan)",
-                    margin: "0 auto 12px",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
-                <p style={{ color: "var(--muted)", fontSize: 13 }}>
-                  Chargement...
-                </p>
-                <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-              </div>
-            )}
-
-            {/* Vide */}
-            {!loading && filtered.length === 0 && (
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "48px 0", gridColumn: "1 / -1" }}>
               <div
                 style={{
-                  textAlign: "center",
-                  padding: "60px 0",
-                  color: "var(--muted)",
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "3px solid var(--cyan-light)",
+                  borderTop: "3px solid var(--cyan)",
+                  margin: "0 auto 12px",
+                  animation: "spin 1s linear infinite",
                 }}
-              >
-                <MdApartment
-                  size={40}
-                  style={{ opacity: 0.3, marginBottom: 12 }}
-                />
-                <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
-                  Aucun bâtiment trouvé
-                </p>
-              </div>
-            )}
-
-            {/* Lignes */}
-            {!loading &&
-              filtered.map((bat, i) => (
+              />
+              <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
+              <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "60px 0",
+                color: "var(--muted)",
+                gridColumn: "1 / -1",
+              }}
+            >
+              <MdApartment size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
+              <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
+                Aucun bâtiment trouvé
+              </p>
+            </div>
+          ) : (
+            filtered.map((bat) => {
+              const imageUrl = bat.photo_url
+                ? `http://localhost:5000${bat.photo_url}`
+                : null;
+              return (
                 <div
                   key={bat.id_batiment}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 2fr 1fr 1fr 100px",
-                    padding: "14px 20px",
-                    alignItems: "center",
-                    borderBottom:
-                      i < filtered.length - 1 ? "1px solid #f1f5f9" : "none",
-                    transition: "background .15s",
+                    background: "#fff",
+                    borderRadius: 22,
+                    border: "1px solid var(--border)",
+                    overflow: "hidden",
+                    boxShadow: "0 18px 60px rgba(15, 23, 42, 0.08)",
+                    transition: "transform .2s, box-shadow .2s",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#f8fafc")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 24px 80px rgba(15, 23, 42, 0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 18px 60px rgba(15, 23, 42, 0.08)";
+                  }}
                 >
-                  {/* Bâtiment */}
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    style={{
+                      width: "100%",
+                      minHeight: 150,
+                      background: "#f8fafc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}
                   >
-                    <div
-                      style={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: 10,
-                        background: "var(--cyan-light)",
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <MdApartment size={20} color="var(--cyan-dark)" />
-                    </div>
-                    <div>
-                      <p
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={bat.nom}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                      />
+                    ) : (
+                      <div
                         style={{
-                          fontFamily: "var(--font-head)",
-                          fontWeight: 600,
-                          fontSize: 13,
-                          color: "var(--text)",
-                          marginBottom: 2,
+                          width: 72,
+                          height: 72,
+                          borderRadius: 18,
+                          background: "var(--cyan-light)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        {bat.nom}
-                      </p>
-                      {bat.salles?.length > 0 && (
-                        <div
+                        <MdApartment size={32} color="var(--cyan-dark)" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <p
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: 18,
+                            color: "var(--text)",
+                            margin: 0,
                           }}
                         >
-                          <MdMeetingRoom size={11} color="var(--subtle)" />
-                          <span style={{ fontSize: 11, color: "var(--muted)" }}>
-                            {bat.salles.length} salle
-                            {bat.salles.length > 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      )}
+                          {bat.nom}
+                        </p>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            marginTop: 8,
+                            padding: "6px 12px",
+                            borderRadius: 999,
+                            background: "#def7ec",
+                            color: "#0f766e",
+                            fontSize: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Bâtiment
+                        </span>
+                      </div>
+                    </div>
+
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: "var(--muted)",
+                        lineHeight: 1.8,
+                        minHeight: 54,
+                        margin: 0,
+                      }}
+                    >
+                      {bat.description?.slice(0, 120) || "Aucune description disponible."}
+                      {bat.description?.length > 120 ? "..." : ""}
+                    </p>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <div
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 14,
+                          background: "#f8fafc",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontSize: 12,
+                          color: "var(--text)",
+                        }}
+                      >
+                        <MdLocationOn size={16} color="var(--cyan)" />
+                        {bat.latitude ? parseFloat(bat.latitude).toFixed(4) : "—"}
+                      </div>
+                      <div
+                        style={{
+                          padding: "12px 14px",
+                          borderRadius: 14,
+                          background: "#f8fafc",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontSize: 12,
+                          color: "var(--text)",
+                        }}
+                      >
+                        <MdLocationOn size={16} color="var(--cyan)" />
+                        {bat.longitude ? parseFloat(bat.longitude).toFixed(4) : "—"}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button
+                        onClick={() => openEdit(bat)}
+                        style={{
+                          flex: 1,
+                          minWidth: 120,
+                          padding: "12px 14px",
+                          borderRadius: 12,
+                          border: "1px solid var(--cyan)",
+                          background: "var(--cyan)",
+                          color: "var(--cyan-text)",
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          cursor: "pointer",
+                          transition: "all .2s",
+                        }}
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => openDelete(bat)}
+                        style={{
+                          flex: 1,
+                          minWidth: 120,
+                          padding: "12px 14px",
+                          borderRadius: 12,
+                          border: "1px solid #fee2e2",
+                          background: "#fff",
+                          color: "#dc2626",
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: 13,
+                          cursor: "pointer",
+                          transition: "all .2s",
+                        }}
+                      >
+                        Supprimer
+                      </button>
                     </div>
                   </div>
-
-                  {/* Description */}
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "var(--muted)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: 200,
-                    }}
-                  >
-                    {bat.description || "—"}
-                  </p>
-
-                  {/* Latitude */}
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 4 }}
-                  >
-                    <MdLocationOn size={13} color="var(--cyan)" />
-                    <span
-                      style={{
-                        fontSize: 12,
-                        color: "var(--muted)",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {bat.latitude ? parseFloat(bat.latitude).toFixed(4) : "—"}
-                    </span>
-                  </div>
-
-                  {/* Longitude */}
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--muted)",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {bat.longitude ? parseFloat(bat.longitude).toFixed(4) : "—"}
-                  </span>
-
-                  {/* Actions */}
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => openEdit(bat)}
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "var(--cyan-light)";
-                        e.currentTarget.style.borderColor = "var(--cyan)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#fff";
-                        e.currentTarget.style.borderColor = "var(--border)";
-                      }}
-                    >
-                      <MdEdit size={15} color="var(--cyan-dark)" />
-                    </button>
-                    <button
-                      onClick={() => openDelete(bat)}
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        border: "1px solid #fee2e2",
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#fee2e2";
-                        e.currentTarget.style.borderColor = "#fca5a5";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#fff";
-                        e.currentTarget.style.borderColor = "#fee2e2";
-                      }}
-                    >
-                      <MdDelete size={15} color="#dc2626" />
-                    </button>
-                  </div>
                 </div>
-              ))}
-          </div>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -636,6 +618,26 @@ export default function BatimentsAdmin() {
               >
                 <MdClose size={18} color="var(--muted)" />
               </button>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <PhotoUpload
+                value={
+                  selected?.photo_url
+                    ? `http://localhost:5000${selected.photo_url}`
+                    : null
+                }
+                onChange={setPhoto}
+                size={120}
+                shape="rounded"
+                label="Photo du bâtiment"
+                placeholder="image"
+              />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

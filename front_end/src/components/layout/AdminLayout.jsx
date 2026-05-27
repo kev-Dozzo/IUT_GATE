@@ -30,7 +30,21 @@ export default function AdminLayout({ children }) {
         >
           <div />
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 13, color: "var(--muted)" }}>
+            <span
+              onClick={() => navigate("/admin/profil")}
+              style={{
+                fontSize: 13,
+                color: "var(--muted)",
+                cursor: "pointer",
+                transition: "color .2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--cyan)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--muted)")
+              }
+            >
               Bonjour,{" "}
               <strong
                 style={{ color: "var(--navy)", fontFamily: "var(--font-head)" }}
