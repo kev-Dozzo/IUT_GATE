@@ -18,62 +18,40 @@ const COLORS = [
   { bg: "#fce7f3", color: "#9d174d" },
 ];
 
-export default function Avatar({
-  nom,
-  photoUrl,
-  size = 48,
-  index = 0,
-  shape = "rounded",
-}) {
-  const av = COLORS[index % COLORS.length];
-  const radius = shape === "circle" ? "50%" : Math.round(size * 0.28);
-  const BASE_URL = "http://localhost:5000";
+const BASE_URL = "http://localhost:5000";
+const DEFAULT_PHOTO = "/noprofil.jpg";
 
-  if (photoUrl) {
-    return (
+export default function Avatar({ nom, photoUrl, size = 48, index = 0 }) {
+  const av = COLORS[index % COLORS.length]; 
+  const radius = Math.round(size * 0.22); 
+
+  const src = photoUrl
+    ? photoUrl.startsWith("http")
+      ? photoUrl
+      : `${BASE_URL}${photoUrl}`
+    : DEFAULT_PHOTO;
+
+  return (
+    <div
+      style={{ position: "relative", width: size, height: size, flexShrink: 0 }}
+    >
       <img
-        src={photoUrl.startsWith("http") ? photoUrl : `${BASE_URL}${photoUrl}`}
-        alt={nom}
+        src={src}
+        alt={nom || ""}
         style={{
           width: size,
           height: size,
           borderRadius: radius,
           objectFit: "cover",
-          flexShrink: 0,
+          objectPosition: "center top",
           border: "2px solid var(--cyan-light)",
+          display: "block",
         }}
         onError={(e) => {
-          // Si image cassée → fallback initiales
-          e.target.style.display = "none";
-          e.target.nextSibling.style.display = "flex";
+          e.target.onerror = null;
+          e.target.src = DEFAULT_PHOTO;
         }}
       />
-    );
-  }
-
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: radius,
-        background: av.bg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-head)",
-          fontSize: size * 0.32,
-          fontWeight: 800,
-          color: av.color,
-        }}
-      >
-        {getInitials(nom)}
-      </span>
     </div>
   );
 }
