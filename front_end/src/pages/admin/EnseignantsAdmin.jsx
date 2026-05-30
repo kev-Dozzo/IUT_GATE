@@ -21,8 +21,10 @@ import {
 import { getDepartements } from "../../services/departementService";
 
 const ROLES = [
-  "Professeur titulaire",
+  "Enseignant",
+  "Directeur De IUT",
   "Maître de conférences",
+  "Responsable Academique(RA)",
   "Chef de département",
   "Enseignant chercheur",
   "Chargé de cours",
@@ -459,8 +461,22 @@ export default function EnseignantsAdmin() {
                     )}
                   </div>
 
-                  <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      padding: 18,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        alignItems: "flex-start",
+                      }}
+                    >
                       <div style={{ minWidth: 0 }}>
                         <p
                           style={{
@@ -543,7 +559,14 @@ export default function EnseignantsAdmin() {
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       <button
                         onClick={() => openEdit(ens)}
                         style={{
@@ -559,7 +582,8 @@ export default function EnseignantsAdmin() {
                         }}
                         title="Modifier"
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "var(--cyan-light)";
+                          e.currentTarget.style.background =
+                            "var(--cyan-light)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = "#fff";

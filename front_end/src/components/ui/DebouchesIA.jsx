@@ -42,8 +42,8 @@ ${filiere.description ? `Description: ${filiere.description}` : ""}
 
 Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT (aucun texte avant ou après, aucun markdown):
 {
-  "resume": "Une phrase percutante résumant les perspectives de cette filière",
-  "salaire_debutant": "Fourchette salariale débutant au Cameroun en FCFA",
+  "resume": "Une phrase percutante résumant les perspectives de cette filière au Cameroun et dans le monde ou d'autre pays telle que france, canada, allemagne, usa etc",
+  "salaire_debutant": "Fourchette salariale débutant au Cameroun en FCFA et dans d'autres pays",
   "salaire_experimente": "Fourchette salariale expérimenté au Cameroun en FCFA",
   "taux_emploi": "Pourcentage estimé de diplômés employés dans les 6 mois",
   "metiers": [
@@ -71,11 +71,9 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
       setData(JSON.parse(clean));
     } catch (err) {
       console.error(err);
-      const adminDetail = err.response?.data?.detail;
+      // const adminDetail = err.response?.data?.detail;
       setError(
-        adminDetail
-          ? `Impossible de charger les débouchés. Détail admin : ${adminDetail}`
-          : "Impossible de charger les débouchés. Réessayez dans quelques instants.",
+        "Impossible de charger les débouchés. Réessayez dans quelques instants.",
       );
     } finally {
       setLoading(false);
@@ -139,7 +137,7 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
                   letterSpacing: 1.5,
                 }}
               >
-                Propulsé par AI
+                Propulsé par IA
               </p>
               <h3
                 style={{
@@ -1019,8 +1017,8 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
               lineHeight: 1.6,
             }}
           >
-            ✨ Analyse générée par Claude AI — Données indicatives basées sur le
-            marché camerounais.
+            Analyse générée par AI - Données indicatives basées sur le marché
+            camerounais.
           </p>
         </div>
       )}

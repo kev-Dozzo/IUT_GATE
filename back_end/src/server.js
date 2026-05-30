@@ -14,6 +14,7 @@ const StaffEnseignant = require("./models/Enseignant");
 const Batiment = require("./models/Batiment");
 const Salle = require("./models/Salle");
 const ServiceAdministratif = require("./models/ServiceAdmin");
+const ActualitePhoto = require("./models/ActualitePhoto");
 
 // ── ASSOCIATIONS ──
 Departement.hasMany(Filiere, { foreignKey: "id_departement", as: "filieres" });
@@ -67,6 +68,11 @@ StaffEnseignant.belongsToMany(Filiere, {
   otherKey: "id_filiere",
   as: "filieres",
 });
+Actualite.hasMany(ActualitePhoto, { foreignKey: "id_actualite", as: "photos" });
+ActualitePhoto.belongsTo(Actualite, {
+  foreignKey: "id_actualite",
+  as: "actualite",
+});
 
 // ── ROUTES ──
 const authRoutes = require("./routes/authRoutes");
@@ -79,7 +85,6 @@ const salleRoutes = require("./routes/salleRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const iaRoutes = require("./routes/iaRoutes");
 const errorHandler = require("./middlewares/errorHandler");
-
 const app = express();
 
 app.use(cors({ origin: "*", credentials: true }));

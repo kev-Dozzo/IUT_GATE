@@ -12,10 +12,9 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getActualites } from "../../services/actualiteService";
-// import CoreService from "../../components/layout/CoreService";
+import { getFilieres } from "../../services/filiereService";
 import iutCampus1 from "../../assets/public/image3.jpg";
 import SearchBar from "../../components/ui/SearchBar";
-// import Actualite from "../../../../back_end/src/models/Actualiter";
 
 const quickLinks = [
   {
@@ -52,6 +51,8 @@ const quickLinks = [
   },
 ];
 
+const BASE_URL = "http://localhost:5000";
+
 const catColors = {
   Examens: { bg: "#fee2e2", color: "#991b1b" },
   Événement: { bg: "#cffafe", color: "#164e63" },
@@ -61,6 +62,12 @@ const catColors = {
   Général: { bg: "#f1f5f9", color: "#475569" },
 };
 
+const getCover = (a) => {
+  if (a.photos?.[0]?.url) return `${BASE_URL}${a.photos[0].url}`;
+  if (a.photo_url) return `${BASE_URL}${a.photo_url}`;
+  return null;
+};
+
 const formatDate = (date) =>
   new Date(date).toLocaleDateString("fr-FR", {
     day: "numeric",
@@ -68,20 +75,37 @@ const formatDate = (date) =>
     year: "numeric",
   });
 
+const FILIERE_COLORS = [
+  "#0e7490",
+  "#065f46",
+  "#1e40af",
+  "#5b21b6",
+  "#991b1b",
+  "#92400e",
+  "#0e7490",
+  "#065f46",
+  "#1e40af",
+  "#5b21b6",
+];
+
 export default function HomePage() {
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
   const [actualites, setActualites] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [filieres, setFilieres] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
 
   useEffect(() => {
     getActualites()
-      .then((data) => setActualites(data.slice(0, 3)))
-      .catch(() => setError("Impossible de charger les annonces."))
-      .finally(() => setLoading(false));
+      .then((d) => setActualites(d.slice(0, 4)))
+      .catch(console.error);
+    getFilieres().then(setFilieres).catch(console.error);
   }, []);
-
-  const featured = actualites[0];
 
   return (
     <div>
@@ -144,8 +168,9 @@ export default function HomePage() {
               margin: "0 auto 36px",
             }}
           >
-            Votre guide intelligent pour vous orienter, informer et accompagner
-            tout au long de votre parcours universitaire
+            Votre guide intelligent pour vous orienter, informer. Toutes les
+            informations dont vous avez besoin, en un seul endroit. Tout au long
+            de votre parcours universitaire
           </p>
 
           {/* Search bar */}
@@ -264,269 +289,718 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-      {/* Services RÉCENTES */}
 
-      {/* <CoreService /> */}
       {/* ANNONCES RÉCENTES */}
-      <section className="page-container" style={{ marginTop: 56 }}>
+      {actualites.length > 0 && (
+        <section
+          style={{ padding: "clamp(40px, 7vw, 72px) 24px", background: "#fff" }}
+        >
+          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+            {/* Header style uliege */}
+            <div style={{ position: "relative", marginBottom: 40 }}>
+              <h2
+                style={{
+                  fontFamily: "var(--font-head)",
+                  fontSize: "clamp(48px, 9vw, 96px)",
+                  fontWeight: 800,
+                  color: "#0f172a",
+                  opacity: 0.07,
+                  letterSpacing: -3,
+                  margin: 0,
+                  lineHeight: 1,
+                  userSelect: "none",
+                }}
+              >
+                Actualités
+              </h2>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: 0,
+                  transform: "translateY(-50%)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: 6,
+                }}
+              >
+                <button
+                  onClick={() => navigate("/actualites")}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "var(--cyan-dark)",
+                    fontFamily: "var(--font-head)",
+                    textTransform: "uppercase",
+                    letterSpacing: 2,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Toutes les <br /> actualités
+                </button>
+                <div
+                  style={{
+                    width: "100%",
+                    height: 2,
+                    background: "var(--cyan)",
+                  }}
+                />
+              </div>
+            </div>
+
+            {isMobile ? (
+              /* MOBILE — liste compacte */
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {actualites.map((a, i) => {
+                  const cover = getCover(a);
+                  const col = catColors[a.categorie] || "#0e7490";
+                  return (
+                    <div
+                      key={a.id_actualite}
+                      onClick={() => navigate(`/actualites/${a.id_actualite}`)}
+                      style={{
+                        display: "flex",
+                        gap: 14,
+                        padding: "18px 0",
+                        cursor: "pointer",
+                        borderBottom:
+                          i < actualites.length - 1
+                            ? "1px solid #f1f5f9"
+                            : "none",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 96,
+                          height: 70,
+                          flexShrink: 0,
+                          overflow: "hidden",
+                          background: "#f1f5f9",
+                        }}
+                      >
+                        {cover ? (
+                          <img
+                            src={cover}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <MdCampaign size={22} color="#cbd5e1" />
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontSize: 9,
+                            fontWeight: 800,
+                            color: col,
+                            fontFamily: "var(--font-head)",
+                            textTransform: "uppercase",
+                            letterSpacing: 1.5,
+                            marginBottom: 5,
+                          }}
+                        >
+                          {a.categorie || "Actualité"}
+                        </p>
+                        <h3
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: 13,
+                            color: "var(--cyan-dark)",
+                            lineHeight: 1.35,
+                            margin: 0,
+                          }}
+                        >
+                          {a.titre}
+                        </h3>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* DESKTOP — GRID 3 COLONNES */
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: 32,
+                }}
+              >
+                {actualites.slice(0, 3).map((a, i) => {
+                  const cover = getCover(a);
+                  const col = catColors[a.categorie] || "#0e7490";
+                  return (
+                    <div
+                      key={a.id_actualite}
+                      onClick={() => navigate(`/actualites/${a.id_actualite}`)}
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      {/* Photo */}
+                      <div
+                        style={{
+                          height: 210,
+                          overflow: "hidden",
+                          background: "#f1f5f9",
+                          lineHeight: 0,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {cover ? (
+                          <img
+                            src={cover}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                              transition: "transform .5s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.target.style.transform = "scale(1.06)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.target.style.transform = "scale(1)")
+                            }
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              background: "#f8fafc",
+                            }}
+                          >
+                            <MdCampaign size={40} color="#cbd5e1" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Texte */}
+                      <div
+                        style={{
+                          padding: "20px 0",
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            color: col,
+                            fontFamily: "var(--font-head)",
+                            textTransform: "uppercase",
+                            letterSpacing: 2,
+                            margin: 0,
+                          }}
+                        >
+                          {a.categorie || "Actualité"}
+                        </p>
+                        <h3
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: "clamp(15px, 2vw, 18px)",
+                            color: "var(--cyan-dark)",
+                            lineHeight: 1.35,
+                            margin: 0,
+                          }}
+                        >
+                          {a.titre}
+                        </h3>
+                        {a.contenu && (
+                          <p
+                            style={{
+                              fontSize: 13,
+                              color: "#475569",
+                              lineHeight: 1.7,
+                              margin: 0,
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                            }}
+                          >
+                            {a.contenu.slice(0, 120)}
+                          </p>
+                        )}
+                        <p
+                          style={{ fontSize: 11, color: "#94a3b8", margin: 0 }}
+                        >
+                          {a.date_publication
+                            ? formatDate(a.date_publication)
+                            : ""}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+      {/* ÉTUDIER À L'IUT  */}
+      {/* ══ ÉTUDIER À L'IUT ══ */}
+      <section
+        style={{
+          background: "#fff",
+          borderBottom: "1px solid #f1f5f9",
+          overflow: "hidden",
+        }}
+      >
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: 28,
-            flexWrap: "wrap",
-            gap: 12,
+            maxWidth: 1100,
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            minHeight: isMobile ? "auto" : 500,
           }}
         >
-          <div>
+          {/* Photo gauche avec zoom au hover */}
+          <div
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              minHeight: isMobile ? 260 : 500,
+            }}
+          >
+            <img
+              src={iutCampus1}
+              alt="Étudiants IUT Douala"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                minHeight: isMobile ? 260 : 500,
+                transition: "transform .6s ease",
+              }}
+              onMouseEnter={(e) => (e.target.style.transform = "scale(1.06)")}
+              onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+            />
+            {/* Overlay léger */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(12,26,64,.15)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+
+          {/* Contenu droit */}
+          <div
+            style={{
+              padding: isMobile
+                ? "clamp(28px, 5vw, 40px) 24px"
+                : "clamp(40px, 6vw, 64px)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: 6,
+            }}
+          >
             <p
               style={{
-                fontSize: 11,
-                fontWeight: 700,
+                fontSize: 10,
+                fontWeight: 800,
                 color: "var(--cyan)",
                 fontFamily: "var(--font-head)",
                 textTransform: "uppercase",
-                letterSpacing: 1,
-                marginBottom: 6,
+                letterSpacing: 2,
+                marginBottom: 8,
               }}
             >
-              Actualités
+              Futur(es) étudiant(es)
             </p>
             <h2
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "clamp(20px, 3vw, 26px)",
+                fontSize: "clamp(22px, 3.5vw, 30px)",
                 fontWeight: 800,
                 color: "#0f172a",
+                lineHeight: 1.25,
+                marginBottom: 20,
                 letterSpacing: -0.5,
               }}
             >
-              Annonces récentes
+              Étudier à l'IUT de Douala
             </h2>
-          </div>
-          <button
-            onClick={() => navigate("/actualites")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: "transparent",
-              color: "var(--blue)",
-              border: "1.5px solid var(--blue)",
-              borderRadius: 8,
-              padding: "8px 16px",
-              fontFamily: "var(--font-head)",
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: "pointer",
-            }}
-          >
-            Voir toutes <MdArrowForward size={16} />
-          </button>
-        </div>
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--muted)",
+                fontWeight: 600,
+                marginBottom: 12,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Votre profil :
+            </p>
 
-        {loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 0",
-              color: "var(--muted)",
-            }}
-          >
-            Chargement des annonces...
-          </div>
-        ) : error ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 0",
-              color: "var(--muted)",
-            }}
-          >
-            {error}
-          </div>
-        ) : actualites.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 0",
-              color: "var(--muted)",
-            }}
-          >
-            Aucune annonce disponible.
-          </div>
-        ) : (
-          featured && (
-            <>
-              {/* ── FEATURED — Article principal ── */}
+            {[
+              { label: "Futur Bachelier en Technologie", path: "/filieres" },
+              { label: "Futur étudiant en Licence Pro", path: "/filieres" },
+              { label: "Futur étudiant international", path: "/a-propos" },
+              { label: "Futur professionnel en formation", path: "/filieres" },
+            ].map(({ label, path }) => (
               <div
-                onClick={() => navigate(`/actualites/${featured.id_actualite}`)}
+                key={label}
+                onClick={() => navigate(path)}
                 style={{
-                  background: "#fff",
-                  borderRadius: 20,
-                  border: "1px solid var(--border)",
-                  overflow: "hidden",
                   cursor: "pointer",
-                  marginBottom: 32,
-                  display: "grid",
-                  gridTemplateColumns: featured.photo_url ? "1fr 1fr" : "1fr",
-                  minHeight: 300,
-                  transition: "all .25s",
+                  padding: "12px 0",
+                  borderBottom: "1px solid #f1f5f9",
+                  transition: "all .2s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow =
-                    "0 16px 48px rgba(0,0,0,.1)";
-                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.paddingLeft = "10px";
+                  e.currentTarget.style.color = "var(--cyan)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.paddingLeft = "0";
+                  e.currentTarget.style.color = "inherit";
                 }}
               >
-                {/* Photo */}
-                {featured.photo_url ? (
-                  <div style={{ position: "relative", overflow: "hidden" }}>
-                    <img
-                      src={`http://localhost:5000${featured.photo_url}`}
-                      alt={featured.titre}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        minHeight: 280,
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(135deg, rgba(12,26,64,.3), transparent)",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      background: "linear-gradient(135deg, #0c1a40, #0e5f75)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minHeight: 200,
-                    }}
-                  >
-                    <span style={{ fontSize: 64, opacity: 0.3 }}>
-                      <MdSearch />
-                    </span>
-                  </div>
-                )}
-
-                {/* Contenu */}
                 <div
-                  style={{
-                    padding: "clamp(24px, 4vw, 36px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
                 >
-                  <div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        marginBottom: 16,
-                      }}
-                    >
-                      <span
-                        style={{
-                          padding: "4px 12px",
-                          borderRadius: 999,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          fontFamily: "var(--font-head)",
-                          background: (
-                            catColors[featured.categorie] ||
-                            catColors["Général"]
-                          ).bg,
-                          color: (
-                            catColors[featured.categorie] ||
-                            catColors["Général"]
-                          ).color,
-                        }}
-                      >
-                        À la une · {featured.categorie || "Général"}
-                      </span>
-                    </div>
-                    <h2
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        fontSize: "clamp(18px, 3vw, 26px)",
-                        fontWeight: 800,
-                        color: "#0f172a",
-                        lineHeight: 1.3,
-                        marginBottom: 14,
-                        letterSpacing: -0.5,
-                      }}
-                    >
-                      {featured.titre}
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        color: "var(--muted)",
-                        lineHeight: 1.8,
-                      }}
-                    >
-                      {featured.contenu?.slice(0, 180)}...
-                    </p>
-                  </div>
-
-                  <div
+                  <span
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 20,
-                      paddingTop: 16,
-                      borderTop: "1px solid #f1f5f9",
+                      fontFamily: "var(--font-head)",
+                      fontWeight: 700,
+                      fontSize: "clamp(13px, 2vw, 15px)",
+                      color: "var(--cyan-dark)",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        color: "var(--muted)",
-                        fontSize: 12,
-                      }}
-                    >
-                      <MdCalendarToday size={13} />
-                      {featured.date_publication
-                        ? formatDate(featured.date_publication)
-                        : ""}
-                    </div>
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 5,
-                        fontSize: 13,
-                        color: "var(--cyan)",
-                        fontWeight: 700,
-                        fontFamily: "var(--font-head)",
-                      }}
-                    >
-                      Lire plus <MdArrowForward size={15} />
-                    </span>
-                  </div>
+                    {label}
+                  </span>
+                  <div
+                    style={{
+                      height: 2,
+                      width: 28,
+                      background: "var(--cyan)",
+                      borderRadius: 2,
+                    }}
+                  />
                 </div>
               </div>
-            </>
-          )
-        )}
+            ))}
+
+            <a
+              href="https://www.iut-dla.cm/"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                padding: "12px",
+                background: "var(--cyan)",
+                color: "var(--cyan-text)",
+                borderRadius: 10,
+                fontFamily: "var(--font-head)",
+                fontWeight: 700,
+                fontSize: 13,
+                textDecoration: "none",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--navy)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "var(--cyan-dark)")
+              }
+            >
+              Étudier à l'IUT <MdArrowForward size={15} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/*  NOS FILIÈRES */}
+      {filieres.length > 0 && (
+        <section
+          style={{ padding: "clamp(40px, 7vw, 72px) 24px", background: "#fff" }}
+        >
+          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+            {/* Header */}
+            <div
+              style={{ position: "relative", marginBottom: isMobile ? 28 : 44 }}
+            >
+              <h2
+                style={{
+                  fontFamily: "var(--font-head)",
+                  fontSize: "clamp(40px, 8vw, 90px)",
+                  fontWeight: 800,
+                  color: "#0f172a",
+                  opacity: 0.07,
+                  letterSpacing: -3,
+                  margin: 0,
+                  lineHeight: 1,
+                  userSelect: "none",
+                }}
+              >
+                Nos Filières
+              </h2>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: 0,
+                  transform: "translateY(-50%)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: 6,
+                }}
+              >
+                <button
+                  onClick={() => navigate("/filieres")}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "var(--cyan-dark)",
+                    fontFamily: "var(--font-head)",
+                    textTransform: "uppercase",
+                    letterSpacing: 2,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Voir plus
+                </button>
+                <div
+                  style={{
+                    width: "100%",
+                    height: 2,
+                    background: "var(--cyan)",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Grid style uliege — 3 colonnes */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+                gap: 2,
+              }}
+            >
+              {filieres.slice(0, isMobile ? 6 : 9).map((f, i) => {
+                const col = FILIERE_COLORS[i % FILIERE_COLORS.length];
+                return (
+                  <div
+                    key={f.id_filiere}
+                    onClick={() => navigate(`/filieres/${f.id_filiere}`)}
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #f1f5f9",
+                      padding: "clamp(18px, 3vw, 26px) clamp(16px, 2vw, 24px)",
+                      cursor: "pointer",
+                      transition: "all .2s",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 16,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = col;
+                      e.currentTarget.style.paddingLeft =
+                        "clamp(22px, 4vw, 32px)";
+                      e.currentTarget.style.color = "#fff";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#fff";
+                      e.currentTarget.style.paddingLeft =
+                        "clamp(16px, 2vw, 24px)";
+                    }}
+                  >
+                    {/* Barre couleur gauche */}
+                    <div
+                      style={{
+                        width: 6,
+                        height: 48,
+                        borderRadius: 3,
+                        background: col,
+                        flexShrink: 0,
+                      }}
+                    />
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 800,
+                          color: col,
+                          fontFamily: "var(--font-head)",
+                          textTransform: "uppercase",
+                          letterSpacing: 1.5,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {f.departement?.nom || "IUT Douala"}
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 700,
+                          fontSize: "clamp(13px, 1.8vw, 15px)",
+                          color: "#0f172a",
+                          lineHeight: 1.3,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {f.nom}
+                      </p>
+                      {/* Trait couleur */}
+                      <div
+                        style={{
+                          height: 2,
+                          width: 24,
+                          background: col,
+                          borderRadius: 2,
+                          marginTop: 8,
+                        }}
+                      />
+                    </div>
+
+                    <MdArrowForward
+                      size={16}
+                      color={col}
+                      style={{ flexShrink: 0 }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* PARTENAIRES */}
+      <section
+        style={{
+          padding: "clamp(32px, 5vw, 56px) 24px",
+          background: "#fff",
+          borderTop: "1px solid #f1f5f9",
+        }}
+      >
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              color: "var(--muted)",
+              fontFamily: "var(--font-head)",
+              textTransform: "uppercase",
+              letterSpacing: 2,
+              textAlign: "center",
+              marginBottom: 32,
+            }}
+          >
+            Nos Partenaires
+          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: "clamp(20px, 5vw, 56px)",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {[
+              { nom: "Université de Douala" },
+              { nom: "MINESUP Cameroun", abr: "MINE" },
+              { nom: "AUF", abr: "AUF" },
+              { nom: "IUT France", abr: "IUTF" },
+              { nom: "UTIC", abr: "UTIC" },
+            ].map(({ nom, abr }) => (
+              <div
+                key={nom}
+                title={nom}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "clamp(80px, 12vw, 110px)",
+                  height: 56,
+                  filter: "grayscale(1)",
+                  opacity: 0.45,
+                  transition: "all .2s",
+                  cursor: "default",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.filter = "none";
+                  e.currentTarget.style.opacity = "1";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.filter = "grayscale(1)";
+                  e.currentTarget.style.opacity = ".45";
+                }}
+              >
+                <div
+                  style={{
+                    background: "#f1f5f9",
+                    borderRadius: 8,
+                    padding: "8px 14px",
+                    fontFamily: "var(--font-head)",
+                    fontWeight: 800,
+                    fontSize: 13,
+                    color: "var(--navy)",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {abr}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <Footer />

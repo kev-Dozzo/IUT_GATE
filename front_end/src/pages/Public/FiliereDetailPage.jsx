@@ -371,7 +371,6 @@ export default function FiliereDetailPage() {
                 {filiere.condition_admission && (
                   <div
                     style={{
-                      background: "var(--cyan-light)",
                       borderRadius: 14,
                       border: "1px solid #67e8f9",
                       padding: "20px",
@@ -393,7 +392,7 @@ export default function FiliereDetailPage() {
                     <p
                       style={{
                         fontSize: 14,
-                        color: "var(--cyan-text)",
+                        color: "var(--text)",
                         lineHeight: 1.8,
                       }}
                     >
@@ -636,7 +635,7 @@ export default function FiliereDetailPage() {
                         fontSize: 22,
                       }}
                     >
-                      🎓
+                      <MdSchool color="var(--cyan)"/>
                     </div>
                     <div>
                       <p
@@ -662,7 +661,7 @@ export default function FiliereDetailPage() {
                     filière.
                   </p>
                   <a
-                    href="https://www.univ-douala.com/inscription"
+                    href="https://www.iut-dla.cm/"
                     target="_blank"
                     rel="noreferrer"
                     style={{
@@ -720,7 +719,7 @@ export default function FiliereDetailPage() {
                             color: "#0f172a",
                           }}
                         >
-                          📍 Localisation
+                          Localisation
                         </p>
                         <p
                           style={{

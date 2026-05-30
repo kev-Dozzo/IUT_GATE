@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { MdMenu, MdClose } from "react-icons/md";
+import { MdMenu, MdClose, MdSearch } from "react-icons/md";
 import campusLogo from "../../assets/public/logo.png";
+import { useLang } from "../../context/LangContext";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
@@ -10,14 +11,25 @@ const navLinks = [
   { label: "Enseignants", path: "/enseignants" },
   { label: "Départements", path: "/departements" },
   { label: "Services", path: "/services" },
+  { label: "Calendrier & Programme ", path: "/calendrier" },
   { label: "Carte", path: "/carte" },
   { label: "À propos", path: "/apropos" },
-  { label: "Aide", path: "/aide" }, 
+  { label: "Aide", path: "/aide" },
 ];
+
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [lang, setLang] = useState(localStorage.getItem("lang") || "fr")
+  useLang();
+
+  const toggleLang = () => {
+    const next = lang === "fr" ? "en" : "fr";
+    setLang(next);
+    localStorage.setItem("lang", next);
+    window.location.reload(); // ← force le rechargement complet
+  };
 
   return (
     <>
@@ -110,6 +122,53 @@ export default function Navbar() {
             }}
           >
             Espace Admin
+          </button>
+
+          <button
+            onClick={toggleLang}
+            style={{
+              padding: "5px 12px",
+              border: "1.5px solid var(--cyan)",
+              borderRadius: 6,
+              background: "transparent",
+              color: "var(--cyan)",
+              fontFamily: "var(--font-head)",
+              fontWeight: 700,
+              fontSize: 12,
+              cursor: "pointer",
+            }}
+          >
+            {lang === "fr" ? "EN" : "FR"}
+          </button>
+
+          <button
+            className="mobile-only"
+            onClick={() => navigate("/recherche")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "7px 12px",
+              background: "transparent",
+              color: "#fff",
+              border: "1.5px solid rgba(255,255,255,.28)",
+              borderRadius: 6,
+              fontFamily: "var(--font-head)",
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: "pointer",
+              transition: "all .2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--cyan)";
+              e.currentTarget.style.color = "var(--cyan)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,.28)";
+              e.currentTarget.style.color = "#fff";
+            }}
+          >
+            <MdSearch size={16} />
           </button>
 
           {/* Hamburger */}

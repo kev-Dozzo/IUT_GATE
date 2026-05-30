@@ -88,6 +88,7 @@ export default function SearchBar({ size = "large" }) {
   // Recherche en temps réel
   useEffect(() => {
     if (!query.trim() || !allData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([]);
       setShowDrop(false);
       return;
@@ -238,7 +239,7 @@ export default function SearchBar({ size = "large" }) {
             onBlur={() => setFocused(false)}
             placeholder={
               isLarge
-                ? "Rechercher un enseignant, une filière, un service..."
+                ? "Rechercher..."
                 : "Rechercher..."
             }
             style={{
@@ -333,7 +334,7 @@ export default function SearchBar({ size = "large" }) {
                   fontFamily: "var(--font-head)",
                 }}
               >
-                ↵ pour aller au 1er résultat
+                 pour aller au 1er résultat
               </span>
             )}
           </div>
@@ -433,9 +434,7 @@ export default function SearchBar({ size = "large" }) {
           {/* Voir tous les résultats */}
           {results.length > 0 && (
             <div
-              onClick={() => {
-                setShowDrop(false);
-              }}
+              onClick={() => navigate("/recherche")} 
               style={{
                 padding: "10px 16px",
                 background: "#f8fafc",
