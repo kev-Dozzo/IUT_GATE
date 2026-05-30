@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  MdSearch,
   MdSchool,
   MdPeople,
   MdAccountBalance,
   MdCampaign,
   MdArrowForward,
-  MdCalendarToday,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getActualites } from "../../services/actualiteService";
 import { getFilieres } from "../../services/filiereService";
 import iutCampus1 from "../../assets/public/image3.jpg";
+import UD from "../../assets/public/logo_ud.jpeg";
+import Camtel from "../../assets/public/camtel.png";
+import minesup from "../../assets/public/min.jpeg";
 import SearchBar from "../../components/ui/SearchBar";
+import SEO from "../../components/ui/SEO";
 
 const quickLinks = [
   {
@@ -43,9 +45,9 @@ const quickLinks = [
   },
   {
     icon: MdCampaign,
-    label: "Acttualites",
+    label: "Actualités",
     sub: "Actualités campus",
-    path: "/actualite",
+    path: "/actualites",
     bg: "#fef3c7",
     color: "#92400e",
   },
@@ -54,26 +56,13 @@ const quickLinks = [
 const BASE_URL = "http://localhost:5000";
 
 const catColors = {
-  Examens: { bg: "#fee2e2", color: "#991b1b" },
-  Événement: { bg: "#cffafe", color: "#164e63" },
-  Infrastructure: { bg: "#dbeafe", color: "#1e40af" },
-  Administration: { bg: "#dbeafe", color: "#1e40af" },
-  Stage: { bg: "#d1fae5", color: "#065f46" },
-  Général: { bg: "#f1f5f9", color: "#475569" },
+  Examens: "#991b1b",
+  Événement: "#0e7490",
+  Infrastructure: "#1e40af",
+  Administration: "#1e40af",
+  Stage: "#065f46",
+  Général: "#475569",
 };
-
-const getCover = (a) => {
-  if (a.photos?.[0]?.url) return `${BASE_URL}${a.photos[0].url}`;
-  if (a.photo_url) return `${BASE_URL}${a.photo_url}`;
-  return null;
-};
-
-const formatDate = (date) =>
-  new Date(date).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
 const FILIERE_COLORS = [
   "#0e7490",
@@ -87,6 +76,35 @@ const FILIERE_COLORS = [
   "#1e40af",
   "#5b21b6",
 ];
+
+const PARTENAIRES = [
+  {
+    nom: "Université de Douala",
+    img: UD,
+    lien: "https://www.univ-douala.com",
+  },
+  { nom: "MINESUP", img: minesup, lien: "https://www.minesup.gov.cm" },
+  // { nom: "AUF", img: "/partenaires/auf.png", lien: "https://www.auf.org" },
+  {
+    nom: "CAMTEL",
+    img: Camtel,
+    lien: "https://www.camtel.cm",
+  },
+  // { nom: "UTIC", img: "/partenaires/utic.png", lien: "#" },
+];
+
+const getCover = (a) => {
+  if (a.photos?.[0]?.url) return `${BASE_URL}${a.photos[0].url}`;
+  if (a.photo_url) return `${BASE_URL}${a.photo_url}`;
+  return null;
+};
+
+const formatDate = (d) =>
+  new Date(d).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -109,17 +127,20 @@ export default function HomePage() {
 
   return (
     <div>
+      <SEO
+        title="Accueil"
+        description="Portail numérique de l'IUT de Douala. Filières, enseignants, carte du campus et actualités."
+        url="https://iutgate.vercel.app"
+      />
       <Navbar />
 
-      {/* HERO */}
+      {/* ══ HERO ══ */}
       <section
         style={{
-          backgroundImage: `linear-gradient(rgba(12,26,64,0.7), rgba(14,95,117,0.7)) ,url(${iutCampus1})`,
+          backgroundImage: `linear-gradient(rgba(12,26,64,0.7), rgba(14,95,117,0.7)), url(${iutCampus1})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          /* background:
-            "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)", */
           padding:
             "clamp(40px, 8vw, 80px) clamp(16px, 4vw, 32px) clamp(60px, 8vw, 100px)",
         }}
@@ -131,12 +152,14 @@ export default function HomePage() {
               alignItems: "center",
               padding: "4px 14px",
               borderRadius: 999,
-              background: "var(--cyan-light)",
-              color: "var(--text)",
+              background: "rgba(6,182,212,.2)",
+              color: "var(--cyan)",
               fontFamily: "var(--font-head)",
               fontSize: 11,
               fontWeight: 700,
               marginBottom: 22,
+              border: "1px solid rgba(6,182,212,.3)",
+              letterSpacing: 1,
             }}
           >
             Portail Numérique du Campus
@@ -163,17 +186,15 @@ export default function HomePage() {
               color: "#7dd3fc",
               fontSize: "clamp(13px, 2vw, 16px)",
               lineHeight: 1.7,
-              marginBottom: 36,
               maxWidth: 500,
               margin: "0 auto 36px",
             }}
           >
-            Votre guide intelligent pour vous orienter, informer. Toutes les
-            informations dont vous avez besoin, en un seul endroit. Tout au long
-            de votre parcours universitaire
+            Votre guide intelligent pour vous orienter et vous informer. Toutes
+            les informations dont vous avez besoin, en un seul endroit, tout au
+            long de votre parcours universitaire.
           </p>
 
-          {/* Search bar */}
           <div
             style={{
               display: "flex",
@@ -184,7 +205,6 @@ export default function HomePage() {
             <SearchBar size="large" />
           </div>
 
-          {/* Stats */}
           <div
             style={{
               display: "flex",
@@ -222,12 +242,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* QUICK LINKS */}
+      {/* ══ QUICK LINKS ══ */}
       <section
         style={{ maxWidth: 1100, margin: "-24px auto 0", padding: "0 24px" }}
       >
         <div className="grid-4">
-          {quickLinks.map(({ icon, label, sub, path, bg, color }) => (
+          {quickLinks.map(({ icon: Icon, label, sub, path, bg, color }) => (
             <div
               key={label}
               onClick={() => navigate(path)}
@@ -266,7 +286,7 @@ export default function HomePage() {
                   flexShrink: 0,
                 }}
               >
-                {React.createElement(icon, { size: 22, color })}
+                <Icon icon={Icon} size={22} color={color} />
               </div>
               <div>
                 <p
@@ -290,13 +310,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ANNONCES RÉCENTES */}
+      {/* ══ ACTUALITÉS RÉCENTES ══ */}
       {actualites.length > 0 && (
         <section
           style={{ padding: "clamp(40px, 7vw, 72px) 24px", background: "#fff" }}
         >
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            {/* Header style uliege */}
             <div style={{ position: "relative", marginBottom: 40 }}>
               <h2
                 style={{
@@ -353,7 +372,6 @@ export default function HomePage() {
             </div>
 
             {isMobile ? (
-              /* MOBILE — liste compacte */
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {actualites.map((a, i) => {
                   const cover = getCover(a);
@@ -439,7 +457,6 @@ export default function HomePage() {
                 })}
               </div>
             ) : (
-              /* DESKTOP — GRID 3 COLONNES */
               <div
                 style={{
                   display: "grid",
@@ -447,7 +464,7 @@ export default function HomePage() {
                   gap: 32,
                 }}
               >
-                {actualites.slice(0, 3).map((a, i) => {
+                {actualites.slice(0, 3).map((a) => {
                   const cover = getCover(a);
                   const col = catColors[a.categorie] || "#0e7490";
                   return (
@@ -460,7 +477,6 @@ export default function HomePage() {
                         flexDirection: "column",
                       }}
                     >
-                      {/* Photo */}
                       <div
                         style={{
                           height: 210,
@@ -481,12 +497,12 @@ export default function HomePage() {
                               display: "block",
                               transition: "transform .5s",
                             }}
-                            onMouseEnter={(e) =>
-                              (e.target.style.transform = "scale(1.06)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.target.style.transform = "scale(1)")
-                            }
+                            onMouseEnter={(e) => {
+                              e.target.style.transform = "scale(1.06)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.transform = "scale(1)";
+                            }}
                           />
                         ) : (
                           <div
@@ -504,7 +520,6 @@ export default function HomePage() {
                         )}
                       </div>
 
-                      {/* Texte */}
                       <div
                         style={{
                           padding: "20px 0",
@@ -571,11 +586,12 @@ export default function HomePage() {
           </div>
         </section>
       )}
-      {/* ÉTUDIER À L'IUT  */}
+
       {/* ══ ÉTUDIER À L'IUT ══ */}
       <section
         style={{
           background: "#fff",
+          borderTop: "1px solid #f1f5f9",
           borderBottom: "1px solid #f1f5f9",
           overflow: "hidden",
         }}
@@ -589,7 +605,7 @@ export default function HomePage() {
             minHeight: isMobile ? "auto" : 500,
           }}
         >
-          {/* Photo gauche avec zoom au hover */}
+          {/* Photo gauche */}
           <div
             style={{
               position: "relative",
@@ -608,10 +624,13 @@ export default function HomePage() {
                 minHeight: isMobile ? 260 : 500,
                 transition: "transform .6s ease",
               }}
-              onMouseEnter={(e) => (e.target.style.transform = "scale(1.06)")}
-              onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "scale(1.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "scale(1)";
+              }}
             />
-            {/* Overlay léger */}
             <div
               style={{
                 position: "absolute",
@@ -687,41 +706,34 @@ export default function HomePage() {
                   padding: "12px 0",
                   borderBottom: "1px solid #f1f5f9",
                   transition: "all .2s",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingLeft = "10px";
-                  e.currentTarget.style.color = "var(--cyan)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.paddingLeft = "0";
-                  e.currentTarget.style.color = "inherit";
                 }}
               >
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
+                <span
+                  style={{
+                    fontFamily: "var(--font-head)",
+                    fontWeight: 700,
+                    fontSize: "clamp(13px, 2vw, 15px)",
+                    color: "var(--cyan-dark)",
+                    display: "block",
+                    marginBottom: 6,
+                  }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 700,
-                      fontSize: "clamp(13px, 2vw, 15px)",
-                      color: "var(--cyan-dark)",
-                    }}
-                  >
-                    {label}
-                  </span>
-                  <div
-                    style={{
-                      height: 2,
-                      width: 28,
-                      background: "var(--cyan)",
-                      borderRadius: 2,
-                    }}
-                  />
-                </div>
+                  {label}
+                </span>
+                <div
+                  style={{
+                    height: 2,
+                    width: 28,
+                    background: "var(--cyan)",
+                    borderRadius: 2,
+                  }}
+                />
               </div>
             ))}
 
@@ -730,39 +742,46 @@ export default function HomePage() {
               target="_blank"
               rel="noreferrer"
               style={{
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                padding: "12px",
-                background: "var(--cyan)",
-                color: "var(--cyan-text)",
-                borderRadius: 10,
+                padding: "13px 22px",
+                background: "var(--cyan-dark)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
                 fontFamily: "var(--font-head)",
                 fontWeight: 700,
                 fontSize: 13,
                 textDecoration: "none",
+                marginTop: 16,
+                alignSelf: "flex-start",
+                transition: "all .2s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--navy)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "var(--cyan-dark)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--navy)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--cyan-dark)";
+              }}
             >
-              Étudier à l'IUT <MdArrowForward size={15} />
+              Étudier à l'IUT
+              <MdArrowForward size={15} />
             </a>
           </div>
         </div>
       </section>
 
-      {/*  NOS FILIÈRES */}
+      {/* ══ NOS FILIÈRES ══ */}
       {filieres.length > 0 && (
         <section
-          style={{ padding: "clamp(40px, 7vw, 72px) 24px", background: "#fff" }}
+          style={{
+            padding: "clamp(40px, 7vw, 72px) 24px",
+            background: "#f8fafc",
+          }}
         >
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            {/* Header */}
             <div
               style={{ position: "relative", marginBottom: isMobile ? 28 : 44 }}
             >
@@ -820,7 +839,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Grid style uliege — 3 colonnes */}
             <div
               style={{
                 display: "grid",
@@ -839,7 +857,7 @@ export default function HomePage() {
                       border: "1px solid #f1f5f9",
                       padding: "clamp(18px, 3vw, 26px) clamp(16px, 2vw, 24px)",
                       cursor: "pointer",
-                      transition: "all .2s",
+                      transition: "all .25s",
                       display: "flex",
                       alignItems: "center",
                       gap: 16,
@@ -848,7 +866,6 @@ export default function HomePage() {
                       e.currentTarget.style.background = col;
                       e.currentTarget.style.paddingLeft =
                         "clamp(22px, 4vw, 32px)";
-                      e.currentTarget.style.color = "#fff";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = "#fff";
@@ -856,7 +873,6 @@ export default function HomePage() {
                         "clamp(16px, 2vw, 24px)";
                     }}
                   >
-                    {/* Barre couleur gauche */}
                     <div
                       style={{
                         width: 6,
@@ -866,7 +882,6 @@ export default function HomePage() {
                         flexShrink: 0,
                       }}
                     />
-
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p
                         style={{
@@ -895,7 +910,6 @@ export default function HomePage() {
                       >
                         {f.nom}
                       </p>
-                      {/* Trait couleur */}
                       <div
                         style={{
                           height: 2,
@@ -906,7 +920,6 @@ export default function HomePage() {
                         }}
                       />
                     </div>
-
                     <MdArrowForward
                       size={16}
                       color={col}
@@ -920,10 +933,10 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* PARTENAIRES */}
+      {/* ══ PARTENAIRES ══ */}
       <section
         style={{
-          padding: "clamp(32px, 5vw, 56px) 24px",
+          padding: "clamp(28px, 5vw, 52px) 24px",
           background: "#fff",
           borderTop: "1px solid #f1f5f9",
         }}
@@ -931,73 +944,75 @@ export default function HomePage() {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <p
             style={{
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: 800,
               color: "var(--muted)",
               fontFamily: "var(--font-head)",
               textTransform: "uppercase",
-              letterSpacing: 2,
+              letterSpacing: 2.5,
               textAlign: "center",
-              marginBottom: 32,
+              marginBottom: 36,
             }}
           >
             Nos Partenaires
           </p>
+
           <div
             style={{
               display: "flex",
-              gap: "clamp(20px, 5vw, 56px)",
+              gap: "clamp(24px, 6vw, 64px)",
               alignItems: "center",
               justifyContent: "center",
               flexWrap: "wrap",
             }}
           >
-            {[
-              { nom: "Université de Douala" },
-              { nom: "MINESUP Cameroun", abr: "MINE" },
-              { nom: "AUF", abr: "AUF" },
-              { nom: "IUT France", abr: "IUTF" },
-              { nom: "UTIC", abr: "UTIC" },
-            ].map(({ nom, abr }) => (
-              <div
+            {PARTENAIRES.map(({ nom, img, lien }) => (
+              <a
                 key={nom}
+                href={lien}
+                target="_blank"
+                rel="noreferrer"
                 title={nom}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: "clamp(80px, 12vw, 110px)",
-                  height: 56,
-                  filter: "grayscale(1)",
-                  opacity: 0.45,
-                  transition: "all .2s",
-                  cursor: "default",
                   flexShrink: 0,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.filter = "none";
-                  e.currentTarget.style.opacity = "1";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.filter = "grayscale(1)";
-                  e.currentTarget.style.opacity = ".45";
+                  transition: "all .3s",
+                  textDecoration: "none",
                 }}
               >
+                <img
+                  src={img}
+                  alt={nom}
+                  style={{
+                    height: 75,
+                    maxWidth: 140,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = "block";
+                    }
+                  }}
+                />
                 <div
                   style={{
+                    display: "none",
                     background: "#f1f5f9",
                     borderRadius: 8,
                     padding: "8px 14px",
                     fontFamily: "var(--font-head)",
                     fontWeight: 800,
-                    fontSize: 13,
-                    color: "var(--navy)",
-                    letterSpacing: 0.5,
+                    fontSize: 12,
+                    color: "#94a3b8",
                   }}
                 >
-                  {abr}
+                  {nom}
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>

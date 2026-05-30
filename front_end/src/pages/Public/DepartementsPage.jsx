@@ -11,6 +11,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getDepartements } from "../../services/departementService";
+import SEO from "../../components/ui/SEO";  
 
 const BASE_URL = "http://localhost:5000";
 
@@ -35,6 +36,12 @@ export default function DepartementsPage() {
 
   return (
     <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
+      <SEO
+        title="Départements"
+        description="Les départements académiques de l'IUT de Douala."
+        url="https://iutgate.vercel.app/departements"
+      />
+
       <Navbar />
 
       {/* HERO ÉPURÉ */}

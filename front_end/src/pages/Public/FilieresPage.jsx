@@ -11,6 +11,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getFilieres } from "../../services/filiereService";
+import SEO from "../../components/ui/SEO";
 
 const BASE_URL = "http://localhost:5000";
 const DEFAULT_PHOTO = "/noprofil.jpg";
@@ -36,6 +37,11 @@ export default function FilieresPage() {
 
   return (
     <div>
+      <SEO
+        title="Filières"
+        description="Découvrez toutes les formations et filières de l'IUT de Douala : Génie Informatique, Réseaux, Génie Civil et plus."
+        url="https://iutgate.vercel.app/filieres"
+      />
       <Navbar />
 
       {/* HERO */}

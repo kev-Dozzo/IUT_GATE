@@ -19,6 +19,7 @@ import Footer from "../../components/layout/Footer";
 import Avatar from "../../components/ui/Avatar";
 import DebouchesIA from "../../components/ui/DebouchesIA";
 import { getFiliereById } from "../../services/filiereService";
+import SEO from "../../components/ui/SEO";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -64,6 +65,11 @@ export default function FiliereDetailPage() {
 
   return (
     <div>
+      <SEO
+        title={filiere?.nom}
+        description={filiere?.description?.slice(0, 150)}
+        url={`https://iutgate.vercel.app/filieres/${id}`}
+      />
       <Navbar />
 
       {loading && (
@@ -553,7 +559,7 @@ export default function FiliereDetailPage() {
                             flexShrink: 0,
                           }}
                         >
-                          <Icon size={17} color="var(--cyan-dark)" />
+                          <Icon icon={Icon} size={17} color="var(--cyan-dark)" />
                         </div>
                         <div>
                           <p
@@ -635,7 +641,7 @@ export default function FiliereDetailPage() {
                         fontSize: 22,
                       }}
                     >
-                      <MdSchool color="var(--cyan)"/>
+                      <MdSchool color="var(--cyan)" />
                     </div>
                     <div>
                       <p

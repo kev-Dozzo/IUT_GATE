@@ -14,6 +14,7 @@ import {
   getActualiteById,
   getActualites,
 } from "../../services/actualiteService";
+import SEO from "../../components/ui/SEO";
 
 const BASE_URL = "http://localhost:5000";
 
@@ -237,7 +238,6 @@ function Lightbox({ photos, initialIndex, onClose }) {
   );
 }
 
-// ── Mosaïque style uliege.be ──
 function PhotoMosaic({ photos, onPhotoClick }) {
   if (!photos?.length) return null;
   const src = (p) => (p.startsWith("http") ? p : `${BASE_URL}${p}`);
@@ -472,6 +472,17 @@ export default function ActualiteDetailPage() {
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <SEO
+        title={actualite?.titre}
+        description={actualite?.contenu?.slice(0, 150)}
+        url={`https://iutgate.vercel.app/actualites/${id}`}
+        image={
+          actualite?.photo_url
+            ? `http://localhost:5000${actualite.photo_url}`
+            : undefined
+        }
+        type="article"
+      />
       <Navbar />
 
       {loading && (

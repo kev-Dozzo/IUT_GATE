@@ -17,6 +17,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getServices } from "../../services/serviceAdminService";
 import { useNavigate } from "react-router-dom";
+import SEO from "../../components/ui/SEO";
 
 const SERVICE_ICONS = [
   MdAssignment,
@@ -61,6 +62,11 @@ export default function ServicesPage() {
 
   return (
     <div>
+      <SEO
+        title="services administratifs - Informations et contacts  "
+        description="Découvrez toutes les services administratifs de l'IUT de Douala - Informations et contacts "
+        url="https://iutgate.vercel.app/services"
+      />
       <Navbar />
       {/* ── HEADER ── */}
       <section

@@ -4,6 +4,7 @@ import { MdSearch, MdClose, MdCampaign } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getActualites } from "../../services/actualiteService";
+import SEO from "../../components/ui/SEO";
 
 const BASE_URL = "http://localhost:5000";
 
@@ -71,6 +72,11 @@ export default function ActualitesPage() {
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <SEO
+        title="Actualités"
+        description="Toutes les actualités de l'IUT de Douala : examens, événements, stages et informations campus."
+        url="https://iutgate.vercel.app/actualites"
+      />
       <Navbar />
 
       {/* ── HERO NAVY — même style que les autres pages ── */}

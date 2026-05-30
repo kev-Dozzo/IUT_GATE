@@ -10,6 +10,7 @@
           "-webkit-overflow-scrolling"
         ]
       }
-    ]
+    ],
+    "apple-touch-icons": "off"
   }
 }

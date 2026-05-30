@@ -93,7 +93,7 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
           overflow: "hidden",
         }}
       >
-        <div
+        {/* <div
           style={{
             position: "absolute",
             top: -30,
@@ -103,7 +103,7 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
             background: "rgba(6,182,212,.1)",
             borderRadius: "50%",
           }}
-        />
+        /> */}
         <div style={{ position: "relative", zIndex: 1 }}>
           <div
             style={{

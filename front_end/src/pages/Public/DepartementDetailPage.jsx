@@ -17,6 +17,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import Avatar from "../../components/ui/Avatar";
 import { getDepartementById } from "../../services/departementService";
+import SEO from "../../components/ui/SEO";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -41,6 +42,7 @@ export default function DepartementDetailPage() {
   const [dept, setDept] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [departements] = useState([]);
 
   useEffect(() => {
     getDepartementById(id)
@@ -60,6 +62,12 @@ export default function DepartementDetailPage() {
 
   return (
     <div>
+      <SEO
+        title={departements?.nom}
+        description={departements?.description?.slice(0, 150)}
+        url={`https://iutgate.vercel.app/departements/${id}`}
+      />
+
       <Navbar />
 
       {loading && (

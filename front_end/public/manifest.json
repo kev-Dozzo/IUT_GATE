@@ -1,12 +1,13 @@
 {
-  "name": "IUT_GATE — IUT de Douala",
-  "short_name": "IUTGate",
-  "description": "Portail numérique de l'IUT de Douala",
+  "name": "IUT GATE - IUT de Douala",
+  "short_name": "IUT GATE",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0c1a40",
   "theme_color": "#06B6D4",
-  "orientation": "portrait-primary",
-  "categories": ["education"],
-  "lang": "fr"
+  "lang": "fr",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/iogo2.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }

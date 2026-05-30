@@ -21,7 +21,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState(localStorage.getItem("lang") || "fr")
+  const [lang, setLang] = useState(localStorage.getItem("lang") || "fr");
   useLang();
 
   const toggleLang = () => {
@@ -106,23 +106,25 @@ export default function Navbar() {
 
         {/* CTA desktop + hamburger mobile */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            className="desktop-only"
-            onClick={() => navigate("/admin/login")}
-            style={{
-              background: "var(--cyan)",
-              color: "var(--cyan-text)",
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 16px",
-              fontFamily: "var(--font-head)",
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: "pointer",
-            }}
-          >
-            Espace Admin
-          </button>
+          {import.meta.env.DEV && (
+            <button
+              className="desktop-only"
+              onClick={() => navigate("/admin/login")}
+              style={{
+                background: "var(--cyan)",
+                color: "var(--cyan-text)",
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 16px",
+                fontFamily: "var(--font-head)",
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              Espace Admin
+            </button>
+          )}
 
           <button
             onClick={toggleLang}
@@ -242,26 +244,28 @@ export default function Navbar() {
               paddingTop: 12,
             }}
           >
-            <button
-              onClick={() => {
-                navigate("/admin/login");
-                setOpen(false);
-              }}
-              style={{
-                width: "100%",
-                padding: "13px",
-                background: "var(--cyan)",
-                color: "var(--cyan-text)",
-                border: "none",
-                borderRadius: 10,
-                fontFamily: "var(--font-head)",
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              Espace Admin
-            </button>
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => {
+                  navigate("/admin/login");
+                  setOpen(false);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  background: "var(--cyan)",
+                  color: "var(--cyan-text)",
+                  border: "none",
+                  borderRadius: 10,
+                  fontFamily: "var(--font-head)",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                Espace Admin
+              </button>
+            )}
           </div>
         </div>
       )}

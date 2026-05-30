@@ -11,6 +11,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import iutRassam1 from "../../assets/public/iut-rassam1.jpg";
+import SEO from "../../components/ui/SEO";
 
 const equipe = [
   {
@@ -69,6 +70,11 @@ export default function AProposPage() {
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <SEO
+        title="À propos"
+        description="Tout sur IUTGate, le portail numérique de l'IUT de Douala développé par des étudiants."
+        url="https://iutgate.vercel.app/a-propos"
+      />
       <Navbar />
 
       {/* ── HERO avec image de fond ── */}
@@ -97,7 +103,7 @@ export default function AProposPage() {
               letterSpacing: 1,
             }}
           >
-             À propos
+            À propos
           </span>
           <h1
             style={{
@@ -434,7 +440,7 @@ export default function AProposPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={18} color="var(--cyan-dark)" />
+                    <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
                   </div>
                   <div>
                     <p

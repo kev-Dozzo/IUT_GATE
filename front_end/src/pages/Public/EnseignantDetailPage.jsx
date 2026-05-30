@@ -390,7 +390,7 @@ export default function EnseignantDetailPage() {
                               flexShrink: 0,
                             }}
                           >
-                            <Icon size={18} color="var(--cyan-dark)" />
+                            <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
                           </div>
                           <div>
                             <p
