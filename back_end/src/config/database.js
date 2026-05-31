@@ -1,6 +1,5 @@
 const { Sequelize } = require("sequelize");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
+require("dotenv").config();
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -8,13 +7,15 @@ const sequelize = new Sequelize(
   process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: "mysql",
-    dialectOptions: {
-      ssl:
-        process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
-    },
+    port: process.env.DB_PORT || 5432,
+    dialect: "postgres", 
     logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, 
+      },
+    },
   },
 );
 
