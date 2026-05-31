@@ -11,7 +11,8 @@ const sequelize = new Sequelize(
     port: process.env.DB_PORT || 3306,
     dialect: "mysql",
     dialectOptions: {
-      ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: true } : false,
+      ssl:
+        process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
     },
     logging: false,
   },
