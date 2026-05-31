@@ -1,12 +1,18 @@
 const Actualite = require("../models/Actualiter");
+const ActualitePhoto = require("../models/ActualitePhoto");
 const Admin = require("../models/Admin");
-const path = require("path");
-const fs = require("fs");
 
 exports.getAll = async (req, res) => {
   try {
     const actualites = await Actualite.findAll({
       order: [["date_publication", "DESC"]],
+      include: [
+        {
+          model: ActualitePhoto,
+          as: "photos",
+          attributes: ["id_photo", "url", "ordre"],
+        },
+      ],
     });
     res.json(actualites);
   } catch (err) {
@@ -16,7 +22,15 @@ exports.getAll = async (req, res) => {
 
 exports.getById = async (req, res) => {
   try {
-    const actualite = await Actualite.findByPk(req.params.id);
+    const actualite = await Actualite.findByPk(req.params.id, {
+      include: [
+        {
+          model: ActualitePhoto,
+          as: "photos",
+          attributes: ["id_photo", "url", "ordre"],
+        },
+      ],
+    });
     if (!actualite)
       return res.status(404).json({ message: "Actualité non trouvée" });
     res.json(actualite);
@@ -40,35 +54,34 @@ exports.create = async (req, res) => {
     if (!titre || !contenu)
       return res.status(400).json({ message: "Titre et contenu obligatoires" });
 
-    // Fichiers uploadés (max 5)
-    let photo_url = null;
-    let fichiers = [];
-
-    if (req.files && req.files.length > 0) {
-      req.files.forEach((file, i) => {
-        const url = `/uploads/${file.filename}`;
-        if (i === 0 && file.mimetype.startsWith("image/")) {
-          photo_url = url;
-        }
-        fichiers.push({
-          url,
-          nom: file.originalname,
-          type: file.mimetype,
-          taille: file.size,
-        });
-      });
-    }
+    // Photo principale = premier fichier
+    const photoUrl =
+      req.files?.length > 0 ? `/uploads/${req.files[0].filename}` : null;
 
     const actualite = await Actualite.create({
       titre,
       contenu,
       categorie,
-      photo_url,
-      fichiers: JSON.stringify(fichiers),
+      photo_url: photoUrl,
       id_admin: req.admin.id_admin,
       date_publication: new Date(),
     });
-    res.status(201).json(actualite);
+
+    // Photos supplémentaires
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        await ActualitePhoto.create({
+          id_actualite: actualite.id_actualite,
+          url: `/uploads/${req.files[i].filename}`,
+          ordre: i,
+        });
+      }
+    }
+
+    const full = await Actualite.findByPk(actualite.id_actualite, {
+      include: [{ model: ActualitePhoto, as: "photos" }],
+    });
+    res.status(201).json(full);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -81,26 +94,22 @@ exports.update = async (req, res) => {
       return res.status(404).json({ message: "Actualité non trouvée" });
 
     const updates = { ...req.body };
-
-    if (req.files && req.files.length > 0) {
-      let fichiers = [];
-      req.files.forEach((file, i) => {
-        const url = `/uploads/${file.filename}`;
-        if (i === 0 && file.mimetype.startsWith("image/")) {
-          updates.photo_url = url;
-        }
-        fichiers.push({
-          url,
-          nom: file.originalname,
-          type: file.mimetype,
-          taille: file.size,
+    if (req.files?.length > 0) {
+      updates.photo_url = `/uploads/${req.files[0].filename}`;
+      // Ajoute les nouvelles photos sans supprimer les anciennes
+      for (let i = 0; i < req.files.length; i++) {
+        await ActualitePhoto.create({
+          id_actualite: actualite.id_actualite,
+          url: `/uploads/${req.files[i].filename}`,
+          ordre: i,
         });
-      });
-      updates.fichiers = JSON.stringify(fichiers);
+      }
     }
-
     await actualite.update(updates);
-    res.json(actualite);
+    const full = await Actualite.findByPk(actualite.id_actualite, {
+      include: [{ model: ActualitePhoto, as: "photos" }],
+    });
+    res.json(full);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
@@ -111,6 +120,7 @@ exports.delete = async (req, res) => {
     const actualite = await Actualite.findByPk(req.params.id);
     if (!actualite)
       return res.status(404).json({ message: "Actualité non trouvée" });
+    await ActualitePhoto.destroy({ where: { id_actualite: req.params.id } });
     await actualite.destroy();
     res.json({ message: "Actualité supprimée" });
   } catch (err) {

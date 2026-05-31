@@ -5,11 +5,14 @@ import {
   MdPhone,
   MdSchool,
   MdPeople,
+  MdArrowForward,
   MdCode,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import iutRassam1 from "../../assets/public/iut-rassam1.jpg";
+import SEO from "../../components/ui/SEO";
+
 const equipe = [
   {
     nom: "DAGANG TCHUIKOUA YOBS KOLER",
@@ -33,7 +36,7 @@ const equipe = [
     color: "#92400e",
   },
   {
-    nom: "EPALE NGOMBA   WILFRIED GIOVANNI",
+    nom: "EPALE NGOMBA WILFRIED GIOVANNI",
     role: "Frontend React",
     initiales: "ENWG",
     bg: "#d1fae5",
@@ -57,8 +60,8 @@ const equipe = [
     nom: "FOKA KAMMOE ALAN BRYAN",
     role: "UI/UX Design",
     initiales: "FKAB",
-    bg: "#daabe2",
-    color: "#8b17cf",
+    bg: "#f3e8ff",
+    color: "#7e22ce",
   },
 ];
 
@@ -66,36 +69,42 @@ export default function AProposPage() {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <SEO
+        title="À propos"
+        description="Tout sur IUTGate, le portail numérique de l'IUT de Douala développé par des étudiants."
+        url="https://iutgate.vercel.app/a-propos"
+      />
       <Navbar />
 
-      {/* ── HERO ── */}
+      {/* ── HERO avec image de fond ── */}
       <section
         style={{
-          backgroundImage: `linear-gradient(rgba(12,26,64,0.7), rgba(14,95,117,0.7)),url(${iutRassam1})`,
+          backgroundImage: `linear-gradient(rgba(12,26,64,0.75), rgba(14,95,117,0.75)), url(${iutRassam1})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          padding: "clamp(40px, 8vw, 72px) 24px",
+          padding: "clamp(48px, 9vw, 80px) 24px",
         }}
       >
-        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
           <span
             style={{
               display: "inline-flex",
               alignItems: "center",
               padding: "4px 14px",
               borderRadius: 999,
-              background: "var(--cyan-light)",
-              color: "var(--cyan-text)",
+              background: "rgba(6,182,212,.25)",
+              color: "var(--cyan)",
               fontFamily: "var(--font-head)",
               fontSize: 11,
               fontWeight: 700,
               marginBottom: 20,
+              border: "1px solid rgba(6,182,212,.3)",
+              letterSpacing: 1,
             }}
           >
-            ✦ À propos
+            À propos
           </span>
-          <br />
           <h1
             style={{
               fontFamily: "var(--font-head)",
@@ -115,7 +124,7 @@ export default function AProposPage() {
           </h1>
           <p
             style={{
-              color: "#7dd3fc",
+              color: "rgba(255,255,255,.75)",
               fontSize: "clamp(13px, 2vw, 15px)",
               lineHeight: 1.8,
               maxWidth: 520,
@@ -123,29 +132,42 @@ export default function AProposPage() {
             }}
           >
             Une plateforme conçue pour connecter les étudiants, enseignants et
-            visiteurs au campus de l'Institut Universitaire de Technologie de
-            Douala.
+            visiteurs au campus de l'IUT de Douala.
           </p>
+          <div
+            style={{
+              height: 3,
+              background: "var(--cyan)",
+              width: 56,
+              margin: "24px auto 0",
+            }}
+          />
         </div>
       </section>
 
-      {/* ── PRÉSENTATION IUT ── */}
-      <section className="page-container">
+      <div
+        style={{
+          maxWidth: 1000,
+          margin: "0 auto",
+          padding: "clamp(32px, 6vw, 64px) 24px",
+        }}
+      >
+        {/* ── PRÉSENTATION ── */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: 20,
-            marginBottom: 60,
+            marginBottom: 64,
           }}
         >
-          {/* Card IUT */}
+          {/* Texte principal */}
           <div
             style={{
               background: "#fff",
               borderRadius: 16,
-              border: "1px solid var(--border)",
-              padding: "32px",
+              border: "1px solid #e2e8f0",
+              padding: "clamp(24px, 4vw, 36px)",
               gridColumn: "span 2",
             }}
           >
@@ -159,9 +181,9 @@ export default function AProposPage() {
             >
               <div
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 14,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 13,
                   background: "var(--cyan-light)",
                   display: "flex",
                   alignItems: "center",
@@ -169,16 +191,16 @@ export default function AProposPage() {
                   flexShrink: 0,
                 }}
               >
-                <MdSchool size={26} color="var(--cyan-dark)" />
+                <MdSchool size={24} color="var(--cyan-dark)" />
               </div>
               <div>
                 <h2
                   style={{
                     fontFamily: "var(--font-head)",
-                    fontSize: 20,
+                    fontSize: "clamp(16px, 2.5vw, 20px)",
                     fontWeight: 800,
                     color: "#0f172a",
-                    marginBottom: 4,
+                    marginBottom: 3,
                   }}
                 >
                   Institut Universitaire de Technologie
@@ -197,9 +219,9 @@ export default function AProposPage() {
             <p
               style={{
                 fontSize: 14,
-                color: "var(--text)",
+                color: "#334155",
                 lineHeight: 1.9,
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               L'IUT de Douala est un établissement d'enseignement supérieur
@@ -209,90 +231,26 @@ export default function AProposPage() {
               professionnelle de haut niveau adaptés aux besoins du marché du
               travail.
             </p>
-            <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.9 }}>
+            <p style={{ fontSize: 14, color: "#334155", lineHeight: 1.9 }}>
               Avec plusieurs départements couvrant le Génie Informatique, les
               Réseaux & Télécommunications, le Génie Civil et bien d'autres
               filières, l'IUT s'engage à offrir une formation de qualité alliant
               théorie et pratique.
             </p>
           </div>
-
-          {/* Stats */}
-          {[
-            {
-              icon: MdSchool,
-              label: "Filières",
-              value: "10+",
-              bg: "#cffafe",
-              color: "#0e7490",
-            },
-            {
-              icon: MdPeople,
-              label: "Enseignants",
-              value: "50+",
-              bg: "#d1fae5",
-              color: "#065f46",
-            },
-          ].map(({ icon: Icon, label, value, bg, color }) => (
-            <div
-              key={label}
-              style={{
-                background: "#fff",
-                borderRadius: 16,
-                border: "1px solid var(--border)",
-                padding: "28px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 16,
-                  background: bg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon size={28} color={color} />
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: 36,
-                  fontWeight: 800,
-                  color: "#0f172a",
-                  lineHeight: 1,
-                }}
-              >
-                {value}
-              </p>
-              <p
-                style={{ fontSize: 13, color: "var(--muted)", fontWeight: 500 }}
-              >
-                {label}
-              </p>
-            </div>
-          ))}
         </div>
 
         {/* ── ÉQUIPE ── */}
-        <div style={{ marginBottom: 60 }}>
-          <div style={{ marginBottom: 32 }}>
+        <div style={{ marginBottom: 64 }}>
+          <div style={{ marginBottom: 28 }}>
             <p
               style={{
-                fontSize: 11,
-                fontWeight: 700,
+                fontSize: 10,
+                fontWeight: 800,
                 color: "var(--cyan)",
                 fontFamily: "var(--font-head)",
                 textTransform: "uppercase",
-                letterSpacing: 1,
+                letterSpacing: 2,
                 marginBottom: 8,
               }}
             >
@@ -305,32 +263,32 @@ export default function AProposPage() {
                 fontWeight: 800,
                 color: "#0f172a",
                 letterSpacing: -0.5,
+                marginBottom: 8,
               }}
             >
               Équipe de développement
             </h2>
-            <p
-              style={{
-                fontSize: 14,
-                color: "var(--muted)",
-                marginTop: 8,
-                lineHeight: 1.7,
-              }}
-            >
-              IUT GATE a été développé par des étudiants pour des etudiants dans
+            <p style={{ fontSize: 14, color: "var(--muted)", lineHeight: 1.7 }}>
+              IUTGate a été développé par des étudiants pour des étudiants dans
               le cadre d'un projet académique.
             </p>
           </div>
 
-          <div className="grid-auto" style={{ "--min": "220px" }}>
-            {equipe.map((membre) => (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: 14,
+            }}
+          >
+            {equipe.map((m) => (
               <div
-                key={membre.nom}
+                key={m.nom}
                 style={{
                   background: "#fff",
                   borderRadius: 14,
-                  border: "1px solid var(--border)",
-                  padding: "24px",
+                  border: "1px solid #e2e8f0",
+                  padding: "clamp(18px, 3vw, 24px)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -339,22 +297,22 @@ export default function AProposPage() {
                   transition: "all .2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = membre.color;
+                  e.currentTarget.style.borderColor = m.color;
                   e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = `0 12px 32px ${membre.bg}`;
+                  e.currentTarget.style.boxShadow = `0 12px 32px ${m.bg}`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--border)";
+                  e.currentTarget.style.borderColor = "#e2e8f0";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 <div
                   style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 18,
-                    background: membre.bg,
+                    width: 60,
+                    height: 60,
+                    borderRadius: 16,
+                    background: m.bg,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -363,12 +321,12 @@ export default function AProposPage() {
                   <span
                     style={{
                       fontFamily: "var(--font-head)",
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: 800,
-                      color: membre.color,
+                      color: m.color,
                     }}
                   >
-                    {membre.initiales}
+                    {m.initiales}
                   </span>
                 </div>
                 <div>
@@ -376,26 +334,27 @@ export default function AProposPage() {
                     style={{
                       fontFamily: "var(--font-head)",
                       fontWeight: 700,
-                      fontSize: 15,
+                      fontSize: 13,
                       color: "#0f172a",
-                      marginBottom: 4,
+                      marginBottom: 6,
+                      lineHeight: 1.35,
                     }}
                   >
-                    {membre.nom}
+                    {m.nom}
                   </p>
                   <span
                     style={{
-                      display: "inline-flex",
-                      padding: "3px 12px",
+                      display: "inline-block",
+                      padding: "3px 10px",
                       borderRadius: 999,
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 700,
                       fontFamily: "var(--font-head)",
-                      background: membre.bg,
-                      color: membre.color,
+                      background: m.bg,
+                      color: m.color,
                     }}
                   >
-                    {membre.role}
+                    {m.role}
                   </span>
                 </div>
               </div>
@@ -403,101 +362,17 @@ export default function AProposPage() {
           </div>
         </div>
 
-        {/* ── TECHNOLOGIES ── */}
-        {/* <div
-          style={{
-            background: "var(--navy)",
-            borderRadius: 20,
-            padding: "32px",
-            marginBottom: 60,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: "rgba(6,182,212,.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <MdCode size={22} color="var(--cyan)" />
-            </div>
-            <div>
-              <p
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "var(--cyan)",
-                  fontFamily: "var(--font-head)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
-                Stack technique
-              </p>
-              <h3
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: 18,
-                  fontWeight: 800,
-                  color: "#fff",
-                }}
-              >
-                Technologies utilisées
-              </h3>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {[
-              ["React.js", "#61DAFB", "#0c1a40"],
-              ["Express.js", "#68A063", "#0c1a40"],
-              ["MySQL", "#00758F", "#fff"],
-              ["Sequelize", "#52B0E7", "#0c1a40"],
-              ["Leaflet.js", "#199900", "#fff"],
-              ["Vite", "#646CFF", "#fff"],
-              ["Axios", "#5A29E4", "#fff"],
-              ["JWT", "#FB015B", "#fff"],
-            ].map(([tech, bg, color]) => (
-              <span
-                key={tech}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: 999,
-                  background: bg,
-                  color: color,
-                  fontFamily: "var(--font-head)",
-                  fontWeight: 700,
-                  fontSize: 12,
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div> */}
-
-        {/* ── CONTACT & LOCALISATION ── */}
+        {/* ── CONTACT ── */}
         <div>
-          <div style={{ marginBottom: 28 }}>
+          <div style={{ marginBottom: 24 }}>
             <p
               style={{
-                fontSize: 11,
-                fontWeight: 700,
+                fontSize: 10,
+                fontWeight: 800,
                 color: "var(--cyan)",
                 fontFamily: "var(--font-head)",
                 textTransform: "uppercase",
-                letterSpacing: 1,
+                letterSpacing: 2,
                 marginBottom: 8,
               }}
             >
@@ -519,12 +394,11 @@ export default function AProposPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
               gap: 20,
             }}
           >
-            {/* Infos contact */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 {
                   icon: MdLocationOn,
@@ -547,8 +421,8 @@ export default function AProposPage() {
                   style={{
                     background: "#fff",
                     borderRadius: 12,
-                    border: "1px solid var(--border)",
-                    padding: "18px",
+                    border: "1px solid #e2e8f0",
+                    padding: "16px 18px",
                     display: "flex",
                     gap: 14,
                     alignItems: "center",
@@ -556,9 +430,9 @@ export default function AProposPage() {
                 >
                   <div
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 11,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
                       background: "var(--cyan-light)",
                       display: "flex",
                       alignItems: "center",
@@ -566,18 +440,18 @@ export default function AProposPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={20} color="var(--cyan-dark)" />
+                    <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
                   </div>
                   <div>
                     <p
                       style={{
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: 700,
                         color: "var(--subtle)",
                         fontFamily: "var(--font-head)",
                         textTransform: "uppercase",
                         letterSpacing: 0.5,
-                        marginBottom: 4,
+                        marginBottom: 3,
                       }}
                     >
                       {label}
@@ -595,13 +469,12 @@ export default function AProposPage() {
                 </div>
               ))}
 
-              {/* Bouton voir carte */}
               <button
                 onClick={() => navigate("/carte")}
                 style={{
                   padding: "13px",
                   background: "var(--cyan)",
-                  color: "var(--cyan-text)",
+                  color: "var(--navy)",
                   border: "none",
                   borderRadius: 10,
                   fontFamily: "var(--font-head)",
@@ -625,13 +498,12 @@ export default function AProposPage() {
               </button>
             </div>
 
-            {/* Mini map placeholder */}
             <div
               style={{
                 background: "var(--cyan-light)",
                 borderRadius: 14,
                 border: "1px solid #67e8f9",
-                minHeight: 280,
+                minHeight: 260,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -651,7 +523,7 @@ export default function AProposPage() {
               }}
             >
               <MdLocationOn
-                size={48}
+                size={44}
                 color="var(--cyan-dark)"
                 style={{ opacity: 0.6 }}
               />
@@ -677,8 +549,7 @@ export default function AProposPage() {
             </div>
           </div>
         </div>
-      </section>
-
+      </div>
       <Footer />
     </div>
   );

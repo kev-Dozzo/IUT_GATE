@@ -77,6 +77,7 @@ export default function ActualitesAdmin() {
   const [previews, setPreviews] = useState([]); // {url, nom, type, taille}[]
   const [dragOver, setDragOver] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -423,20 +424,36 @@ export default function ActualitesAdmin() {
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "60px 0",
+              color: "var(--muted)",
+            }}
+          >
             <MdCampaign size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>Aucune actualité trouvée</p>
+            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
+              Aucune actualité trouvée
+            </p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: 12,
+            }}
+          >
             {filtered.map((a) => {
               const cat = catColors[a.categorie] || catColors["Général"];
               const fics = a.fichiers ? JSON.parse(a.fichiers) : [];
               const img = a.photo_url
                 ? `http://localhost:5000${a.photo_url}`
                 : fics[0] && fics[0].type?.startsWith("image/")
-                ? `http://localhost:5000${fics[0].url}`
-                : null;
+                  ? `http://localhost:5000${fics[0].url}`
+                  : null;
               return (
                 <div
                   key={a.id_actualite}
@@ -451,31 +468,152 @@ export default function ActualitesAdmin() {
                   }}
                 >
                   {img ? (
-                    <div style={{ width: "100%", height: 160, overflow: "hidden", borderRadius: 10 }}>
-                      <img src={img} alt={a.titre} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e)=>e.currentTarget.style.display='none'} />
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 160,
+                        overflow: "hidden",
+                        borderRadius: 10,
+                      }}
+                    >
+                      <img
+                        src={img}
+                        alt={a.titre}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) =>
+                          (e.currentTarget.style.display = "none")
+                        }
+                      />
                     </div>
                   ) : (
-                    <div style={{ width: "100%", height: 120, borderRadius: 10, background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 120,
+                        borderRadius: 10,
+                        background: "#f8fafc",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       <MdCampaign size={34} color="var(--cyan-dark)" />
                     </div>
                   )}
 
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: 8,
+                    }}
+                  >
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.titre}</div>
-                      <div style={{ fontSize: 13, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>{a.contenu}</div>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-head)",
+                          fontWeight: 800,
+                          fontSize: 16,
+                          color: "var(--text)",
+                          marginBottom: 6,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {a.titre}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "var(--muted)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {a.contenu}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-                      <span style={{ display: "inline-flex", padding: "6px 10px", borderRadius: 999, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-head)", background: cat.bg, color: cat.color }}>{a.categorie || "Général"}</span>
-                      <div style={{ fontSize: 12, color: "var(--muted)" }}>{a.date_publication ? formatDate(a.date_publication) : "—"}</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        gap: 8,
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          padding: "6px 10px",
+                          borderRadius: 999,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          fontFamily: "var(--font-head)",
+                          background: cat.bg,
+                          color: cat.color,
+                        }}
+                      >
+                        {a.categorie || "Général"}
+                      </span>
+                      <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                        {a.date_publication
+                          ? formatDate(a.date_publication)
+                          : "—"}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                    <button onClick={() => openEdit(a)} style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--border)", background: "#fff", cursor: "pointer", fontWeight:700 }} onMouseEnter={(e)=>e.currentTarget.style.background='var(--cyan-light)'} onMouseLeave={(e)=>e.currentTarget.style.background='#fff'}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <button
+                      onClick={() => openEdit(a)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "#fff",
+                        cursor: "pointer",
+                        fontWeight: 700,
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "var(--cyan-light)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "#fff")
+                      }
+                    >
                       <MdEdit size={16} color="var(--cyan-dark)" />
                     </button>
-                    <button onClick={() => openDelete(a)} style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #fee2e2", background: "#fff", cursor: "pointer" }} onMouseEnter={(e)=>e.currentTarget.style.background='#fee2e2'} onMouseLeave={(e)=>e.currentTarget.style.background='#fff'}>
+                    <button
+                      onClick={() => openDelete(a)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        border: "1px solid #fee2e2",
+                        background: "#fff",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#fee2e2")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "#fff")
+                      }
+                    >
                       <MdDelete size={16} color="#dc2626" />
                     </button>
                   </div>

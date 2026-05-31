@@ -4,45 +4,26 @@ import {
   MdClose,
   MdPeople,
   MdEmail,
-  MdPhone,
-  MdLocationOn,
   MdSchool,
   MdArrowForward,
+  MdFilterList,
 } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignants } from "../../services/enseignantService";
-import Avatar from "../../components/ui/Avatar";
-import { useNavigate } from "react-router-dom";
+import SEO from "../../components/ui/SEO";  
 
-const AVATAR_COLORS = [
-  { bg: "#cffafe", color: "#0e7490" },
-  { bg: "#d1fae5", color: "#065f46" },
-  { bg: "#fef3c7", color: "#92400e" },
-  { bg: "#ede9fe", color: "#5b21b6" },
-  { bg: "#fee2e2", color: "#991b1b" },
-  { bg: "#fce7f3", color: "#9d174d" },
-];
-
-const getInitials = (nom) => {
-  if (!nom) return "??";
-  const parts = nom
-    .replace(/^(Prof\.|Dr\.|M\.|Mme\.)\s*/i, "")
-    .trim()
-    .split(" ");
-  return parts.length >= 2
-    ? (parts[0][0] + parts[1][0]).toUpperCase()
-    : parts[0].slice(0, 2).toUpperCase();
-};
+const DEFAULT_PHOTO = "/noprofil.jpg";
+const BASE_URL = "http://localhost:5000";
 
 export default function EnseignantsPage() {
+  const navigate = useNavigate();
   const [enseignants, setEnseignants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("Tous");
-  const [selected, setSelected] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     getEnseignants()
@@ -51,21 +32,13 @@ export default function EnseignantsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Départements uniques pour le filtre
   const departements = [
     "Tous",
-    ...new Set(
-      enseignants
-        .map((e) => e.departement?.nom || e.id_departement)
-        .filter(Boolean),
-    ),
+    ...new Set(enseignants.map((e) => e.departement?.nom).filter(Boolean)),
   ];
 
   const filtered = enseignants.filter((e) => {
-    const matchDept =
-      dept === "Tous" ||
-      e.departement?.nom === dept ||
-      e.id_departement === dept;
+    const matchDept = dept === "Tous" || e.departement?.nom === dept;
     const matchSearch =
       e.nom?.toLowerCase().includes(search.toLowerCase()) ||
       e.role?.toLowerCase().includes(search.toLowerCase()) ||
@@ -75,14 +48,19 @@ export default function EnseignantsPage() {
 
   return (
     <div>
+      <SEO
+        title="Enseignants"
+        description="Le corps enseignant de l'IUT de Douala. Trouvez les professeurs par département."
+        url="https://iutgate.vercel.app/enseignants"
+      />
       <Navbar />
 
-      {/* ── HEADER ── */}
+      {/* HERO */}
       <section
         style={{
           background:
             "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)",
-          padding: "48px 32px",
+          padding: "clamp(32px, 6vw, 56px) 24px",
         }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -102,10 +80,9 @@ export default function EnseignantsPage() {
           <h1
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: 36,
+              fontSize: "clamp(26px, 5vw, 40px)",
               fontWeight: 800,
               color: "#fff",
-              letterSpacing: -0.8,
               marginBottom: 8,
             }}
           >
@@ -115,7 +92,6 @@ export default function EnseignantsPage() {
             Retrouvez tous les membres du corps enseignant de l'IUT.
           </p>
 
-          {/* Search + Filtre */}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <div
               style={{
@@ -126,7 +102,7 @@ export default function EnseignantsPage() {
                 borderRadius: 10,
                 padding: "10px 16px",
                 flex: 1,
-                minWidth: 260,
+                minWidth: 240,
                 boxShadow: "0 4px 24px rgba(0,0,0,.2)",
               }}
             >
@@ -156,7 +132,6 @@ export default function EnseignantsPage() {
                 />
               )}
             </div>
-
             <select
               value={dept}
               onChange={(e) => setDept(e.target.value)}
@@ -175,18 +150,17 @@ export default function EnseignantsPage() {
               }}
             >
               {departements.map((d) => (
-                <option key={d}>{d}</option>
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
           </div>
         </div>
       </section>
 
-      {/* ── CONTENT ── */}
-      <section
-        style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}
-      >
-        {/* Compteur */}
+      {/* CONTENU */}
+      <section className="page-container">
         {!loading && !error && (
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>
             {filtered.length} enseignant{filtered.length > 1 ? "s" : ""} trouvé
@@ -194,7 +168,6 @@ export default function EnseignantsPage() {
           </p>
         )}
 
-        {/* Loading */}
         {loading && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div
@@ -208,41 +181,33 @@ export default function EnseignantsPage() {
                 animation: "spin 1s linear infinite",
               }}
             />
-            <p style={{ color: "var(--muted)", fontSize: 14 }}>
-              Chargement des enseignants...
-            </p>
+            <p style={{ color: "var(--muted)" }}>Chargement...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
         )}
 
-        {/* Erreur */}
         {error && (
           <div
             style={{
               textAlign: "center",
               padding: "40px",
-              background: "#cffafe",
+              background: "#fee2e2",
               borderRadius: 12,
               border: "1px solid #fca5a5",
             }}
           >
             <p
               style={{
+                color: "#991b1b",
                 fontFamily: "var(--font-head)",
                 fontWeight: 600,
-                color: "#991b1b",
-                marginBottom: 8,
               }}
             >
-              Erreur de chargement
-            </p>
-            <p style={{ fontSize: 13, color: "#164e63" }}>
-              Un Problem est survenu.
+              {error}
             </p>
           </div>
         )}
 
-        {/* Aucun résultat */}
         {!loading && !error && filtered.length === 0 && (
           <div
             style={{
@@ -261,148 +226,174 @@ export default function EnseignantsPage() {
             >
               Aucun enseignant trouvé
             </p>
-            <p style={{ fontSize: 13, marginTop: 8 }}>
-              Essayez un autre filtre.
-            </p>
           </div>
         )}
 
-        {/* Grille */}
+        {/* ── GRILLE CARDS ── */}
         {!loading && !error && filtered.length > 0 && (
           <div className="grid-auto">
-            {filtered.map((ens, i) => {
+            {filtered.map((ens) => {
+              const photoSrc = ens.photo_url
+                ? `${BASE_URL}${ens.photo_url}`
+                : DEFAULT_PHOTO;
+
               return (
                 <div
                   key={ens.id_enseignant}
                   onClick={() => navigate(`/enseignants/${ens.id_enseignant}`)}
                   style={{
                     background: "#fff",
-                    borderRadius: 16,
+                    borderRadius: 18,
                     border: "1px solid var(--border)",
-                    padding: "22px",
                     cursor: "pointer",
+                    overflow: "hidden",
+                    boxShadow: "0 2px 12px rgba(0,0,0,.06)",
                     transition: "all .25s",
                     display: "flex",
-                    gap: 16,
-                    alignItems: "flex-start",
+                    flexDirection: "column",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--cyan)";
-                    e.currentTarget.style.transform = "translateY(-3px)";
+                    e.currentTarget.style.transform = "translateY(-5px)";
                     e.currentTarget.style.boxShadow =
-                      "0 10px 32px rgba(6,182,212,.1)";
+                      "0 16px 40px rgba(6,182,212,.15)";
+                    e.currentTarget.style.borderColor = "var(--cyan)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--border)";
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 12px rgba(0,0,0,.06)";
+                    e.currentTarget.style.borderColor = "var(--border)";
                   }}
                 >
-                  {/* Avatar */}
-                  <Avatar
-                    nom={ens.nom}
-                    photoUrl={ens.photo_url}
-                    size={54}
-                    index={i}
-                    shape="rounded"
-                  />
+                  {/* ── PHOTO EN HAUT ── */}
+                  <div
+                    style={{
+                      position: "relative",
+                      height: 200,
+                      overflow: "hidden",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={photoSrc}
+                      alt={ens.nom}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center top",
+                      }}
+                      onError={(e) => {
+                        e.target.src = DEFAULT_PHOTO;
+                      }}
+                    />
+                    {/* Gradient bas */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 80,
+                        background:
+                          "linear-gradient(to bottom, transparent, rgba(12,26,64,.7))",
+                      }}
+                    />
+                    {/* Badge département */}
+                    {ens.departement?.nom && (
+                      <div style={{ position: "absolute", top: 12, left: 12 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: "3px 10px",
+                            borderRadius: 999,
+                            background: "rgba(6,182,212,.9)",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            fontFamily: "var(--font-head)",
+                            color: "#fff",
+                            backdropFilter: "blur(4px)",
+                          }}
+                        >
+                          <MdSchool size={10} /> {ens.departement.nom}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Infos */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p
+                  {/* ── INFOS ── */}
+                  <div
+                    style={{
+                      padding: "16px 18px",
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                    }}
+                  >
+                    <h3
                       style={{
                         fontFamily: "var(--font-head)",
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: "var(--text)",
-                        marginBottom: 3,
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: "#0f172a",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
                       {ens.nom}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 12,
-                        color: "var(--cyan)",
-                        fontWeight: 500,
-                        marginBottom: 8,
-                      }}
-                    >
-                      {ens.role || ens.poste}
-                    </p>
-
-                    {/* Département */}
-                    {(ens.departement?.nom || ens.id_departement) && (
-                      <div
+                    </h3>
+                    {(ens.role || ens.poste) && (
+                      <p
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                          padding: "2px 10px",
-                          borderRadius: 999,
-                          background: "var(--cyan-light)",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          fontFamily: "var(--font-head)",
-                          color: "var(--cyan-dark)",
-                          marginBottom: 10,
+                          fontSize: 13,
+                          color: "var(--cyan)",
+                          fontWeight: 500,
                         }}
                       >
-                        <MdSchool size={10} />
-                        {ens.departement?.nom || `Dept. ${ens.id_departement}`}
-                      </div>
+                        {ens.role || ens.poste}
+                      </p>
                     )}
-
-                    {/* Contact */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 4,
-                      }}
-                    >
-                      {ens.email && (
-                        <div
+                    {ens.email && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        <MdEmail size={12} color="var(--subtle)" />
+                        <span
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
+                            fontSize: 11,
+                            color: "var(--muted)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <MdEmail size={12} color="var(--subtle)" />
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "var(--muted)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {ens.email}
-                          </span>
-                        </div>
-                      )}
-                      
-                    </div>
-
-                    {/* Voir profil */}
+                          {ens.email}
+                        </span>
+                      </div>
+                    )}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 4,
+                        gap: 5,
                         color: "var(--cyan)",
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 600,
                         fontFamily: "var(--font-head)",
-                        marginTop: 12,
+                        marginTop: "auto",
+                        paddingTop: 10,
+                        borderTop: "1px solid #f1f5f9",
                       }}
                     >
-                      Voir le profil <MdArrowForward size={13} />
+                      Voir le profil <MdArrowForward size={14} />
                     </div>
                   </div>
                 </div>
@@ -411,215 +402,6 @@ export default function EnseignantsPage() {
           </div>
         )}
       </section>
-      {selected && (
-        <div
-          onClick={() => setSelected(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(12,26,64,.65)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 200,
-            padding: 20,
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "#fff",
-              borderRadius: 20,
-              padding: "36px",
-              width: "100%",
-              maxWidth: 520,
-              maxHeight: "85vh",
-              overflow: "auto",
-              boxShadow: "0 24px 64px rgba(0,0,0,.2)",
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginBottom: 20,
-              }}
-            >
-              <button
-                onClick={() => setSelected(null)}
-                style={{
-                  background: "#f1f5f9",
-                  border: "none",
-                  borderRadius: 8,
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                <MdClose size={18} color="var(--muted)" />
-              </button>
-            </div>
-
-            {/* Avatar + nom */}
-            <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 20,
-                  background: "var(--cyan-light)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 14px",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontSize: 28,
-                    fontWeight: 800,
-                    color: "var(--cyan-dark)",
-                  }}
-                >
-                  {getInitials(selected.nom)}
-                </span>
-              </div>
-              <h2
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: "#0f172a",
-                  marginBottom: 6,
-                }}
-              >
-                {selected.nom}
-              </h2>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "var(--cyan)",
-                  fontWeight: 500,
-                  marginBottom: 10,
-                }}
-              >
-                {selected.role || selected.poste}
-              </p>
-              {(selected.departement?.nom || selected.id_departement) && (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 5,
-                    padding: "4px 14px",
-                    borderRadius: 999,
-                    background: "var(--cyan-light)",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-head)",
-                    color: "var(--cyan-dark)",
-                  }}
-                >
-                  <MdSchool size={13} />
-                  {selected.departement?.nom ||
-                    `Département ${selected.id_departement}`}
-                </span>
-              )}
-            </div>
-
-            {/* Infos contact */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
-              }}
-            >
-              {[
-                { icon: MdEmail, label: "Email", value: selected.email },
-                {
-                  icon: MdPhone,
-                  label: "Téléphone",
-                  value: selected.telephone,
-                },
-                {
-                  icon: MdLocationOn,
-                  label: "Bureau",
-                  value: selected.bureau || selected.coordonnees_bureau,
-                },
-                {
-                  icon: MdSchool,
-                  label: "Département",
-                  value:
-                    selected.departement?.nom ||
-                    `Dept. ${selected.id_departement}`,
-                },
-              ]
-                .filter((item) => item.value)
-                .map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    style={{
-                      background: "#f8fafc",
-                      borderRadius: 12,
-                      padding: "14px 16px",
-                      border: "1px solid var(--border)",
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        background: "var(--cyan-light)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon size={16} color="var(--cyan-dark)" />
-                    </div>
-                    <div>
-                      <p
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: "var(--subtle)",
-                          fontFamily: "var(--font-head)",
-                          textTransform: "uppercase",
-                          letterSpacing: 0.5,
-                          marginBottom: 3,
-                        }}
-                      >
-                        {label}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: 12,
-                          color: "var(--text)",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {value}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <Footer />
     </div>
   );

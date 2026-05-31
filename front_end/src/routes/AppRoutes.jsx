@@ -16,6 +16,8 @@ import CartePage from "../pages/Public/CartePage";
 import NotFoundPage from "../pages/Public/NotFoundPage";
 import AproposPage from "../pages/Public/about";
 import AidePage from "../pages/Public/AidePage";
+import CalendrierPage from "../pages/Public/CalendrierPage";
+import RecherchePage from "../pages/Public/RecherchePage";
 
 // Admin
 import LoginPage from "../pages/admin/LoginPage";
@@ -50,6 +52,8 @@ export default function AppRoutes() {
       <Route path="/carte" element={<CartePage />} />
       <Route path="/apropos" element={<AproposPage />} />
       <Route path="/aide" element={<AidePage />} />
+      <Route path="/calendrier" element={<CalendrierPage />} />
+      <Route path="/recherche" element={<RecherchePage />} />
 
       {/* ── ADMIN AUTH ── */}
       <Route path="/admin/login" element={<LoginPage />} />

@@ -21,6 +21,7 @@ import "leaflet/dist/leaflet.css";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getServiceById } from "../../services/serviceAdminService";
+import SEO from "../../components/ui/SEO";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -42,7 +43,7 @@ const SERVICE_ICONS = [
   <MdPages color="blue" />,
   <MdComputer color="purple" />,
   <MdSchool color="orange" />,
-  <MdMoney  />,
+  <MdMoney />,
   <MdHandshake />,
   <MdLocalHospital />,
 ];
@@ -70,6 +71,11 @@ export default function ServiceDetailPage() {
 
   return (
     <div>
+      <SEO
+        title={service?.nom}
+        description={service?.description?.slice(0, 150)}
+        url={`https://iutgate.vercel.app/services/${id}`}
+      />
       <Navbar />
 
       <section
@@ -281,7 +287,7 @@ export default function ServiceDetailPage() {
                           flexShrink: 0,
                         }}
                       >
-                        <Icon size={18} color="var(--cyan-dark)" />
+                        <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
                       </div>
                       <div>
                         <p

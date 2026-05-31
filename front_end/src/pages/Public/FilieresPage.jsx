@@ -2,34 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MdSearch,
+  MdClose,
+  MdSchool,
   MdAccessTime,
   MdPeople,
-  MdSchool,
   MdArrowForward,
-  MdClose,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getFilieres } from "../../services/filiereService";
+import SEO from "../../components/ui/SEO";
 
-const dureeColors = {
-  "2 ans": { bg: "#d1fae5", color: "#065f46" },
-  "3 ans": { bg: "#cffafe", color: "#164e63" },
-  "4 ans": { bg: "#ede9fe", color: "#5b21b6" },
-};
+const BASE_URL = "http://localhost:5000";
+const DEFAULT_PHOTO = "/noprofil.jpg";
 
 export default function FilieresPage() {
   const navigate = useNavigate();
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     getFilieres()
       .then((data) => setFilieres(data))
-      .catch(() => setError("Impossible de charger les filières."))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
@@ -41,14 +37,19 @@ export default function FilieresPage() {
 
   return (
     <div>
+      <SEO
+        title="Filières"
+        description="Découvrez toutes les formations et filières de l'IUT de Douala : Génie Informatique, Réseaux, Génie Civil et plus."
+        url="https://iutgate.vercel.app/filieres"
+      />
       <Navbar />
 
-      {/* ── HEADER ── */}
+      {/* HERO */}
       <section
         style={{
           background:
             "linear-gradient(135deg, #0c1a40 0%, #0e3460 40%, #0e5f75 100%)",
-          padding: "48px 32px",
+          padding: "clamp(32px, 6vw, 56px) 24px",
         }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -68,20 +69,18 @@ export default function FilieresPage() {
           <h1
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: 36,
+              fontSize: "clamp(26px, 5vw, 40px)",
               fontWeight: 800,
               color: "#fff",
-              letterSpacing: -0.8,
               marginBottom: 8,
             }}
           >
             Nos Filières
           </h1>
           <p style={{ color: "#7dd3fc", fontSize: 14, marginBottom: 28 }}>
-            Découvrez nos programmes de formation professionnelle et académique.
+            Découvrez toutes les formations disponibles à l'IUT de Douala.
           </p>
 
-          {/* Search */}
           <div
             style={{
               display: "flex",
@@ -123,17 +122,14 @@ export default function FilieresPage() {
         </div>
       </section>
 
-      {/* ── CONTENT ── */}
       <section className="page-container">
-        {/* Compteur */}
-        {!loading && !error && (
+        {!loading && (
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>
-            {filtered.length} filière{filtered.length > 1 ? "s" : ""} disponible
+            {filtered.length} filière{filtered.length > 1 ? "s" : ""} trouvée
             {filtered.length > 1 ? "s" : ""}
           </p>
         )}
 
-        {/* Loading */}
         {loading && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div
@@ -147,42 +143,11 @@ export default function FilieresPage() {
                 animation: "spin 1s linear infinite",
               }}
             />
-            <p style={{ color: "var(--muted)", fontSize: 14 }}>
-              Chargement des filières...
-            </p>
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </div>
         )}
 
-        {/* Erreur */}
-        {error && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px",
-              background: "#cffafe",
-              borderRadius: 12,
-              border: "1px solid #fca5a5",
-            }}
-          >
-            <p
-              style={{
-                fontFamily: "var(--font-head)",
-                fontWeight: 600,
-                color: "#991b1b",
-                marginBottom: 8,
-              }}
-            >
-              {error}
-            </p>
-            <p style={{ fontSize: 13, color: "#164e63" }}>
-              Un Problem est survenu.
-            </p>
-          </div>
-        )}
-
-        {/* Aucun résultat */}
-        {!loading && !error && filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div
             style={{
               textAlign: "center",
@@ -200,395 +165,230 @@ export default function FilieresPage() {
             >
               Aucune filière trouvée
             </p>
-            <p style={{ fontSize: 13, marginTop: 8 }}>
-              Essayez un autre mot-clé.
-            </p>
           </div>
         )}
 
-        {/* Grille filières */}
-        {!loading && !error && filtered.length > 0 && (
-          <div className="grid-auto">
-            {filtered.map((filiere) => {
-              const duree = dureeColors[filiere.duree] || dureeColors["3 ans"];
+        <div className="grid-auto">
+          {!loading &&
+            filtered.map((f) => {
+              const photoSrc = f.photo_url ? `${BASE_URL}${f.photo_url}` : null;
+
               return (
                 <div
-                  key={filiere.id_filiere}
-                  onClick={() => navigate(`/filieres/${filiere.id_filiere}`)}
+                  key={f.id_filiere}
+                  onClick={() => navigate(`/filieres/${f.id_filiere}`)}
                   style={{
                     background: "#fff",
-                    borderRadius: 16,
+                    borderRadius: 18,
                     border: "1px solid var(--border)",
-                    padding: "26px",
                     cursor: "pointer",
+                    overflow: "hidden",
+                    boxShadow: "0 2px 12px rgba(0,0,0,.06)",
                     transition: "all .25s",
                     display: "flex",
                     flexDirection: "column",
-                    gap: 14,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--cyan)";
-                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.transform = "translateY(-5px)";
                     e.currentTarget.style.boxShadow =
-                      "0 12px 36px rgba(6,182,212,.12)";
+                      "0 16px 40px rgba(6,182,212,.15)";
+                    e.currentTarget.style.borderColor = "var(--cyan)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--border)";
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 12px rgba(0,0,0,.06)";
+                    e.currentTarget.style.borderColor = "var(--border)";
                   }}
                 >
-                  {/* Header card */}
+                  {/* ── PHOTO EN HAUT ── */}
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
+                      position: "relative",
+                      height: 180,
+                      overflow: "hidden",
+                      flexShrink: 0,
                     }}
                   >
-                    {filiere.photo_url ? (
+                    {photoSrc ? (
                       <img
-                        src={`http://localhost:5000${filiere.photo_url}`}
-                        alt={filiere.nom}
+                        src={photoSrc}
+                        alt={f.nom}
                         style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 14,
+                          width: "100%",
+                          height: "100%",
                           objectFit: "cover",
-                          border: "2px solid var(--cyan-light)",
-                          flexShrink: 0,
                         }}
                         onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.parentElement.style.background =
+                            "linear-gradient(135deg, #0c1a40, #0e5f75)";
                           e.target.style.display = "none";
                         }}
                       />
                     ) : (
                       <div
                         style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 14,
-                          background: "var(--cyan-light)",
+                          width: "100%",
+                          height: "100%",
+                          background:
+                            "linear-gradient(135deg, #0c1a40, #0e5f75)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          flexShrink: 0,
                         }}
                       >
-                        <MdSchool size={28} color="var(--cyan-dark)" />
+                        <MdSchool size={52} color="rgba(6,182,212,.4)" />
                       </div>
                     )}
+                    {/* Gradient bas */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 80,
+                        background:
+                          "linear-gradient(to bottom, transparent, rgba(12,26,64,.8))",
+                      }}
+                    />
+
+                    {/* Badge durée */}
+                    {f.duree && (
+                      <div style={{ position: "absolute", top: 12, right: 12 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background: "rgba(6,182,212,.9)",
+                            fontSize: 11,
+                            fontWeight: 700,
+                            fontFamily: "var(--font-head)",
+                            color: "#fff",
+                            backdropFilter: "blur(4px)",
+                          }}
+                        >
+                          <MdAccessTime size={11} /> {f.duree}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── INFOS ── */}
+                  <div
+                    style={{
+                      padding: "18px",
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: "#0f172a",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {f.nom}
+                    </h3>
+
+                    {f.description && (
+                      <p
+                        style={{
+                          fontSize: 13,
+                          color: "var(--muted)",
+                          lineHeight: 1.6,
+                          flex: 1,
+                          overflow: "hidden",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {f.description}
+                      </p>
+                    )}
+
+                    {/* Infos bas de card */}
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-end",
-                        gap: 6,
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingTop: 10,
+                        borderTop: "1px solid #f1f5f9",
+                        marginTop: 4,
                       }}
                     >
+                      <div style={{ display: "flex", gap: 12 }}>
+                        {f.places && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            <MdPeople size={13} color="var(--subtle)" />
+                            <span
+                              style={{ fontSize: 11, color: "var(--muted)" }}
+                            >
+                              {f.places} places
+                            </span>
+                          </div>
+                        )}
+                        {f.departement?.nom && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            <MdSchool size={13} color="var(--subtle)" />
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--muted)",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 120,
+                              }}
+                            >
+                              {f.departement.nom}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <span
                         style={{
-                          padding: "3px 10px",
-                          borderRadius: 999,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          fontFamily: "var(--font-head)",
-                          background: duree.bg,
-                          color: duree.color,
                           display: "flex",
                           alignItems: "center",
                           gap: 4,
-                        }}
-                      >
-                        <MdAccessTime size={11} />
-                        {filiere.duree}
-                      </span>
-                      {filiere.places && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: "var(--subtle)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                          }}
-                        >
-                          <MdPeople size={12} />
-                          {filiere.places} places
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Nom */}
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--text)",
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {filiere.nom}
-                  </h3>
-
-                  {/* Description */}
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "var(--muted)",
-                      lineHeight: 1.7,
-                      flex: 1,
-                    }}
-                  >
-                    {filiere.description?.slice(0, 110)}
-                    {filiere.description?.length > 110 ? "..." : ""}
-                  </p>
-
-                  {/* Admission */}
-                  {filiere.condition_admission && (
-                    <div
-                      style={{
-                        borderTop: "1px solid #f1f5f9",
-                        paddingTop: 12,
-                      }}
-                    >
-                      <p
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: "var(--subtle)",
-                          fontFamily: "var(--font-head)",
-                          textTransform: "uppercase",
-                          letterSpacing: 0.5,
-                          marginBottom: 4,
-                        }}
-                      >
-                        Conditions d'admission
-                      </p>
-                      <p
-                        style={{
                           fontSize: 12,
-                          color: "#475569",
-                          lineHeight: 1.5,
+                          color: "var(--cyan)",
+                          fontWeight: 700,
+                          fontFamily: "var(--font-head)",
                         }}
                       >
-                        {filiere.condition_admission}
-                      </p>
+                        Détails <MdArrowForward size={14} />
+                      </span>
                     </div>
-                  )}
-
-                  {/* CTA */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      color: "var(--cyan)",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      fontFamily: "var(--font-head)",
-                    }}
-                  >
-                    Voir les détails <MdArrowForward size={14} />
                   </div>
                 </div>
               );
             })}
-          </div>
-        )}
-      </section>
-
-      {/* ── MODAL DÉTAIL ── */}
-      {selected && (
-        <div
-          onClick={() => setSelected(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(12,26,64,.65)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 200,
-            padding: 20,
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "#fff",
-              borderRadius: 20,
-              padding: "36px",
-              width: "100%",
-              maxWidth: 560,
-              maxHeight: "85vh",
-              overflow: "auto",
-              boxShadow: "0 24px 64px rgba(0,0,0,.2)",
-            }}
-          >
-            {/* Header modal */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: 24,
-              }}
-            >
-              <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                <div
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: 14,
-                    background: "var(--cyan-light)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MdSchool size={26} color="var(--cyan-dark)" />
-                </div>
-                <div>
-                  <h2
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontSize: 20,
-                      fontWeight: 800,
-                      color: "#0f172a",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {selected.nom}
-                  </h2>
-                  <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-                    <span
-                      style={{
-                        padding: "2px 10px",
-                        borderRadius: 999,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        fontFamily: "var(--font-head)",
-                        background: (
-                          dureeColors[selected.duree] || dureeColors["3 ans"]
-                        ).bg,
-                        color: (
-                          dureeColors[selected.duree] || dureeColors["3 ans"]
-                        ).color,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <MdAccessTime size={11} /> {selected.duree}
-                    </span>
-                    {selected.places && (
-                      <span
-                        style={{
-                          padding: "2px 10px",
-                          borderRadius: 999,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          fontFamily: "var(--font-head)",
-                          background: "#f1f5f9",
-                          color: "#475569",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
-                        <MdPeople size={11} /> {selected.places} places
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                style={{
-                  background: "#f1f5f9",
-                  border: "none",
-                  borderRadius: 8,
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                }}
-              >
-                <MdClose size={18} color="var(--muted)" />
-              </button>
-            </div>
-
-            {/* Description */}
-            <div style={{ marginBottom: 20 }}>
-              <p
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "var(--cyan)",
-                  fontFamily: "var(--font-head)",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                  marginBottom: 8,
-                }}
-              >
-                Description
-              </p>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "var(--text)",
-                  lineHeight: 1.8,
-                }}
-              >
-                {selected.description}
-              </p>
-            </div>
-
-            {/* Conditions admission */}
-            {selected.condition_admission && (
-              <div
-                style={{
-                  background: "var(--cyan-light)",
-                  borderRadius: 12,
-                  padding: "16px 20px",
-                  border: "1px solid #67e8f9",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "var(--cyan-dark)",
-                    fontFamily: "var(--font-head)",
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    marginBottom: 8,
-                  }}
-                >
-                  Conditions d'admission
-                </p>
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "var(--cyan-text)",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {selected.condition_admission}
-                </p>
-              </div>
-            )}
-          </div>
         </div>
-      )}
-
+      </section>
       <Footer />
     </div>
   );

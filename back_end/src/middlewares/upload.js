@@ -54,7 +54,7 @@ const uploadSingle = multer({
 const uploadMultiple = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 50 * 1024 * 1024, files: 5 }, // 50MB total, 5 fichiers
+  limits: { fileSize: 50 * 1024 * 1024, files: 10 }, // 50MB total, 5 fichiers
 });
 
 module.exports = { uploadSingle, uploadMultiple };

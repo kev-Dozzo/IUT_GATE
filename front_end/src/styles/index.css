@@ -241,3 +241,22 @@ button {
     padding: 0 !important;
   }
 }
+
+[data-contrast="high"] {
+  --text:   #000000;
+  --muted:  #333333;
+  --subtle: #444444;
+  --border: #000000;
+  --bg:     #ffffff;
+  --cyan:   #0077cc;
+  --cyan-dark: #005599;
+  --navy:   #000033;
+}
+
+[data-contrast="high"] body {
+  background: #fff !important;
+}
+
+[data-contrast="high"] * {
+  border-color: currentColor !important;
+}

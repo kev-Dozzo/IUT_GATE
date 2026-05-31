@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Bloque les pages admin
+Disallow: /admin/
+Disallow: /admin/login
+Disallow: /admin/dashboard
+
+# Sitemap
+Sitemap: https://iutgate.vercel.app/sitemap.xml

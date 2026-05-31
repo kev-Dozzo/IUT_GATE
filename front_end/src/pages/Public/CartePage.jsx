@@ -29,6 +29,7 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import { getBatiments } from "../../services/batimentService";
 import { getSalles } from "../../services/salleService";
+import SEO from "../../components/ui/SEO";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -65,7 +66,7 @@ function FlyTo({ coords, zoom = 18 }) {
   const map = useMap();
   useEffect(() => {
     if (coords) map.flyTo(coords, zoom, { animate: true, duration: 1.2 });
-  }, [coords, map]);
+  }, [coords, map, zoom]);
   return null;
 }
 
@@ -135,7 +136,7 @@ export default function CartePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // ── Demande géolocalisation avec modal ──
+  //  Demande géolocalisation avec modal
   const requestGeolocation = (destLat, destLng, nom) => {
     if (userPos) {
       calculateRoute(userPos, [destLat, destLng]);
@@ -382,7 +383,7 @@ export default function CartePage() {
               transition: "all .2s",
             }}
           >
-            <Icon size={15} />
+            <Icon icon={Icon} size={15} />
             {label}
           </button>
         ))}
@@ -750,6 +751,11 @@ export default function CartePage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <SEO
+        title="Carte du Campus"
+        description="Carte interactive du campus de l'IUT de Douala. Trouvez bâtiments et salles facilement."
+        url="https://iutgate.vercel.app/carte"
+      />
       <Navbar />
 
       <div
@@ -808,7 +814,7 @@ export default function CartePage() {
                         fontSize: 13,
                       }}
                     >
-                      📍 Votre position
+                      Votre position
                     </p>
                   </Popup>
                 </Marker>
@@ -927,7 +933,7 @@ export default function CartePage() {
                               color: "#fff",
                             }}
                           >
-                           {bat.nom}
+                            {bat.nom}
                           </p>
                         </div>
                       )}
@@ -991,7 +997,7 @@ export default function CartePage() {
                                       fontWeight: 600,
                                     }}
                                   >
-                                    <MdDoorSliding size={15}/> {s.nom}
+                                    <MdDoorSliding size={15} /> {s.nom}
                                   </span>
                                   <div style={{ display: "flex", gap: 4 }}>
                                     {s.type && (
