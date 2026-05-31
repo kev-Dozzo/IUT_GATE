@@ -48,7 +48,7 @@ fournissant un espace où les étudiants peuvent collaborer, résoudre des probl
 et suivre leur parcours éducatif en temps réel.
             </p>
             <div className="flex items-center gap-4 text-slate-900 font-semibold">
-              <span className="w-12 h-[2px] bg-blue-600"></span>
+              <span className="w-12 h-0.5 bg-blue-600"></span>
               Construit par des étudiants, pour des étudiants.
             </div>
           </div>
