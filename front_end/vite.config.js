@@ -1,25 +1,28 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
-    sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          map:    ['leaflet', 'react-leaflet'],
-        }
-      }
-    }
+        // ✅ manualChunks doit être une FONCTION pas un objet
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react-router")
+            ) {
+              return "react-vendor";
+            }
+            if (id.includes("leaflet")) {
+              return "leaflet-vendor";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
   },
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': 'http://localhost:5000',
-      '/uploads': 'http://localhost:5000'
-    }
-  }
-})
+});
