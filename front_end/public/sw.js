@@ -1,9 +1,7 @@
 const CACHE = "iutgate-v1";
-const OFFLINE_URLS = ["/", "/index.html", "/noprofil.jpg"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(OFFLINE_URLS)));
-  self.skipWaiting();
+  self.skipWaiting(e);
 });
 
 self.addEventListener("activate", (e) => {
@@ -19,6 +17,21 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+  // Ignore les requêtes non-GET et les requêtes API
   if (e.request.method !== "GET") return;
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  if (e.request.url.includes("/api/")) return;
+  if (e.request.url.includes("localhost:5000")) return;
+
+  e.respondWith(
+    fetch(e.request)
+      .then((response) => {
+        // Vérifie que la réponse est valide
+        if (!response || response.status !== 200) return response;
+        return response;
+      })
+      .catch(() => {
+        // En cas d'erreur réseau, retourne la page depuis le cache
+        return caches.match(e.request);
+      }),
+  );
 });
