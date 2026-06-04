@@ -64,22 +64,27 @@ exports.create = async (req, res) => {
       id_departement,
       id_batiment,
     } = req.body;
+
     if (!nom || !email)
       return res.status(400).json({ message: "Nom et email obligatoires" });
+
     const ens = await StaffEnseignant.create({
       nom,
       email,
-      telephone,
-      role,
-      poste,
-      bureau,
-      id_departement,
-      id_batiment,
+      telephone: telephone || null,
+      role: role || null,
+      poste : poste || null,
+      bureau : bureau || null,
+      id_departement : id_departement || null,
+      id_batiment : id_batiment || null,
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       created_by_admin: req.admin.id_admin,
     });
     res.status(201).json(ens);
+    
   } catch (err) {
+     console.error('❌ Erreur create filiere:', err.message)
+    console.error('❌ Détail complet:', err)
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

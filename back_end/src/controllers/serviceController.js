@@ -43,15 +43,17 @@ exports.count = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { nom, description, contact, id_batiment } = req.body;
-    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    if (!nom || !description) return res.status(400).json({ message: "Nom obligatoire" });
     const svc = await ServiceAdministratif.create({
       nom,
       description,
       contact,
-      id_batiment,
+      id_batiment: id_batiment || null,
     });
     res.status(201).json(svc);
   } catch (err) {
+     console.error('❌ Erreur create Service:', err.message)
+    console.error('❌ Détail complet:', err)
     res.status(500).json({ message: "Erreur serveur", err: err.message });
   }
 };

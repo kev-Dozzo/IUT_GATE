@@ -55,6 +55,11 @@ exports.count = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
+    // 🔍 LOGS DE DEBUG
+    console.log('📥 Body reçu:', req.body)
+    console.log('👤 Admin connecté:', req.admin)
+    console.log('📁 Fichier reçu:', req.file)
+
     const {
       nom,
       description,
@@ -62,23 +67,32 @@ exports.create = async (req, res) => {
       condition_admission,
       places,
       id_departement,
-    } = req.body;
-    if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
+    } = req.body
+
+    if (!nom) {
+      return res.status(400).json({ message: "Nom obligatoire" })
+    }
+
     const filiere = await Filiere.create({
       nom,
-      description,
-      duree,
-      condition_admission,
-      places,
-      id_departement,
+      description: description || null,
+      duree: duree || null,
+      condition_admission: condition_admission || null,
+      places: places || null,
+      id_departement: id_departement || null,
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
-      id_admin: req.admin.id_admin,
-    });
-    res.status(201).json(filiere);
+      id_admin: req.admin.id_admin
+    })
+
+    res.status(201).json(filiere)
+
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err: err.message });
+    // 🔍 AFFICHE L'ERREUR DANS LE TERMINAL
+    console.error('❌ Erreur create filiere:', err.message)
+    console.error('❌ Détail complet:', err)
+    res.status(500).json({ message: "Erreur serveur", err: err.message })
   }
-};
+}
 
 exports.update = async (req, res) => {
   try {
