@@ -1,6 +1,13 @@
 const router = require("express").Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+router.get("/status", (req, res) => {
+  res.json({
+    available: !!process.env.GEMINI_API_KEY,
+    provider: "gemini",
+  });
+});
+
 router.post("/debouches", async (req, res) => {
   try {
     const { prompt } = req.body;
