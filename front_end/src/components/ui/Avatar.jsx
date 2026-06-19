@@ -17,8 +17,8 @@ const COLORS = [
   { bg: "#fee2e2", color: "#991b1b" },
   { bg: "#fce7f3", color: "#9d174d" },
 ];
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = "http://localhost:5000";
 const DEFAULT_PHOTO = "/noprofil.jpg";
 
 export default function Avatar({ nom, photoUrl, size = 48, index = 0 }) {

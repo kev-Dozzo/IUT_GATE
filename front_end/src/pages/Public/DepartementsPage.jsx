@@ -12,8 +12,8 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getDepartements } from "../../services/departementService";
 import SEO from "../../components/ui/SEO";  
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = "http://localhost:5000";
 
 export default function DepartementsPage() {
   const navigate = useNavigate();

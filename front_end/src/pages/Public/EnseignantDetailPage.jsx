@@ -16,6 +16,7 @@ import "leaflet/dist/leaflet.css";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignantById } from "../../services/enseignantService";
+import { BASE_URL } from "../../config/constants";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -32,7 +33,6 @@ const markerIcon = L.divIcon({
   iconAnchor: [18, 36],
 });
 
-const BASE_URL = "http://localhost:5000";
 const DEFAULT_PHOTO = "/noprofil.jpg";
 
 // const getInitials = (nom) => {
@@ -390,7 +390,11 @@ export default function EnseignantDetailPage() {
                               flexShrink: 0,
                             }}
                           >
-                            <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
+                            <Icon
+                              icon={Icon}
+                              size={18}
+                              color="var(--cyan-dark)"
+                            />
                           </div>
                           <div>
                             <p

@@ -23,6 +23,7 @@ import {
   updateActualite,
   deleteActualite,
 } from "../../services/actualiteService";
+import { BASE_URL } from "../../config/constants";
 
 const CATEGORIES = [
   "Examens",
@@ -77,7 +78,7 @@ export default function ActualitesAdmin() {
   const [previews, setPreviews] = useState([]); // {url, nom, type, taille}[]
   const [dragOver, setDragOver] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [photos, setPhotos] = useState([]);
+  // const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -106,7 +107,8 @@ export default function ActualitesAdmin() {
     fetchData();
   }, [fetchData]);
 
-  // ── Gestion fichiers ──
+  // Gestion fichiers
+
   const addFichiers = (files) => {
     const arr = Array.from(files);
     const restant = 5 - fichiers.length;
@@ -170,13 +172,13 @@ export default function ActualitesAdmin() {
     setPreviews(
       existants.map((f) => ({
         url: f.type?.startsWith("image/")
-          ? `http://localhost:5000${f.url}`
+          ? `${BASE_URL}${f.url}`
           : null,
         nom: f.nom,
         type: f.type,
         taille: f.taille,
         local: false,
-        url_serveur: `http://localhost:5000${f.url}`,
+        url_serveur: `${BASE_URL}${f.url}`,
       })),
     );
     setSelected(a);
@@ -450,9 +452,9 @@ export default function ActualitesAdmin() {
               const cat = catColors[a.categorie] || catColors["Général"];
               const fics = a.fichiers ? JSON.parse(a.fichiers) : [];
               const img = a.photo_url
-                ? `http://localhost:5000${a.photo_url}`
+                ? `{BASE_URL}${a.photo_url}`
                 : fics[0] && fics[0].type?.startsWith("image/")
-                  ? `http://localhost:5000${fics[0].url}`
+                  ? `{BASE_URL}${fics[0].url}`
                   : null;
               return (
                 <div

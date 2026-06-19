@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const DEFAULT = {
-  title: "IUTGate — Portail Numérique de l'IUT de Douala",
+  title: "IUT GATE - Portail Numérique de l'IUT de Douala",
   description:
     "Orientez-vous, trouvez vos filières, enseignants et informations sur le campus de l'IUT de Douala.",
   url: "https://iutgate.vercel.app",

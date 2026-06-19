@@ -13,8 +13,8 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import api from "../../services/api";
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = "http://localhost:5000";
 
 const TYPES = [
   { key: "all", label: "Tout" },
@@ -45,7 +45,9 @@ export default function RecherchePage() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/immutability
     if (params.get("q")) doSearch(params.get("q"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const doSearch = async (q = query) => {

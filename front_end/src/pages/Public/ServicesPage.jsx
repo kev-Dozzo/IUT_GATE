@@ -18,6 +18,7 @@ import Footer from "../../components/layout/Footer";
 import { getServices } from "../../services/serviceAdminService";
 import { useNavigate } from "react-router-dom";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
 const SERVICE_ICONS = [
   MdAssignment,

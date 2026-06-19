@@ -32,6 +32,7 @@ const ROLES = [
 ];
 import PhotoUpload from "../../components/ui/PhotoUpload";
 import Avatar from "../../components/ui/Avatar";
+import { BASE_URL } from "../../config/constants";
 
 const AVATAR_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -396,7 +397,7 @@ export default function EnseignantsAdmin() {
                 (d) => d.id_departement === ens.id_departement,
               );
               const photoURL = ens.photo_url
-                ? `http://localhost:5000${ens.photo_url}`
+                ? `${BASE_URL}${ens.photo_url}`
                 : null;
               return (
                 <div
@@ -707,7 +708,7 @@ export default function EnseignantsAdmin() {
               <PhotoUpload
                 value={
                   selected?.photo_url
-                    ? `http://localhost:5000${selected.photo_url}`
+                    ? `${BASE_URL}${selected.photo_url}`
                     : null
                 }
                 onChange={setPhoto}

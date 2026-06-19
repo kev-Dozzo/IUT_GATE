@@ -18,6 +18,7 @@ import Footer from "../../components/layout/Footer";
 import Avatar from "../../components/ui/Avatar";
 import { getDepartementById } from "../../services/departementService";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,8 +34,6 @@ const markerIcon = L.divIcon({
   iconSize: [36, 36],
   iconAnchor: [18, 36],
 });
-
-const BASE_URL = "http://localhost:5000";
 
 export default function DepartementDetailPage() {
   const { id } = useParams();
@@ -568,7 +567,7 @@ export default function DepartementDetailPage() {
                           color: "#0f172a",
                         }}
                       >
-                        📍 Localisation
+                        Localisation
                       </p>
                       <p
                         style={{

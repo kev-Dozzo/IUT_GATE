@@ -12,8 +12,10 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getFilieres } from "../../services/filiereService";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = "http://localhost:5000";
+
+  
 const DEFAULT_PHOTO = "/noprofil.jpg";
 
 export default function FilieresPage() {

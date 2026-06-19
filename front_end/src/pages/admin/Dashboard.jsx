@@ -14,6 +14,7 @@ import { getBatiments } from "../../services/batimentService";
 import { getEnseignants } from "../../services/enseignantService";
 import { getActualites } from "../../services/actualiteService";
 import { getIAStatus } from "../../services/iaService";
+import { BASE_URL } from "../../config/constants";
 
 const statsConfig = [
   {
@@ -295,7 +296,7 @@ export default function DashboardPage() {
               >
                 {b.photo_url ? (
                   <img
-                    src={`http://localhost:5000${b.photo_url}`}
+                    src={`${BASE_URL}${b.photo_url}`}
                     alt={b.nom}
                     style={{
                       width: "100%",
@@ -365,7 +366,7 @@ export default function DashboardPage() {
               >
                 {e.photo_url ? (
                   <img
-                    src={`http://localhost:5000${e.photo_url}`}
+                    src={`${BASE_URL}${e.photo_url}`}
                     alt={e.nom}
                     style={{
                       width: "100%",
@@ -428,7 +429,7 @@ export default function DashboardPage() {
               >
                 {a.fichiers?.[0]?.url ? (
                   <img
-                    src={`http://localhost:5000${a.fichiers[0].url}`}
+                    src={`${BASE_URL}${a.fichiers[0].url}`}
                     alt={a.titre}
                     style={{
                       width: "100%",
