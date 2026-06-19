@@ -8,6 +8,7 @@ const DEFAULT = {
   image: "https://iutgate.vercel.app/logo.png",
 };
 
+
 export default function SEO({
   title,
   description,
