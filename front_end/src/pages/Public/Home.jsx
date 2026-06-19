@@ -17,6 +17,7 @@ import Camtel from "../../assets/public/camtel.png";
 import minesup from "../../assets/public/min.jpeg";
 import SearchBar from "../../components/ui/SearchBar";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
 const quickLinks = [
   {
@@ -53,9 +54,7 @@ const quickLinks = [
   },
 ];
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace("/api", "")
-  : "http://localhost:5000";
+
 
 const catColors = {
   Examens: "#991b1b",

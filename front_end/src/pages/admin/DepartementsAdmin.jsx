@@ -19,6 +19,7 @@ import {
   updateDepartement,
   deleteDepartement,
 } from "../../services/departementService";
+import { BASE_URL } from "../../config/constants";
 
 const DEPT_COLORS = [
   { bg: "#cffafe", color: "#0e7490" },
@@ -342,7 +343,7 @@ export default function DepartementsAdmin() {
           {filtered.map((dept, i) => {
             const col = DEPT_COLORS[i % DEPT_COLORS.length];
             const imageUrl = dept.photo_url
-              ? `http://localhost:5000${dept.photo_url}`
+              ? `${BASE_URL}${dept.photo_url}`
               : null;
             return (
               <div
@@ -626,7 +627,7 @@ export default function DepartementsAdmin() {
                 <PhotoUpload
                   value={
                     selected?.photo_url
-                      ? `http://localhost:5000${selected.photo_url}`
+                      ? `${BASE_URL}${selected.photo_url}`
                       : null
                   }
                   onChange={setPhoto}

@@ -15,10 +15,8 @@ import {
   getActualites,
 } from "../../services/actualiteService";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace("/api", "")
-  : "http://localhost:5000";
 
 const catColors = {
   Examens: { color: "#991b1b" },
@@ -479,7 +477,7 @@ export default function ActualiteDetailPage() {
         url={`https://iutgate.vercel.app/actualites/${id}`}
         image={
           actualite?.photo_url
-            ? `http://localhost:5000${actualite.photo_url}`
+            ? `${BASE_URL}${actualite.photo_url}`
             : undefined
         }
         type="article"

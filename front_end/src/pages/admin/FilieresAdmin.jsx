@@ -20,6 +20,7 @@ import {
 } from "../../services/filiereService";
 import { getDepartements } from "../../services/departementService";
 import PhotoUpload from "../../components/ui/PhotoUpload";
+import { BASE_URL } from "../../config/constants";
 
 const DUREES = ["1 an", "2 ans", "3 ans", "4 ans", "5 ans"];
 
@@ -365,7 +366,7 @@ export default function FilieresAdmin() {
                 (d) => d.id_departement === filiere.id_departement,
               );
               const imageUrl = filiere.photo_url
-                ? `http://localhost:5000${filiere.photo_url}`
+                ? `${BASE_URL}${filiere.photo_url}`
                 : null;
               return (
                 <div
@@ -651,7 +652,7 @@ export default function FilieresAdmin() {
               <PhotoUpload
                 value={
                   selected?.photo_url
-                    ? `http://localhost:5000${selected.photo_url}`
+                    ? `${BASE_URL}${selected.photo_url}`
                     : null
                 }
                 onChange={setPhoto}

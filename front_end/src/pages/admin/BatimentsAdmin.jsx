@@ -19,6 +19,7 @@ import {
   deleteBatiment,
 } from "../../services/batimentService";
 import PhotoUpload from "../../components/ui/PhotoUpload";
+import { BASE_URL } from "../../config/constants";
 
 const emptyForm = { nom: "", description: "", latitude: "", longitude: "" };
 
@@ -328,7 +329,13 @@ export default function BatimentsAdmin() {
           }}
         >
           {loading ? (
-            <div style={{ textAlign: "center", padding: "48px 0", gridColumn: "1 / -1" }}>
+            <div
+              style={{
+                textAlign: "center",
+                padding: "48px 0",
+                gridColumn: "1 / -1",
+              }}
+            >
               <div
                 style={{
                   width: 36,
@@ -340,7 +347,9 @@ export default function BatimentsAdmin() {
                   animation: "spin 1s linear infinite",
                 }}
               />
-              <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
+              <p style={{ color: "var(--muted)", fontSize: 13 }}>
+                Chargement...
+              </p>
               <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
             </div>
           ) : filtered.length === 0 ? (
@@ -352,7 +361,10 @@ export default function BatimentsAdmin() {
                 gridColumn: "1 / -1",
               }}
             >
-              <MdApartment size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
+              <MdApartment
+                size={40}
+                style={{ opacity: 0.3, marginBottom: 12 }}
+              />
               <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
                 Aucun bâtiment trouvé
               </p>
@@ -360,7 +372,7 @@ export default function BatimentsAdmin() {
           ) : (
             filtered.map((bat) => {
               const imageUrl = bat.photo_url
-                ? `http://localhost:5000${bat.photo_url}`
+                ? `{BASE_URL}${bat.photo_url}`
                 : null;
               return (
                 <div
@@ -401,8 +413,14 @@ export default function BatimentsAdmin() {
                       <img
                         src={imageUrl}
                         alt={bat.nom}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        onError={(e) => (e.currentTarget.style.display = "none")}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) =>
+                          (e.currentTarget.style.display = "none")
+                        }
                       />
                     ) : (
                       <div
@@ -421,8 +439,22 @@ export default function BatimentsAdmin() {
                     )}
                   </div>
 
-                  <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      padding: 22,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 16,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        alignItems: "flex-start",
+                      }}
+                    >
                       <div style={{ minWidth: 0 }}>
                         <p
                           style={{
@@ -463,11 +495,18 @@ export default function BatimentsAdmin() {
                         margin: 0,
                       }}
                     >
-                      {bat.description?.slice(0, 120) || "Aucune description disponible."}
+                      {bat.description?.slice(0, 120) ||
+                        "Aucune description disponible."}
                       {bat.description?.length > 120 ? "..." : ""}
                     </p>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 10,
+                      }}
+                    >
                       <div
                         style={{
                           padding: "12px 14px",
@@ -481,7 +520,9 @@ export default function BatimentsAdmin() {
                         }}
                       >
                         <MdLocationOn size={16} color="var(--cyan)" />
-                        {bat.latitude ? parseFloat(bat.latitude).toFixed(4) : "—"}
+                        {bat.latitude
+                          ? parseFloat(bat.latitude).toFixed(4)
+                          : "—"}
                       </div>
                       <div
                         style={{
@@ -496,7 +537,9 @@ export default function BatimentsAdmin() {
                         }}
                       >
                         <MdLocationOn size={16} color="var(--cyan)" />
-                        {bat.longitude ? parseFloat(bat.longitude).toFixed(4) : "—"}
+                        {bat.longitude
+                          ? parseFloat(bat.longitude).toFixed(4)
+                          : "—"}
                       </div>
                     </div>
 
@@ -628,9 +671,7 @@ export default function BatimentsAdmin() {
             >
               <PhotoUpload
                 value={
-                  selected?.photo_url
-                    ? `http://localhost:5000${selected.photo_url}`
-                    : null
+                  selected?.photo_url ? `{BASE_URL}${selected.photo_url}` : null
                 }
                 onChange={setPhoto}
                 size={120}

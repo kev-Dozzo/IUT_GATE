@@ -13,10 +13,8 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import api from "../../services/api";
+import { BASE_URL } from "../../config/constants";
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace("/api", "")
-  : "http://localhost:5000";
 
 const TYPES = [
   { key: "all", label: "Tout" },

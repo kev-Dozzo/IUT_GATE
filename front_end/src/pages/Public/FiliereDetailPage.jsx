@@ -20,6 +20,7 @@ import Avatar from "../../components/ui/Avatar";
 import DebouchesIA from "../../components/ui/DebouchesIA";
 import { getFiliereById } from "../../services/filiereService";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -36,9 +37,7 @@ const markerIcon = L.divIcon({
   iconAnchor: [18, 36],
 });
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace("/api", "")
-  : "http://localhost:5000";
+
 
 export default function FiliereDetailPage() {
   const { id } = useParams();

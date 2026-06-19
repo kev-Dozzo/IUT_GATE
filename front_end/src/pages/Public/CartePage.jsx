@@ -30,6 +30,7 @@ import Navbar from "../../components/layout/Navbar";
 import { getBatiments } from "../../services/batimentService";
 import { getSalles } from "../../services/salleService";
 import SEO from "../../components/ui/SEO";
+import { BASE_URL } from "../../config/constants";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -882,7 +883,7 @@ export default function CartePage() {
                           }}
                         >
                           <img
-                            src={`http://localhost:5000${bat.photo_url}`}
+                            src={`${BASE_URL}${bat.photo_url}`}
                             alt={bat.nom}
                             style={{
                               width: "100%",
