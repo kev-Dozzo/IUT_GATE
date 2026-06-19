@@ -1,7 +1,7 @@
 import ReactGA from "react-ga4";
 
 // ← Tu mettras ton vrai ID après avoir créé la propriété GA4
-const GA_ID = "G-XXXXXXXXXX";
+const GA_ID = "G-Q6R2643TMK";
 
 export const initGA = () => {
   // N'active qu'en production

@@ -88,7 +88,7 @@ const MAP_STYLES = [
   },
 ];
 
-const IUT_CENTER = [4.0511, 9.7679];
+const IUT_CENTER = [4.055384, 9.745314];
 
 export default function CartePage() {
   const [batiments, setBatiments] = useState([]);

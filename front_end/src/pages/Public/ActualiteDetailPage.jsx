@@ -16,7 +16,9 @@ import {
 } from "../../services/actualiteService";
 import SEO from "../../components/ui/SEO";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace("/api", "")
+  : "http://localhost:5000";
 
 const catColors = {
   Examens: { color: "#991b1b" },
@@ -304,9 +306,8 @@ function PhotoMosaic({ photos, onPhotoClick }) {
       </div>
     );
 
-  // 3+ photos — mosaïque exacte uliege.be : 2 colonnes gauche + 1 grande droite
-  const left = photos.slice(0, Math.ceil((photos.length - 1) / 1));
-  const right = photos[photos.length - 1];
+  // const left = photos.slice(0, Math.ceil((photos.length - 1) / 1));
+  // const right = photos[photos.length - 1];
 
   return (
     <div style={{ marginBottom: 40 }}>
@@ -462,7 +463,7 @@ export default function ActualiteDetailPage() {
       ].filter((p, i, arr) => arr.indexOf(p) === i)
     : [];
 
-  const cat = catColors[actualite?.categorie] || catColors["Général"];
+  // const cat = catColors[actualite?.categorie] || catColors["Général"];
 
   const getCover = (a) => {
     if (a.photos?.[0]?.url) return `${BASE_URL}${a.photos[0].url}`;

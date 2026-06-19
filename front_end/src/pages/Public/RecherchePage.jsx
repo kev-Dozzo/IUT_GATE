@@ -14,7 +14,9 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import api from "../../services/api";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace("/api", "")
+  : "http://localhost:5000";
 
 const TYPES = [
   { key: "all", label: "Tout" },
@@ -45,7 +47,9 @@ export default function RecherchePage() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/immutability
     if (params.get("q")) doSearch(params.get("q"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const doSearch = async (q = query) => {

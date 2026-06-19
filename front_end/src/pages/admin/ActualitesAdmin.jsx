@@ -77,7 +77,7 @@ export default function ActualitesAdmin() {
   const [previews, setPreviews] = useState([]); // {url, nom, type, taille}[]
   const [dragOver, setDragOver] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [photos, setPhotos] = useState([]);
+  // const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -106,7 +106,8 @@ export default function ActualitesAdmin() {
     fetchData();
   }, [fetchData]);
 
-  // ── Gestion fichiers ──
+  // Gestion fichiers
+
   const addFichiers = (files) => {
     const arr = Array.from(files);
     const restant = 5 - fichiers.length;

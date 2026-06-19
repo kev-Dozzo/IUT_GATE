@@ -13,7 +13,9 @@ import Footer from "../../components/layout/Footer";
 import { getDepartements } from "../../services/departementService";
 import SEO from "../../components/ui/SEO";  
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace("/api", "")
+  : "http://localhost:5000";
 
 export default function DepartementsPage() {
   const navigate = useNavigate();

@@ -32,7 +32,10 @@ const markerIcon = L.divIcon({
   iconAnchor: [18, 36],
 });
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace("/api", "")
+  : "http://localhost:5000";
+
 const DEFAULT_PHOTO = "/noprofil.jpg";
 
 // const getInitials = (nom) => {
@@ -390,7 +393,11 @@ export default function EnseignantDetailPage() {
                               flexShrink: 0,
                             }}
                           >
-                            <Icon icon={Icon} size={18} color="var(--cyan-dark)" />
+                            <Icon
+                              icon={Icon}
+                              size={18}
+                              color="var(--cyan-dark)"
+                            />
                           </div>
                           <div>
                             <p
