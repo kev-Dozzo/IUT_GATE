@@ -11,9 +11,8 @@ import {
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getDepartements } from "../../services/departementService";
-import SEO from "../../components/ui/SEO";  
+import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
-
 
 export default function DepartementsPage() {
   const navigate = useNavigate();
@@ -61,14 +60,6 @@ export default function DepartementsPage() {
               marginBottom: 12,
             }}
           >
-            <div
-              style={{
-                width: 4,
-                height: 28,
-                background: "var(--cyan)",
-                borderRadius: 2,
-              }}
-            />
             <p
               style={{
                 fontSize: 11,
