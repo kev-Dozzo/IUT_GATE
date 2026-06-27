@@ -403,7 +403,8 @@ export default function AProposPage() {
                 {
                   icon: MdLocationOn,
                   label: "Adresse",
-                  value: "NDON-BONG, Douala, Cameroun",
+                  value:
+                    "Ndogbong (Lieu-dit Château d'eau) | Douala, Cameroun - Ntoumba (site de la Pépinière nationale pilote d'entreprises) | Edea, Cameroun",
                 },
                 {
                   icon: MdEmail,
@@ -411,9 +412,14 @@ export default function AProposPage() {
                   value: "contact@iut-douala.cm",
                 },
                 {
+                  icon: MdSchool,
+                  label: "Boîte postale",
+                  Value: "BP 21422 Douala",
+                },
+                {
                   icon: MdPhone,
                   label: "Téléphone",
-                  value: "+237 233 40 65 00",
+                  value: "6 94 29 64 81 - 233 40 24 82",
                 },
               ].map(({ icon: Icon, label, value }) => (
                 <div
