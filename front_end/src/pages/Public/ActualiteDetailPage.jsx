@@ -17,7 +17,6 @@ import {
 import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
 
-
 const catColors = {
   Examens: { color: "#991b1b" },
   Événement: { color: "#0e7490" },
@@ -474,11 +473,9 @@ export default function ActualiteDetailPage() {
       <SEO
         title={actualite?.titre}
         description={actualite?.contenu?.slice(0, 150)}
-        url={`https://iutgate.vercel.app/actualites/${id}`}
+        url={`${window.location.origin}/actualites/${id}`}
         image={
-          actualite?.photo_url
-            ? `${BASE_URL}${actualite.photo_url}`
-            : undefined
+          actualite?.photo_url ? `${BASE_URL}${actualite.photo_url}` : undefined
         }
         type="article"
       />
@@ -650,57 +647,22 @@ export default function ActualiteDetailPage() {
               <PhotoMosaic photos={allPhotos} onPhotoClick={setLightboxIndex} />
             )}
 
-            {/* Chapeau italique style uliege */}
+            {/* Corps de l'article avec retours à la ligne préservés */}
             {actualite.contenu && (
-              <p
+              <div
                 style={{
                   fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: "clamp(16px, 2.5vw, 20px)",
+                  fontSize: "clamp(15px, 2vw, 18px)",
                   color: "#334155",
-                  lineHeight: 1.85,
-                  fontStyle: "italic",
+                  lineHeight: 1.9,
+                  whiteSpace: "pre-wrap",
                   marginBottom: 36,
+                  textAlign: "justify",
                 }}
               >
-                {actualite.contenu.slice(0, 220)}
-              </p>
+                {actualite.contenu}
+              </div>
             )}
-
-            {/* Corps avec drop cap style uliege */}
-            {actualite.contenu &&
-              actualite.contenu.length > 220 &&
-              (() => {
-                const rest = actualite.contenu.slice(220);
-                const firstChar = rest.trimStart()[0] || "";
-                const restText = rest.trimStart().slice(1);
-                return (
-                  <div
-                    style={{
-                      fontSize: "clamp(14px, 2vw, 16px)",
-                      color: "#334155",
-                      lineHeight: 1.9,
-                      fontFamily: "Georgia, serif",
-                    }}
-                  >
-                    <span
-                      style={{
-                        float: "left",
-                        fontFamily: "var(--font-head)",
-                        fontSize: "clamp(56px, 9vw, 76px)",
-                        fontWeight: 800,
-                        color: "var(--cyan-dark)",
-                        lineHeight: 0.82,
-                        marginRight: 8,
-                        marginTop: 6,
-                        display: "block",
-                      }}
-                    >
-                      {firstChar.toUpperCase()}
-                    </span>
-                    {restText}
-                  </div>
-                );
-              })()}
 
             {/* Séparateur */}
             <div

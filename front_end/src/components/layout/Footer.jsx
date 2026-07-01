@@ -7,7 +7,7 @@ const cols = [
       { label: "Accueil", path: "/" },
       { label: "Actualités", path: "/actualites" },
       { label: "À propos", path: "/apropos" },
-      { label: "Aide", path: "/aide" }, 
+      { label: "Aide", path: "/aide" },
     ],
   },
   {
@@ -18,7 +18,6 @@ const cols = [
       { label: "Carte", path: "/carte" },
     ],
   },
-  { title: "Admin", links: [{ label: "Espace Admin", path: "/admin/login" }] },
 ];
 
 export default function Footer() {

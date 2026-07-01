@@ -139,6 +139,9 @@ export default function Sidebar() {
           gap: 4,
           minHeight: "100vh",
           flexShrink: 0,
+          position: "sticky",
+          top: 0,
+          alignSelf: "flex-start",
         }}
       >
         <SidebarContent

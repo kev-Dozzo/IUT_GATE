@@ -64,7 +64,7 @@ export default function DepartementDetailPage() {
       <SEO
         title={departements?.nom}
         description={departements?.description?.slice(0, 150)}
-        url={`https://iutgate.vercel.app/departements/${id}`}
+        url={`${window.location.origin}/departements/${id}`}
       />
 
       <Navbar />
@@ -334,6 +334,8 @@ export default function DepartementDetailPage() {
                     fontSize: 14,
                     color: "var(--text)",
                     lineHeight: 1.8,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
                   }}
                 >
                   {dept.description || "Aucune description disponible."}

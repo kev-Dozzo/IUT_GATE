@@ -14,8 +14,6 @@ import { getFilieres } from "../../services/filiereService";
 import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
 
-
-  
 const DEFAULT_PHOTO = "/noprofil.jpg";
 
 export default function FilieresPage() {
@@ -42,7 +40,7 @@ export default function FilieresPage() {
       <SEO
         title="Filières"
         description="Découvrez toutes les formations et filières de l'IUT de Douala : Génie Informatique, Réseaux, Génie Civil et plus."
-        url="https://iutgate.vercel.app/filieres"
+        url={`${window.location.origin}/filieres`}
       />
       <Navbar />
 

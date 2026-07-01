@@ -663,7 +663,12 @@ export default function DepartementsAdmin() {
                   }
                   placeholder="Décrivez le département..."
                   rows={4}
-                  style={{ ...inputStyle, resize: "vertical" }}
+                  style={{
+                    ...inputStyle,
+                    resize: "vertical",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.7,
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />

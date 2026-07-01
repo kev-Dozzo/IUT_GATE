@@ -705,7 +705,12 @@ export default function BatimentsAdmin() {
                   }
                   placeholder="Ex: Bâtiment administratif principal..."
                   rows={3}
-                  style={{ ...inp, resize: "vertical" }}
+                  style={{
+                    ...inp,
+                    resize: "vertical",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.7,
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />

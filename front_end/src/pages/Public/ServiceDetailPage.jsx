@@ -74,7 +74,7 @@ export default function ServiceDetailPage() {
       <SEO
         title={service?.nom}
         description={service?.description?.slice(0, 150)}
-        url={`https://iutgate.vercel.app/services/${id}`}
+        url={`${window.location.origin}/services/${id}`}
       />
       <Navbar />
 
@@ -233,6 +233,8 @@ export default function ServiceDetailPage() {
                     fontSize: 14,
                     color: "var(--text)",
                     lineHeight: 1.8,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
                   }}
                 >
                   {service.description || "Aucune description disponible."}

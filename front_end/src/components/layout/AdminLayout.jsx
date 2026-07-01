@@ -3,13 +3,13 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminLayout({ children }) {
-  const { admin, logout } = useAuth();
+  const { admin } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/admin/login");
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   navigate("/admin/login");
+  // };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -26,6 +26,8 @@ export default function AdminLayout({ children }) {
             justifyContent: "space-between",
             padding: "0 24px",
             marginTop: 0,
+            position: "sticky",
+            top: 0,
           }}
         >
           <div />
