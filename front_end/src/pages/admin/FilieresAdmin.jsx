@@ -764,6 +764,8 @@ export default function FilieresAdmin() {
                   style={{
                     ...inputStyle,
                     resize: "vertical",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.7,
                   }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
@@ -783,6 +785,8 @@ export default function FilieresAdmin() {
                   style={{
                     ...inputStyle,
                     resize: "vertical",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.7,
                   }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}

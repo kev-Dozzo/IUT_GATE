@@ -54,8 +54,6 @@ const quickLinks = [
   },
 ];
 
-
-
 const catColors = {
   Examens: "#991b1b",
   Événement: "#0e7490",
@@ -131,7 +129,7 @@ export default function HomePage() {
       <SEO
         title="Accueil"
         description="Portail numérique de l'IUT de Douala. Filières, enseignants, carte du campus et actualités."
-        url="https://iutgate.vercel.app"
+        url={window.location.origin}
       />
       <Navbar />
 

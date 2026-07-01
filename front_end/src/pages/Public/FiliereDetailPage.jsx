@@ -37,8 +37,6 @@ const markerIcon = L.divIcon({
   iconAnchor: [18, 36],
 });
 
-
-
 export default function FiliereDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -69,7 +67,7 @@ export default function FiliereDetailPage() {
       <SEO
         title={filiere?.nom}
         description={filiere?.description?.slice(0, 150)}
-        url={`https://iutgate.vercel.app/filieres/${id}`}
+        url={`${window.location.origin}/filieres/${id}`}
       />
       <Navbar />
 
@@ -368,6 +366,8 @@ export default function FiliereDetailPage() {
                       fontSize: 14,
                       color: "var(--text)",
                       lineHeight: 1.8,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
                     }}
                   >
                     {filiere.description || "Aucune description disponible."}
@@ -401,6 +401,8 @@ export default function FiliereDetailPage() {
                         fontSize: 14,
                         color: "var(--text)",
                         lineHeight: 1.8,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
                       }}
                     >
                       {filiere.condition_admission}
@@ -560,7 +562,11 @@ export default function FiliereDetailPage() {
                             flexShrink: 0,
                           }}
                         >
-                          <Icon icon={Icon} size={17} color="var(--cyan-dark)" />
+                          <Icon
+                            icon={Icon}
+                            size={17}
+                            color="var(--cyan-dark)"
+                          />
                         </div>
                         <div>
                           <p

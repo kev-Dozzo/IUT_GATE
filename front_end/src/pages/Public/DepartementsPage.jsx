@@ -38,7 +38,7 @@ export default function DepartementsPage() {
       <SEO
         title="Départements"
         description="Les départements académiques de l'IUT de Douala."
-        url="https://iutgate.vercel.app/departements"
+        url={`${window.location.origin}/departements`}
       />
 
       <Navbar />

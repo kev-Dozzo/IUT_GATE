@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { getEnseignants } from "../../services/enseignantService";
-import SEO from "../../components/ui/SEO";  
+import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
 
 const DEFAULT_PHOTO = "/noprofil.jpg";
@@ -51,7 +51,7 @@ export default function EnseignantsPage() {
       <SEO
         title="Enseignants"
         description="Le corps enseignant de l'IUT de Douala. Trouvez les professeurs par département."
-        url="https://iutgate.vercel.app/enseignants"
+        url={`${window.location.origin}/enseignants`}
       />
       <Navbar />
 

@@ -126,16 +126,24 @@ export default function CartePage() {
         setSalles(sals);
         if (bats.length > 0) {
           setSelected(bats[0]);
-          if (bats[0].latitude && bats[0].longitude)
-            setFlyCoords([
-              parseFloat(bats[0].latitude),
-              parseFloat(bats[0].longitude),
-            ]);
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  const fallbackToApproximateLocation = async () => {
+    try {
+      const res = await fetch("https://ipapi.co/json");
+      const data = await res.json();
+      if (data?.latitude && data?.longitude) {
+        return [data.latitude, data.longitude];
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  };
 
   //  Demande géolocalisation avec modal
   const requestGeolocation = (destLat, destLng, nom) => {
@@ -155,6 +163,13 @@ export default function CartePage() {
       setGpsLoading(false);
       return;
     }
+    if (!window.isSecureContext) {
+      alert(
+        "La géolocalisation nécessite un accès sécurisé (HTTPS ou localhost).",
+      );
+      setGpsLoading(false);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = [pos.coords.latitude, pos.coords.longitude];
@@ -170,16 +185,41 @@ export default function CartePage() {
           setPendingDestination(null);
         }
       },
-      (err) => {
+      async (err) => {
         setGpsLoading(false);
+        const fallbackCoords = await fallbackToApproximateLocation();
+        if (fallbackCoords) {
+          setUserPos(fallbackCoords);
+          setFlyCoords(fallbackCoords);
+          setFlyZoom(16);
+          if (pendingDestination) {
+            calculateRoute(fallbackCoords, [
+              pendingDestination.lat,
+              pendingDestination.lng,
+            ]);
+            setPendingDestination(null);
+          }
+          alert(
+            "Impossible de récupérer votre position exacte. Une position approximative a été utilisée pour l'itinéraire.",
+          );
+          return;
+        }
         setPendingDestination(null);
-        if (err.code === 1)
+        if (err.code === 1) {
           alert(
             "Permission refusée. Activez la localisation dans les paramètres de votre navigateur.",
           );
-        else alert("Impossible d'obtenir votre position.");
+        } else if (err.code === 2) {
+          alert(
+            "Position indisponible. Vérifiez que le GPS ou la localisation réseau est activé.",
+          );
+        } else {
+          alert(
+            "Impossible d'obtenir votre position exacte. Vérifiez que la localisation est activée et que le site utilise un accès sécurisé (HTTPS ou localhost).",
+          );
+        }
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 },
     );
   };
 
@@ -191,6 +231,13 @@ export default function CartePage() {
       setGpsLoading(false);
       return;
     }
+    if (!window.isSecureContext) {
+      alert(
+        "La géolocalisation nécessite un accès sécurisé (HTTPS ou localhost).",
+      );
+      setGpsLoading(false);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = [pos.coords.latitude, pos.coords.longitude];
@@ -199,11 +246,31 @@ export default function CartePage() {
         setFlyZoom(16);
         setGpsLoading(false);
       },
-      () => {
-        alert("Impossible d'obtenir votre position.");
+      async (err) => {
+        const fallbackCoords = await fallbackToApproximateLocation();
+        if (fallbackCoords) {
+          setUserPos(fallbackCoords);
+          setFlyCoords(fallbackCoords);
+          setFlyZoom(16);
+          alert(
+            "Position approximative utilisée car la localisation exacte n'a pas pu être obtenue.",
+          );
+        } else if (err.code === 1) {
+          alert(
+            "Permission refusée. Autorisez la localisation dans les paramètres de votre navigateur, puis réessayez.",
+          );
+        } else if (err.code === 2) {
+          alert(
+            "Position indisponible. Vérifiez que le GPS ou la localisation réseau est activé.",
+          );
+        } else {
+          alert(
+            "Impossible d'obtenir votre position exacte. Vérifiez que la localisation est activée et que le site utilise un accès sécurisé (HTTPS ou localhost).",
+          );
+        }
         setGpsLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
     );
   };
 
@@ -755,7 +822,7 @@ export default function CartePage() {
       <SEO
         title="Carte du Campus"
         description="Carte interactive du campus de l'IUT de Douala. Trouvez bâtiments et salles facilement."
-        url="https://iutgate.vercel.app/carte"
+        url="https://iut-dla.com/carte"
       />
       <Navbar />
 
@@ -787,8 +854,8 @@ export default function CartePage() {
         {/* MAP */}
         <div style={{ flex: 1, position: "relative" }}>
           <MapContainer
-            center={IUT_CENTER}
-            zoom={15}
+            center={userPos || IUT_CENTER}
+            zoom={userPos ? 15 : 15}
             minZoom={3}
             maxZoom={22}
             style={{ height: "100%", width: "100%" }}

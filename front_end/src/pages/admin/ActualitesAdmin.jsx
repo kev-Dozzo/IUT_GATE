@@ -44,6 +44,24 @@ const catColors = {
 };
 
 const emptyForm = { titre: "", contenu: "", categorie: "Général" };
+const ACTUALITES_DRAFT_KEY = "iutgate_actualites_draft";
+
+const loadDraft = () => {
+  try {
+    const raw = localStorage.getItem(ACTUALITES_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const clearDraft = () => {
+  try {
+    localStorage.removeItem(ACTUALITES_DRAFT_KEY);
+  } catch {
+    // ignore
+  }
+};
 
 // ── Icône selon type de fichier ──
 const FileIcon = ({ type }) => {
@@ -107,6 +125,33 @@ export default function ActualitesAdmin() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    if (modal === "add" || modal === "edit") {
+      const draft = {
+        form,
+        fichiersMeta: fichiers.map((f) => ({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+        })),
+      };
+
+      if (
+        draft.form.titre.trim() ||
+        draft.form.contenu.trim() ||
+        draft.fichiersMeta.length > 0
+      ) {
+        try {
+          localStorage.setItem(ACTUALITES_DRAFT_KEY, JSON.stringify(draft));
+        } catch {
+          // ignore
+        }
+      } else {
+        clearDraft();
+      }
+    }
+  }, [form, fichiers, modal]);
+
   // Gestion fichiers
 
   const addFichiers = (files) => {
@@ -153,7 +198,15 @@ export default function ActualitesAdmin() {
   };
 
   const openAdd = () => {
-    setForm(emptyForm);
+    const draft = loadDraft();
+
+    if (draft?.form && (draft.form.titre || draft.form.contenu)) {
+      setForm({ ...emptyForm, ...draft.form });
+      showToast("Brouillon restauré automatiquement.", "success");
+    } else {
+      setForm(emptyForm);
+    }
+
     setFichiers([]);
     setPreviews([]);
     setSelected(null);
@@ -161,6 +214,7 @@ export default function ActualitesAdmin() {
   };
 
   const openEdit = (a) => {
+    clearDraft();
     setForm({
       titre: a.titre,
       contenu: a.contenu,
@@ -171,9 +225,7 @@ export default function ActualitesAdmin() {
     const existants = a.fichiers ? JSON.parse(a.fichiers) : [];
     setPreviews(
       existants.map((f) => ({
-        url: f.type?.startsWith("image/")
-          ? `${BASE_URL}${f.url}`
-          : null,
+        url: f.type?.startsWith("image/") ? `${BASE_URL}${f.url}` : null,
         nom: f.nom,
         type: f.type,
         taille: f.taille,
@@ -212,6 +264,7 @@ export default function ActualitesAdmin() {
         await updateActualite(selected.id_actualite, form, fichiers);
         showToast("Actualité modifiée avec succès !");
       }
+      clearDraft();
       await fetchData();
       closeModal();
     } catch {
@@ -408,251 +461,255 @@ export default function ActualitesAdmin() {
       </div>
 
       {/* LISTE - Cartes responsive */}
-      <div style={{ marginTop: 6 }}>
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "48px 0" }}>
+      {modal === null && (
+        <div style={{ marginTop: 6 }}>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "3px solid var(--cyan-light)",
+                  borderTop: "3px solid var(--cyan)",
+                  margin: "0 auto 12px",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+              <p style={{ color: "var(--muted)", fontSize: 13 }}>
+                Chargement...
+              </p>
+              <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+            </div>
+          ) : filtered.length === 0 ? (
             <div
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                border: "3px solid var(--cyan-light)",
-                borderTop: "3px solid var(--cyan)",
-                margin: "0 auto 12px",
-                animation: "spin 1s linear infinite",
+                textAlign: "center",
+                padding: "60px 0",
+                color: "var(--muted)",
               }}
-            />
-            <p style={{ color: "var(--muted)", fontSize: 13 }}>Chargement...</p>
-            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "60px 0",
-              color: "var(--muted)",
-            }}
-          >
-            <MdCampaign size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
-              Aucune actualité trouvée
-            </p>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: 12,
-            }}
-          >
-            {filtered.map((a) => {
-              const cat = catColors[a.categorie] || catColors["Général"];
-              const fics = a.fichiers ? JSON.parse(a.fichiers) : [];
-              const img = a.photo_url
-                ? `{BASE_URL}${a.photo_url}`
-                : fics[0] && fics[0].type?.startsWith("image/")
-                  ? `{BASE_URL}${fics[0].url}`
-                  : null;
-              return (
-                <div
-                  key={a.id_actualite}
-                  style={{
-                    background: "#fff",
-                    borderRadius: 12,
-                    border: "1px solid var(--border)",
-                    padding: 12,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  {img ? (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 160,
-                        overflow: "hidden",
-                        borderRadius: 10,
-                      }}
-                    >
-                      <img
-                        src={img}
-                        alt={a.titre}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                        onError={(e) =>
-                          (e.currentTarget.style.display = "none")
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 120,
-                        borderRadius: 10,
-                        background: "#f8fafc",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <MdCampaign size={34} color="var(--cyan-dark)" />
-                    </div>
-                  )}
-
+            >
+              <MdCampaign
+                size={40}
+                style={{ opacity: 0.3, marginBottom: 12 }}
+              />
+              <p style={{ fontFamily: "var(--font-head)", fontWeight: 600 }}>
+                Aucune actualité trouvée
+              </p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "repeat(auto-fill, minmax(320px, 1fr))",
+                gap: 12,
+              }}
+            >
+              {filtered.map((a) => {
+                const cat = catColors[a.categorie] || catColors["Général"];
+                const fics = a.fichiers ? JSON.parse(a.fichiers) : [];
+                const img = a.photo_url
+                  ? `{BASE_URL}${a.photo_url}`
+                  : fics[0] && fics[0].type?.startsWith("image/")
+                    ? `{BASE_URL}${fics[0].url}`
+                    : null;
+                return (
                   <div
+                    key={a.id_actualite}
                     style={{
+                      background: "#fff",
+                      borderRadius: 12,
+                      border: "1px solid var(--border)",
+                      padding: 12,
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: 8,
+                      flexDirection: "column",
+                      gap: 10,
                     }}
                   >
-                    <div style={{ minWidth: 0 }}>
+                    {img ? (
                       <div
                         style={{
-                          fontFamily: "var(--font-head)",
-                          fontWeight: 800,
-                          fontSize: 16,
-                          color: "var(--text)",
-                          marginBottom: 6,
+                          width: "100%",
+                          height: 160,
                           overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
+                          borderRadius: 10,
                         }}
                       >
-                        {a.titre}
+                        <img
+                          src={img}
+                          alt={a.titre}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          onError={(e) =>
+                            (e.currentTarget.style.display = "none")
+                          }
+                        />
                       </div>
+                    ) : (
                       <div
                         style={{
-                          fontSize: 13,
-                          color: "var(--muted)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: "vertical",
+                          width: "100%",
+                          height: 120,
+                          borderRadius: 10,
+                          background: "#f8fafc",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        {a.contenu}
+                        <MdCampaign size={34} color="var(--cyan-dark)" />
                       </div>
-                    </div>
+                    )}
+
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-end",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
                         gap: 8,
                       }}
                     >
-                      <span
+                      <div style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            fontWeight: 800,
+                            fontSize: 16,
+                            color: "var(--text)",
+                            marginBottom: 6,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {a.titre}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "var(--muted)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                            whiteSpace: "pre-wrap",
+                            lineHeight: 1.5,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {a.contenu}
+                        </div>
+                      </div>
+                      <div
                         style={{
-                          display: "inline-flex",
-                          padding: "6px 10px",
-                          borderRadius: 999,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          fontFamily: "var(--font-head)",
-                          background: cat.bg,
-                          color: cat.color,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
+                          gap: 8,
                         }}
                       >
-                        {a.categorie || "Général"}
-                      </span>
-                      <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                        {a.date_publication
-                          ? formatDate(a.date_publication)
-                          : "—"}
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            padding: "6px 10px",
+                            borderRadius: 999,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            fontFamily: "var(--font-head)",
+                            background: cat.bg,
+                            color: cat.color,
+                          }}
+                        >
+                          {a.categorie || "Général"}
+                        </span>
+                        <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                          {a.date_publication
+                            ? formatDate(a.date_publication)
+                            : "—"}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 8,
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <button
-                      onClick={() => openEdit(a)}
+                    <div
                       style={{
-                        padding: "8px 10px",
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "#fff",
-                        cursor: "pointer",
-                        fontWeight: 700,
+                        display: "flex",
+                        gap: 8,
+                        justifyContent: "flex-end",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "var(--cyan-light)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "#fff")
-                      }
                     >
-                      <MdEdit size={16} color="var(--cyan-dark)" />
-                    </button>
-                    <button
-                      onClick={() => openDelete(a)}
-                      style={{
-                        padding: "8px 10px",
-                        borderRadius: 8,
-                        border: "1px solid #fee2e2",
-                        background: "#fff",
-                        cursor: "pointer",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#fee2e2")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "#fff")
-                      }
-                    >
-                      <MdDelete size={16} color="#dc2626" />
-                    </button>
+                      <button
+                        onClick={() => openEdit(a)}
+                        style={{
+                          padding: "8px 10px",
+                          borderRadius: 8,
+                          border: "1px solid var(--border)",
+                          background: "#fff",
+                          cursor: "pointer",
+                          fontWeight: 700,
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            "var(--cyan-light)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "#fff")
+                        }
+                      >
+                        <MdEdit size={16} color="var(--cyan-dark)" />
+                      </button>
+                      <button
+                        onClick={() => openDelete(a)}
+                        style={{
+                          padding: "8px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #fee2e2",
+                          background: "#fff",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "#fee2e2")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "#fff")
+                        }
+                      >
+                        <MdDelete size={16} color="#dc2626" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* ── MODAL ADD / EDIT ── */}
+      {/* ── PAGE ADD / EDIT ── */}
       {(modal === "add" || modal === "edit") && (
         <div
-          onClick={closeModal}
           style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(12,26,64,.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 200,
-            padding: 20,
-            backdropFilter: "blur(4px)",
+            marginTop: 18,
+            background: "#fff",
+            borderRadius: 18,
+            padding: "28px",
+            width: "100%",
+            maxWidth: 860,
+            marginBottom: 24,
+            border: "1px solid var(--border)",
+            boxShadow: "0 8px 30px rgba(15, 23, 42, 0.04)",
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               background: "#fff",
-              borderRadius: 18,
-              padding: "36px",
               width: "100%",
-              maxWidth: 580,
-              maxHeight: "90vh",
-              overflow: "auto",
-              boxShadow: "0 24px 64px rgba(0,0,0,.2)",
             }}
           >
             {/* Header */}
@@ -681,6 +738,16 @@ export default function ActualitesAdmin() {
                   style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}
                 >
                   Remplissez les informations et ajoutez jusqu'à 5 fichiers.
+                </p>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--cyan-dark)",
+                    marginTop: 6,
+                    fontWeight: 600,
+                  }}
+                >
+                  Brouillon sauvegardé automatiquement localement.
                 </p>
               </div>
               <button
@@ -748,8 +815,14 @@ export default function ActualitesAdmin() {
                     setForm({ ...form, contenu: e.target.value })
                   }
                   placeholder="Rédigez le contenu de l'actualité..."
-                  rows={5}
-                  style={{ ...inp, resize: "vertical" }}
+                  rows={8}
+                  style={{
+                    ...inp,
+                    resize: "vertical",
+                    minHeight: 240,
+                    lineHeight: 1.7,
+                    whiteSpace: "pre-wrap",
+                  }}
                   onFocus={(e) => (e.target.style.borderColor = "var(--cyan)")}
                   onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
                 />

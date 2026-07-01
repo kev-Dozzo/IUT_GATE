@@ -62,12 +62,6 @@ const FAQ = [
     categorie: "Général",
   },
   {
-    question: "Comment accéder à l'espace administrateur ?",
-    reponse:
-      "L'espace admin est réservé au personnel autorisé de l'IUT. Cliquez sur \"Espace Admin\" dans le menu et connectez-vous avec vos identifiants fournis par l'administration.",
-    categorie: "Admin",
-  },
-  {
     question: "Que faire si une information est incorrecte ?",
     reponse:
       "Contactez directement le service concerné ou l'administration de l'IUT par email à contact@iut-douala.cm. L'équipe mettra à jour les informations dans les plus brefs délais.",
@@ -308,7 +302,7 @@ export default function AidePage() {
                       justifyContent: "center",
                     }}
                   >
-                    <Icon size={24} color={color} />
+                    <Icon size={24} color={color}  />
                   </div>
                   <div>
                     <p

@@ -7,8 +7,6 @@ import { getActualites } from "../../services/actualiteService";
 import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
 
-
-  
 const CATEGORIES = [
   "Toutes",
   "Examens",
@@ -76,7 +74,7 @@ export default function ActualitesPage() {
       <SEO
         title="Actualités"
         description="Toutes les actualités de l'IUT de Douala : examens, événements, stages et informations campus."
-        url="https://iutgate.vercel.app/actualites"
+        url={`${window.location.origin}/actualites`}
       />
       <Navbar />
 

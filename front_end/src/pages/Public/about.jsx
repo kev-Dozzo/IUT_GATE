@@ -73,7 +73,7 @@ export default function AProposPage() {
       <SEO
         title="À propos"
         description="Tout sur IUTGate, le portail numérique de l'IUT de Douala développé par des étudiants."
-        url="https://iutgate.vercel.app/a-propos"
+        url={`${window.location.origin}/a-propos`}
       />
       <Navbar />
 

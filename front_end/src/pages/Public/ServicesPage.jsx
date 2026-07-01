@@ -66,7 +66,7 @@ export default function ServicesPage() {
       <SEO
         title="services administratifs - Informations et contacts  "
         description="Découvrez toutes les services administratifs de l'IUT de Douala - Informations et contacts "
-        url="https://iutgate.vercel.app/services"
+        url="https://iut-dla.com/services"
       />
       <Navbar />
       {/* ── HEADER ── */}

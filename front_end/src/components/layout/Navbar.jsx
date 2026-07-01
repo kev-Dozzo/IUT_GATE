@@ -43,8 +43,10 @@ export default function Navbar() {
           justifyContent: "space-between",
           position: "sticky",
           top: 0,
-          zIndex: 100,
+          zIndex: 1000,
           borderBottom: "1px solid rgba(255,255,255,.07)",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {/* Logo */}

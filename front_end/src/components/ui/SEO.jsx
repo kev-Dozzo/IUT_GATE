@@ -1,13 +1,13 @@
 import { Helmet } from "react-helmet-async";
+import { PRIMARY_SITE_URL, SITE_URLS } from "../../config/constants";
 
 const DEFAULT = {
   title: "IUT GATE - Portail Numérique de l'IUT de Douala",
   description:
     "Orientez-vous, trouvez vos filières, enseignants et informations sur le campus de l'IUT de Douala.",
-  url: "https://iutgate.vercel.app",
-  image: "https://iutgate.vercel.app/logo.png",
+  url: PRIMARY_SITE_URL,
+  image: `${PRIMARY_SITE_URL}/logo.png`,
 };
-
 
 export default function SEO({
   title,
@@ -20,6 +20,9 @@ export default function SEO({
   const d = description || DEFAULT.description;
   const u = url || DEFAULT.url;
   const img = image || DEFAULT.image;
+  const fallbackSite =
+    SITE_URLS.find((site) => site !== PRIMARY_SITE_URL) || SITE_URLS[0];
+  const alternateUrl = u.replace(PRIMARY_SITE_URL, fallbackSite);
 
   return (
     <Helmet>
@@ -28,6 +31,7 @@ export default function SEO({
       <meta name="description" content={d} />
       <meta name="robots" content="index, follow" />
       <link rel="canonical" href={u} />
+      <link rel="alternate" href={alternateUrl} hrefLang="fr" />
       <html lang="fr" />
 
       {/* ── Open Graph (Facebook, WhatsApp) ── */}
