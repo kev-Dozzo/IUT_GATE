@@ -1,6 +1,7 @@
 const Departement = require("../models/Departement");
 const StaffEnseignant = require("../models/Enseignant");
 const Filiere = require("../models/Filiere");
+const logActivity = require("../utils/logActivity");
 
 exports.getAll = async (req, res) => {
   try {
@@ -45,6 +46,15 @@ exports.create = async (req, res) => {
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       id_admin: req.admin.id_admin,
     });
+
+    await logActivity(
+      req,
+      "CREATE",
+      "departement",
+      dept.id_departement,
+      dept.nom,
+    );
+
     res.status(201).json(dept);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -59,6 +69,15 @@ exports.update = async (req, res) => {
     const updates = { ...req.body };
     if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
     await dept.update(updates);
+
+    await logActivity(
+      req,
+      "UPDATE",
+      "departement",
+      dept.id_departement,
+      dept.nom,
+    );
+
     res.json(dept);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -71,6 +90,15 @@ exports.delete = async (req, res) => {
     if (!dept)
       return res.status(404).json({ message: "Département non trouvé" });
     await dept.destroy();
+
+    await logActivity(
+      req,
+      "DELETE",
+      "departement",
+      dept.id_departement,
+      dept.nom,
+    );
+
     res.json({ message: "Département supprimé" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

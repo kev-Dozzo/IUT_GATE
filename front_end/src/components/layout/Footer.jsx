@@ -124,7 +124,10 @@ export default function Footer() {
             color: "#64748b",
           }}
         >
-          <span>© 2026 IUT GATE – Institut Universitaire de Technologie</span>
+          <span>
+            Institut Universitaire de Technologie© IUT DOUALA –IUT GATE{" "}
+            {new Date().getFullYear()}
+          </span>
           <span>Douala, Cameroun</span>
         </div>
       </div>

@@ -1,5 +1,6 @@
 const Batiment = require("../models/Batiment");
 const Salle = require("../models/Salle");
+const logActivity = require("../utils/logActivity");
 
 exports.getAll = async (req, res) => {
   try {
@@ -43,6 +44,9 @@ exports.create = async (req, res) => {
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       id_admin: req.admin.id_admin,
     });
+
+    await logActivity(req, "CREATE", "batiment", bat.id_batiment, bat.nom);
+
     res.status(201).json(bat);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -56,6 +60,9 @@ exports.update = async (req, res) => {
     const updates = { ...req.body };
     if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
     await bat.update(updates);
+
+    await logActivity(req, "UPDATE", "batiment", bat.id_batiment, bat.nom);
+
     res.json(bat);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -67,6 +74,9 @@ exports.delete = async (req, res) => {
     const bat = await Batiment.findByPk(req.params.id);
     if (!bat) return res.status(404).json({ message: "Bâtiment non trouvé" });
     await bat.destroy();
+
+    await logActivity(req, "DELETE", "batiment", bat.id_batiment, bat.nom);
+
     res.json({ message: "Bâtiment supprimé" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

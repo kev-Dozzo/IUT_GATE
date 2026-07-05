@@ -18,6 +18,7 @@ import minesup from "../../assets/public/min.jpeg";
 import SearchBar from "../../components/ui/SearchBar";
 import SEO from "../../components/ui/SEO";
 import { BASE_URL } from "../../config/constants";
+import { getPartenaires, getLogoUrl } from "../../services/partenaireService";
 
 const quickLinks = [
   {
@@ -110,6 +111,7 @@ export default function HomePage() {
   const [actualites, setActualites] = useState([]);
   const [filieres, setFilieres] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [partenaires, setPartenaires] = useState([]);
 
   useEffect(() => {
     const h = () => setIsMobile(window.innerWidth < 768);
@@ -122,6 +124,7 @@ export default function HomePage() {
       .then((d) => setActualites(d.slice(0, 4)))
       .catch(console.error);
     getFilieres().then(setFilieres).catch(console.error);
+    getPartenaires().then(setPartenaires).catch(console.error);
   }, []);
 
   return (
@@ -933,14 +936,16 @@ export default function HomePage() {
       )}
 
       {/* ══ PARTENAIRES ══ */}
-      <section
-        style={{
-          padding: "clamp(28px, 5vw, 52px) 24px",
-          background: "#fff",
-          borderTop: "1px solid #f1f5f9",
-        }}
-      >
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+      {partenaires.length > 0 && (
+        <section
+          style={{
+            padding: "clamp(28px, 5vw, 52px) 0",
+            background: "#fff",
+            borderTop: "1px solid #f1f5f9",
+            overflow: "hidden",
+          }}
+        >
           <p
             style={{
               fontSize: 10,
@@ -950,72 +955,109 @@ export default function HomePage() {
               textTransform: "uppercase",
               letterSpacing: 2.5,
               textAlign: "center",
-              marginBottom: 36,
+              marginBottom: 32,
             }}
           >
             Nos Partenaires
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "clamp(24px, 6vw, 64px)",
-              alignItems: "center",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            {PARTENAIRES.map(({ nom, img, lien }) => (
-              <a
-                key={nom}
-                href={lien}
-                target="_blank"
-                rel="noreferrer"
-                title={nom}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "all .3s",
-                  textDecoration: "none",
-                }}
-              >
-                <img
-                  src={img}
-                  alt={nom}
+          {/* Marquee wrapper */}
+          <div style={{ position: "relative" }}>
+            {/* Gradient gauche */}
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 80,
+                background: "linear-gradient(to right, #fff, transparent)",
+                zIndex: 2,
+                pointerEvents: "none",
+              }}
+            />
+            {/* Gradient droite */}
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 80,
+                background: "linear-gradient(to left, #fff, transparent)",
+                zIndex: 2,
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Marquee */}
+            <div
+              style={{
+                display: "flex",
+                gap: 64,
+                animation: "marquee 20s linear infinite",
+                width: "max-content",
+              }}
+            >
+              {/* Double la liste pour boucle infinie */}
+              {[...partenaires, ...partenaires].map((p, i) => (
+                <a
+                  key={`${p.id_partenaire}-${i}`}
+                  href={p.lien || "#"}
+                  target={p.lien ? "_blank" : "_self"}
+                  rel="noreferrer"
+                  title={p.nom}
                   style={{
-                    height: 75,
-                    maxWidth: 140,
-                    objectFit: "contain",
-                    display: "block",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    opacity: 0.45,
+                    filter: "grayscale(1)",
+                    transition: "all .3s",
+                    textDecoration: "none",
+                    height: 56,
                   }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    if (e.target.nextSibling) {
-                      e.target.nextSibling.style.display = "block";
-                    }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = "1";
+                    e.currentTarget.style.filter = "none";
                   }}
-                />
-                <div
-                  style={{
-                    display: "none",
-                    background: "#f1f5f9",
-                    borderRadius: 8,
-                    padding: "8px 14px",
-                    fontFamily: "var(--font-head)",
-                    fontWeight: 800,
-                    fontSize: 12,
-                    color: "#94a3b8",
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = ".45";
+                    e.currentTarget.style.filter = "grayscale(1)";
                   }}
                 >
-                  {nom}
-                </div>
-              </a>
-            ))}
+                  {p.logo_url ? (
+                    <img
+                      src={getLogoUrl(p.logo_url)}
+                      alt={p.nom}
+                      style={{
+                        height: 48,
+                        maxWidth: 140,
+                        objectFit: "contain",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        background: "#f1f5f9",
+                        borderRadius: 8,
+                        padding: "8px 16px",
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 800,
+                        fontSize: 12,
+                        color: "#94a3b8",
+                      }}
+                    >
+                      {p.nom}
+                    </div>
+                  )}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <Footer />
     </div>

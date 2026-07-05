@@ -1,5 +1,6 @@
 const Salle = require("../models/Salle");
 const Batiment = require("../models/Batiment");
+const logActivity = require("../utils/logActivity");
 
 exports.getAll = async (req, res) => {
   try {
@@ -32,6 +33,16 @@ exports.create = async (req, res) => {
     const { nom, capacite, type, id_batiment } = req.body;
     if (!nom) return res.status(400).json({ message: "Nom obligatoire" });
     const salle = await Salle.create({ nom, capacite, type, id_batiment });
+
+    await logActivity(
+      req,
+      "CREATE",
+      "salle",
+      salle.id_salle,
+      salle.nom,
+    );
+
+
     res.status(201).json(salle);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -43,6 +54,17 @@ exports.update = async (req, res) => {
     const salle = await Salle.findByPk(req.params.id);
     if (!salle) return res.status(404).json({ message: "Salle non trouvée" });
     await salle.update(req.body);
+
+
+    await logActivity(
+      req,
+      "UPDATE ",
+      "salle",
+      salle.id_salle,
+      salle.nom,
+    );
+
+
     res.json(salle);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -54,6 +76,16 @@ exports.delete = async (req, res) => {
     const salle = await Salle.findByPk(req.params.id);
     if (!salle) return res.status(404).json({ message: "Salle non trouvée" });
     await salle.destroy();
+
+    await logActivity(
+      req,
+      "DELETE",
+      "salle",
+      salle.id_salle,
+      salle.nom,
+    );
+
+
     res.json({ message: "Salle supprimée" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

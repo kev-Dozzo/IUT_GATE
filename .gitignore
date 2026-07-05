@@ -1,6 +1,7 @@
 # Dépendances
 node_modules/
 
+dist/
 # Variables d'environnement
 .env
 

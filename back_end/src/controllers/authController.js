@@ -21,23 +21,42 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, mot_de_passe } = req.body;
+
     const admin = await Admin.findOne({ where: { email } });
     if (!admin) return res.status(404).json({ message: "Admin non trouvé" });
+
+    // Vérifie si le compte est actif
+    if (admin.is_active === false) {
+      return res.status(403).json({ message: "Compte désactivé" });
+    }
+
     const isMatch = await bcrypt.compare(mot_de_passe, admin.mot_de_passe);
     if (!isMatch)
       return res.status(400).json({ message: "Mot de passe incorrect" });
+
     const token = jwt.sign(
-      { id_admin: admin.id_admin, email: admin.email },
+      {
+        id_admin: admin.id_admin,
+        role: admin.role || "editeur",
+        permissions: admin.permissions || [],
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "7d" },
     );
+
     res.json({
-      message: "Connexion réussie",
       token,
-      admin: { id_admin: admin.id_admin, nom: admin.nom, email: admin.email },
+      admin: {
+        id_admin: admin.id_admin,
+        nom: admin.nom,
+        email: admin.email,
+        role: admin.role || "editeur",
+        permissions: admin.permissions || [],
+      },
     });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", err: err.message });
+    console.error("Erreur login:", err);
+    res.status(500).json({ message: "Erreur serveur", detail: err.message });
   }
 };
 
@@ -198,7 +217,7 @@ exports.resetPassword = async (req, res) => {
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: admin.email,
-      subject: "✅ Mot de passe modifié — IUTGate",
+      subject: "✅ Mot de passe modifié — IUT GATE",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #f8fafc; padding: 20px; border-radius: 12px;">
           <div style="background: #0c1a40; padding: 24px; border-radius: 10px; text-align: center; margin-bottom: 24px;">

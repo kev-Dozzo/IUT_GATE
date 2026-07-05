@@ -1,6 +1,7 @@
 const Actualite = require("../models/Actualiter");
 const ActualitePhoto = require("../models/ActualitePhoto");
 const Admin = require("../models/Admin");
+const logActivity = require("../utils/logActivity");
 
 exports.getAll = async (req, res) => {
   try {
@@ -78,6 +79,15 @@ exports.create = async (req, res) => {
       }
     }
 
+    await logActivity(
+      req,
+      "CREATE",
+      "actualite",
+      actualite.id_actualite,
+      actualite.titre,
+    );
+
+
     const full = await Actualite.findByPk(actualite.id_actualite, {
       include: [{ model: ActualitePhoto, as: "photos" }],
     });
@@ -106,6 +116,16 @@ exports.update = async (req, res) => {
       }
     }
     await actualite.update(updates);
+
+    await logActivity(
+      req,
+      "UPDATE",
+      "actualite",
+      actualite.id_actualite,
+      actualite.titre,
+    );
+
+
     const full = await Actualite.findByPk(actualite.id_actualite, {
       include: [{ model: ActualitePhoto, as: "photos" }],
     });
@@ -122,6 +142,14 @@ exports.delete = async (req, res) => {
       return res.status(404).json({ message: "Actualité non trouvée" });
     await ActualitePhoto.destroy({ where: { id_actualite: req.params.id } });
     await actualite.destroy();
+    await logActivity(
+      req,
+      "DELETE",
+      "actualite",
+      actualite.id_actualite,
+      actualite.titre,
+    );
+
     res.json({ message: "Actualité supprimée" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
