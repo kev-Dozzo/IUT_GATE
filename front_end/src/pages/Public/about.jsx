@@ -16,10 +16,11 @@ import SEO from "../../components/ui/SEO";
 const equipe = [
   {
     nom: "DAGANG TCHUIKOUA YOBS KOLER",
-    role: "Chef de projet & FULLSTACK",
-    initiales: "DT",
+    role: "Chef de projet & Fullstack",
+    initiales: "DTYK",
     bg: "#cffafe",
     color: "#0e7490",
+    portfolio: "https://yobskoler.vercel.app", // ← ton portfolio
   },
   {
     nom: "DONFACK WAMBA ANTONIE",
@@ -27,13 +28,15 @@ const equipe = [
     initiales: "DWA",
     bg: "#d1fae5",
     color: "#065f46",
+    portfolio: "https://donfackantony.netlify.app",
   },
   {
     nom: "ELATE NGALLE KEVIN AUXENCE",
-    role: "FULLSTACK",
+    role: "Fullstack",
     initiales: "ENKA",
     bg: "#fef3c7",
     color: "#92400e",
+    portfolio: "https://ngallekevinportfolio.netlify.app",
   },
   {
     nom: "EPALE NGOMBA WILFRIED GIOVANNI",
@@ -41,6 +44,7 @@ const equipe = [
     initiales: "ENWG",
     bg: "#d1fae5",
     color: "#065f46",
+    portfolio: "https://newporfolio-ctfy.vercel.app/",
   },
   {
     nom: "DOKOU NGASSA ARLANE",
@@ -48,13 +52,15 @@ const equipe = [
     initiales: "DNA",
     bg: "#ede9fe",
     color: "#5b21b6",
+    portfolio: null,
   },
   {
     nom: "DONGMO JACKY DAMARIS",
     role: "UI/UX Design",
-    initiales: "DJ",
+    initiales: "DJD",
     bg: "#fee2e2",
     color: "#991b1b",
+    portfolio: null,
   },
   {
     nom: "FOKA KAMMOE ALAN BRYAN",
@@ -62,6 +68,7 @@ const equipe = [
     initiales: "FKAB",
     bg: "#f3e8ff",
     color: "#7e22ce",
+    portfolio: null,
   },
 ];
 
@@ -281,84 +288,118 @@ export default function AProposPage() {
               gap: 14,
             }}
           >
-            {equipe.map((m) => (
-              <div
-                key={m.nom}
-                style={{
-                  background: "#fff",
-                  borderRadius: 14,
-                  border: "1px solid #e2e8f0",
-                  padding: "clamp(18px, 3vw, 24px)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                  gap: 12,
-                  transition: "all .2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = m.color;
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = `0 12px 32px ${m.bg}`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#e2e8f0";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                <div
+            {equipe.map((m) => {
+              const CardWrapper = m.portfolio ? "a" : "div";
+              return (
+                <CardWrapper
+                  key={m.nom}
+                  href={m.portfolio || undefined}
+                  target={m.portfolio ? "_blank" : undefined}
+                  rel={m.portfolio ? "noreferrer" : undefined}
                   style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 16,
-                    background: m.bg,
+                    background: "#fff",
+                    borderRadius: 14,
+                    border: "1px solid #e2e8f0",
+                    padding: "clamp(18px, 3vw, 24px)",
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
+                    textAlign: "center",
+                    gap: 12,
+                    transition: "all .2s",
+                    textDecoration: "none",
+                    cursor: m.portfolio ? "pointer" : "default",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = m.color;
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.boxShadow = `0 12px 32px ${m.bg}`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#e2e8f0";
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
-                  <span
+                  {/* Badge portfolio */}
+                  {m.portfolio && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 10,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        background: m.bg,
+                        color: m.color,
+                        fontSize: 9,
+                        fontWeight: 800,
+                        fontFamily: "var(--font-head)",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      PORTFOLIO <MdArrowForward/>
+                    </div>
+                  )}
+
+                  {/* Avatar */}
+                  <div
                     style={{
-                      fontFamily: "var(--font-head)",
-                      fontSize: 18,
-                      fontWeight: 800,
-                      color: m.color,
-                    }}
-                  >
-                    {m.initiales}
-                  </span>
-                </div>
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-head)",
-                      fontWeight: 700,
-                      fontSize: 13,
-                      color: "#0f172a",
-                      marginBottom: 6,
-                      lineHeight: 1.35,
-                    }}
-                  >
-                    {m.nom}
-                  </p>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "3px 10px",
-                      borderRadius: 999,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      fontFamily: "var(--font-head)",
+                      width: 60,
+                      height: 60,
+                      borderRadius: 16,
                       background: m.bg,
-                      color: m.color,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {m.role}
-                  </span>
-                </div>
-              </div>
-            ))}
+                    <span
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontSize: 18,
+                        fontWeight: 800,
+                        color: m.color,
+                      }}
+                    >
+                      {m.initiales}
+                    </span>
+                  </div>
+
+                  {/* Infos */}
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-head)",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        color: "#0f172a",
+                        marginBottom: 6,
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {m.nom}
+                    </p>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-head)",
+                        background: m.bg,
+                        color: m.color,
+                      }}
+                    >
+                      {m.role}
+                    </span>
+                  </div>
+                </CardWrapper>
+              );
+            })}
           </div>
         </div>
 

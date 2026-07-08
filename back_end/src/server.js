@@ -108,6 +108,7 @@ app.use("/api/admin/users", require("./routes/adminUserRoutes"));
 app.use("/api/partenaires", require("./routes/partenaireRoutes"));
 app.use("/api/programmes", require("./routes/programmeRoutes"));
 app.use("/api/calendrier", require("./routes/calendrierRoutes"));
+app.use("/api/newsletter", require("./routes/newsletterRoutes"));
 
 app.get("/", (req, res) => res.json({ message: "🚀 IUTGate API running !" }));
 

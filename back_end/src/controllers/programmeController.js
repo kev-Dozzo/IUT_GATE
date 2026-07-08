@@ -1,5 +1,7 @@
 const Programme = require("../models/Programme");
 const logActivity = require("../utils/logActivity");
+const { sendNewsletter } = require("../config/mailer");
+const NewsletterAbonne = require("../models/NewsletterAbonne");
 
 exports.getAll = async (req, res) => {
   try {
@@ -55,6 +57,18 @@ exports.create = async (req, res) => {
       ordre: ordre || 0,
       id_admin: req.admin?.id_admin,
     });
+    NewsletterAbonne.findAll({ where: { actif: true } }).then((abonnes) => {
+      if (abonnes.length > 0) {
+        sendNewsletter(
+          abonnes,
+          "Nouveau programme",
+          p.nom,
+          p.description?.slice(0, 150),
+          `https://iut-dla.com/calendrier/${p.id_programme}`,
+        );
+      }
+    });
+
     await logActivity(req, "CREATE", "programme", p.id_programme, p.nom);
     res.status(201).json(p);
   } catch (err) {

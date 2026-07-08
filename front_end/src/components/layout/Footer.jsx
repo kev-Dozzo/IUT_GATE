@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import NewsletterWidget from "../ui/NewsletterWidget";
 
 const cols = [
   {
@@ -75,6 +76,62 @@ export default function Footer() {
               Le portail numérique de l'Institut Universitaire de Technologie de
               Douala.
             </p>
+          </div>
+
+          <div>
+            <NewsletterWidget />
+            <div style={{ marginTop: 24 }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "rgba(255,255,255,.5)",
+                  fontFamily: "var(--font-head)",
+                  textTransform: "uppercase",
+                  letterSpacing: 1.5,
+                  marginBottom: 12,
+                }}
+              >
+                Suivez-nous
+              </p>
+              <div style={{ display: "flex", gap: 12 }}>
+                {[
+                  { href: "https://facebook.com", label: "f", bg: "#1877f2" },
+                  { href: "https://linkedin.com", label: "in", bg: "#0a66c2" },
+                  { href: "https://youtube.com", label: "▶", bg: "#ff0000" },
+                ].map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 6,
+                      background: "rgba(255,255,255,.1)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      textDecoration: "none",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      transition: "background .2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = s.bg)
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,.1)")
+                    }
+                  >
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Colonnes */}

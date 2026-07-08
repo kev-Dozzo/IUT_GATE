@@ -2,6 +2,8 @@ const Actualite = require("../models/Actualiter");
 const ActualitePhoto = require("../models/ActualitePhoto");
 const Admin = require("../models/Admin");
 const logActivity = require("../utils/logActivity");
+const { sendNewsletter } = require("../config/mailer");
+const NewsletterAbonne = require("../models/NewsletterAbonne");
 
 exports.getAll = async (req, res) => {
   try {
@@ -66,6 +68,18 @@ exports.create = async (req, res) => {
       photo_url: photoUrl,
       id_admin: req.admin.id_admin,
       date_publication: new Date(),
+    });
+
+    NewsletterAbonne.findAll({ where: { actif: true } }).then((abonnes) => {
+      if (abonnes.length > 0) {
+        sendNewsletter(
+          abonnes,
+          "Nouvelle actualité",
+          actualite.titre,
+          actualite.contenu?.slice(0, 150),
+          `https://iut-dla.com/actualites/${actualite.id_actualite}`,
+        );
+      }
     });
 
     // Photos supplémentaires

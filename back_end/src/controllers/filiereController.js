@@ -2,6 +2,8 @@ const Filiere = require("../models/Filiere");
 const Departement = require("../models/Departement");
 const StaffEnseignant = require("../models/Enseignant");
 const logActivity = require("../utils/logActivity");
+const { sendNewsletter } = require("../config/mailer");
+const NewsletterAbonne = require("../models/NewsletterAbonne");
 
 exports.getAll = async (req, res) => {
   try {
@@ -74,6 +76,18 @@ exports.create = async (req, res) => {
       id_departement,
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       id_admin: req.admin.id_admin,
+    });
+
+    NewsletterAbonne.findAll({ where: { actif: true } }).then((abonnes) => {
+      if (abonnes.length > 0) {
+        sendNewsletter(
+          abonnes,
+          "Nouvelle filier",
+          filiere.nom,
+          filiere.description?.slice(0, 150),
+          `https://iut-dla.com/filiers/${filiere.id_filiere}`,
+        );
+      }
     });
 
     await logActivity(

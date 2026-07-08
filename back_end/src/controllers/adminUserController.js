@@ -1,10 +1,11 @@
 const Admin = require("../models/Admin");
+const { sendWelcomeAdmin, sendNewAdminNotif } = require("../config/mailer");
 const AdminActivity = require("../models/AdminActivity");
 const bcrypt = require("bcryptjs");
 const logActivity = require("../utils/logActivity");
 const { ROLE_PERMISSIONS } = require("../config/permissions");
 
-// ── Lister tous les admins ──
+// Lister tous les admins
 exports.getAll = async (req, res) => {
   try {
     const admins = await Admin.findAll({
@@ -25,7 +26,7 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// ── Créer un admin ──
+// Créer un admin 
 exports.create = async (req, res) => {
   try {
     const { nom, email, mot_de_passe, role, permissions } = req.body;
@@ -50,6 +51,14 @@ exports.create = async (req, res) => {
       permissions: perms,
     });
 
+    sendWelcomeAdmin(admin.email, admin.nom, admin.role, admin.permissions);
+
+    // Envoie notification au super admin
+    const superAdmin = await Admin.findOne({ where: { role: "super_admin" } });
+    if (superAdmin && superAdmin.email !== admin.email) {
+      sendNewAdminNotif(superAdmin.email, admin);
+    }
+
     await logActivity(
       req,
       "CREATE_USER",
@@ -73,7 +82,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// ── Modifier un admin ──
+// Modifier un admin 
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
