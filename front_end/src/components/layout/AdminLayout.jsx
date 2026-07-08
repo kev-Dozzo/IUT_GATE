@@ -6,64 +6,60 @@ export default function AdminLayout({ children }) {
   const { admin } = useAuth();
   const navigate = useNavigate();
 
-  // const handleLogout = () => {
-  //   logout();
-  //   navigate("/admin/login");
-  // };
-
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div
+      style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}
+    >
       <Sidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Topbar */}
+
+      {/* Contenu principal */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+        }}
+      >
+        {/* Topbar desktop */}
         <header
+          className="admin-header-desktop"
           style={{
             height: 56,
             background: "var(--card)",
             borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
             padding: "0 24px",
-            marginTop: 0,
             position: "sticky",
             top: 0,
+            zIndex: 100,
+            flexShrink: 0,
           }}
         >
-          <div />
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span
-              onClick={() => navigate("/admin/profil")}
-              style={{
-                fontSize: 13,
-                color: "var(--muted)",
-                cursor: "pointer",
-                transition: "color .2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--cyan)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--muted)")
-              }
+          <span
+            onClick={() => navigate("/admin/profil")}
+            style={{
+              fontSize: 13,
+              color: "var(--muted)",
+              cursor: "pointer",
+              transition: "color .2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--cyan)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
+          >
+            Bonjour,{" "}
+            <strong
+              style={{ color: "var(--navy)", fontFamily: "var(--font-head)" }}
             >
-              Bonjour,{" "}
-              <strong
-                style={{ color: "var(--navy)", fontFamily: "var(--font-head)" }}
-              >
-                {admin?.nom || "Admin"}
-              </strong>
-            </span>
-          </div>
+              {admin?.nom || "Admin"}
+            </strong>
+          </span>
         </header>
 
-        {/* Content */}
-        <main
-          className="admin-main"
-          style={{ flex: 1, background: "var(--bg)", overflowX: "hidden" }}
-        >
-          {children}
-        </main>
+        {/* Page content */}
+        <main style={{ flex: 1, overflowX: "hidden" }}>{children}</main>
       </div>
     </div>
   );

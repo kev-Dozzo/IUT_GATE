@@ -7,6 +7,7 @@ const sequelize = require("./config/database");
 
 // ── MODÈLES ──
 const Admin = require("./models/Admin");
+const AdminActivity = require("./models/AdminActivity");
 const Actualite = require("./models/Actualiter");
 const Departement = require("./models/Departement");
 const Filiere = require("./models/Filiere");
@@ -54,6 +55,7 @@ ServiceAdministratif.belongsTo(Batiment, {
 });
 
 Admin.hasMany(Actualite, { foreignKey: "id_admin", as: "actualites" });
+AdminActivity.belongsTo(Admin, { foreignKey: "id_admin", as: "admin" });
 Actualite.belongsTo(Admin, { foreignKey: "id_admin", as: "admin" });
 
 Filiere.belongsToMany(StaffEnseignant, {
@@ -102,6 +104,11 @@ app.use("/api/batiments", batimentRoutes);
 app.use("/api/salles", salleRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/ia", iaRoutes);
+app.use("/api/admin/users", require("./routes/adminUserRoutes"));
+app.use("/api/partenaires", require("./routes/partenaireRoutes"));
+app.use("/api/programmes", require("./routes/programmeRoutes"));
+app.use("/api/calendrier", require("./routes/calendrierRoutes"));
+app.use("/api/newsletter", require("./routes/newsletterRoutes"));
 
 app.get("/", (req, res) => res.json({ message: "🚀 IUTGate API running !" }));
 

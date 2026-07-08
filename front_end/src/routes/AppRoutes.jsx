@@ -33,6 +33,12 @@ import SallesAdmin from "../pages/admin/SallesAdmin";
 import ServicesAdmin from "../pages/admin/ServicesAdmin";
 import ProfilAdmin from "../pages/admin/ProfilAdmin";
 import PrivateRoute from "./PrivateRoute";
+import UsersAdmin from "../pages/admin/UsersAdmin";
+import HistoriqueAdmin from "../pages/admin/HistoriqueAdmin";
+import PartenairesAdmin from "../pages/admin/PartenairesAdmin";
+import ProgrammesAdmin from "../pages/admin/ProgrammesAdmin";
+import CalendrierAdmin from "../pages/admin/CalendrierAdmin";
+
 
 export default function AppRoutes() {
   return (
@@ -66,6 +72,38 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/utilisateurs"
+        element={
+          <PrivateRoute>
+            <UsersAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/partenaires"
+        element={
+          <PrivateRoute>
+            <PartenairesAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/programmes"
+        element={
+          <PrivateRoute>
+            <ProgrammesAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/calendrier"
+        element={
+          <PrivateRoute>
+            <CalendrierAdmin />
           </PrivateRoute>
         }
       />
@@ -122,6 +160,14 @@ export default function AppRoutes() {
         element={
           <PrivateRoute>
             <ServicesAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/historique"
+        element={
+          <PrivateRoute>
+            <HistoriqueAdmin />
           </PrivateRoute>
         }
       />

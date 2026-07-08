@@ -1,5 +1,6 @@
 const ServiceAdministratif = require("../models/ServiceAdmin");
 const Batiment = require("../models/Batiment");
+const logActivity = require("../utils/logActivity");  
 
 exports.getAll = async (req, res) => {
   try {
@@ -50,6 +51,9 @@ exports.create = async (req, res) => {
       contact,
       id_batiment,
     });
+
+    await logActivity(req, "CREATE", "service", svc.id_service, svc.nom);
+
     res.status(201).json(svc);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -61,6 +65,9 @@ exports.update = async (req, res) => {
     const svc = await ServiceAdministratif.findByPk(req.params.id);
     if (!svc) return res.status(404).json({ message: "Service non trouvé" });
     await svc.update(req.body);
+
+    await logActivity(req, "UPDATE", "service", svc.id_service, svc.nom);
+
     res.json(svc);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -72,6 +79,9 @@ exports.delete = async (req, res) => {
     const svc = await ServiceAdministratif.findByPk(req.params.id);
     if (!svc) return res.status(404).json({ message: "Service non trouvé" });
     await svc.destroy();
+
+    await logActivity(req, "DELETE", "service", svc.id_service, svc.nom);
+
     res.json({ message: "Service supprimé" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

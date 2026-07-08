@@ -52,7 +52,9 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
       "description": "Description courte du métier (2-3 phrases)",
       "entreprises": ["Entreprise 1", "Entreprise 2"],
       "competences": ["compétence 1", "compétence 2", "compétence 3"],
-      "niveau": "Débutant"
+      "niveau": ["Débutant &"," Senior &"," Expert"],
+      "salaire_junior": "XXX 000 - XXX 000 FCFA/mois",
+      "salaire_senior": "XXX 000 - XXX 000 FCFA/mois"
     }
   ],
   "secteurs": [
@@ -62,7 +64,12 @@ Génère une analyse complète des débouchés professionnels en JSON UNIQUEMENT
     { "diplome": "Nom du diplôme", "etablissement": "Établissement" }
   ],
   "conseil": "Un conseil personnalisé pour les étudiants de cette filière"
-}`;
+}
+  IMPORTANT: 
+- Génère EXACTEMENT 8 métiers minimum (jamais moins de 6)
+- Adapte les salaires au marché camerounais (FCFA),france,canada,allemagne et autre.
+- Mets en avant les opportunités en Afrique centrale
+  `;
 
     try {
       const json = await getDebouches(prompt);

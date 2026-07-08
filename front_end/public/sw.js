@@ -1,8 +1,6 @@
 const CACHE = "iutgate-v1";
 
-self.addEventListener("install", (e) => {
-  self.skipWaiting(e);
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
@@ -17,21 +15,16 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  // Ignore les requêtes non-GET et les requêtes API
-  if (e.request.method !== "GET") return;
-  if (e.request.url.includes("/api/")) return;
-  if (e.request.url.includes("localhost:5000")) return;
+  const url = e.request.url;
 
-  e.respondWith(
-    fetch(e.request)
-      .then((response) => {
-        // Vérifie que la réponse est valide
-        if (!response || response.status !== 200) return response;
-        return response;
-      })
-      .catch(() => {
-        // En cas d'erreur réseau, retourne la page depuis le cache
-        return caches.match(e.request);
-      }),
-  );
+  // Ignore tout sauf GET
+  if (e.request.method !== "GET") return;
+
+  // Ignore API, fonts Google, localhost backend
+  if (url.includes("/api/")) return;
+  if (url.includes("localhost:5000")) return;
+  if (url.includes("fonts.googleapis.com")) return;
+  if (url.includes("fonts.gstatic.com")) return;
+
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });

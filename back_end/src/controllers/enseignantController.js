@@ -1,6 +1,7 @@
 const StaffEnseignant = require("../models/Enseignant");
 const Departement = require("../models/Departement");
 const Batiment = require("../models/Batiment");
+const logActivity = require("../utils/logActivity");
 
 exports.getAll = async (req, res) => {
   try {
@@ -78,6 +79,15 @@ exports.create = async (req, res) => {
       photo_url: req.file ? `/uploads/${req.file.filename}` : null,
       created_by_admin: req.admin.id_admin,
     });
+
+    await logActivity(
+      req,
+      "CREATE",
+      "enseignant",
+      ens.id_enseignant,
+      ens.nom,
+    );
+
     res.status(201).json(ens);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -91,6 +101,16 @@ exports.update = async (req, res) => {
     const updates = { ...req.body };
     if (req.file) updates.photo_url = `/uploads/${req.file.filename}`;
     await ens.update(updates);
+
+    await logActivity(
+      req,
+      "UPDATE",
+      "enseignant",
+      ens.id_enseignant,
+      ens.nom ,
+    );
+
+
     res.json(ens);
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });
@@ -102,6 +122,16 @@ exports.delete = async (req, res) => {
     const ens = await StaffEnseignant.findByPk(req.params.id);
     if (!ens) return res.status(404).json({ message: "Enseignant non trouvé" });
     await ens.destroy();
+
+    await logActivity(
+      req,
+      "DELETE",
+      "enseignant",
+      ens.id_enseignant,
+      ens.nom,
+    );
+
+
     res.json({ message: "Enseignant supprimé" });
   } catch (err) {
     res.status(500).json({ message: "Erreur serveur", err: err.message });

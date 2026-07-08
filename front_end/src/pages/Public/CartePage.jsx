@@ -25,6 +25,7 @@ import {
   MdNavigation,
   MdDoorBack,
   MdDoorSliding,
+  MdMap,
 } from "react-icons/md";
 import Navbar from "../../components/layout/Navbar";
 import { getBatiments } from "../../services/batimentService";
@@ -140,7 +141,7 @@ export default function CartePage() {
         return [data.latitude, data.longitude];
       }
     } catch {
-      // ignore
+      //
     }
     return null;
   };
@@ -225,54 +226,46 @@ export default function CartePage() {
 
   // ── GPS bouton ──
   const getUserLocation = () => {
-    setGpsLoading(true);
     if (!navigator.geolocation) {
-      alert("Géolocalisation non supportée.");
-      setGpsLoading(false);
+      alert("La géolocalisation n'est pas supportée par votre navigateur.");
       return;
     }
-    if (!window.isSecureContext) {
-      alert(
-        "La géolocalisation nécessite un accès sécurisé (HTTPS ou localhost).",
-      );
-      setGpsLoading(false);
-      return;
-    }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = [pos.coords.latitude, pos.coords.longitude];
-        setUserPos(coords);
-        setFlyCoords(coords);
+        const { latitude, longitude } = pos.coords;
+        setUserPos([latitude, longitude]);
+        setFlyCoords([latitude, longitude]);
         setFlyZoom(16);
         setGpsLoading(false);
+        setShowGeoModal(false);
       },
-      async (err) => {
-        const fallbackCoords = await fallbackToApproximateLocation();
-        if (fallbackCoords) {
-          setUserPos(fallbackCoords);
-          setFlyCoords(fallbackCoords);
-          setFlyZoom(16);
-          alert(
-            "Position approximative utilisée car la localisation exacte n'a pas pu être obtenue.",
-          );
-        } else if (err.code === 1) {
-          alert(
-            "Permission refusée. Autorisez la localisation dans les paramètres de votre navigateur, puis réessayez.",
-          );
-        } else if (err.code === 2) {
-          alert(
-            "Position indisponible. Vérifiez que le GPS ou la localisation réseau est activé.",
-          );
-        } else {
-          alert(
-            "Impossible d'obtenir votre position exacte. Vérifiez que la localisation est activée et que le site utilise un accès sécurisé (HTTPS ou localhost).",
-          );
+      (error) => {
+        // ← Pas de position par défaut en cas d'échec
+        let message = "Impossible d'obtenir votre position.";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message =
+              "Accès à la localisation refusé. Activez-la dans les paramètres de votre navigateur.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = "Position indisponible. Vérifiez que le GPS est activé.";
+            break;
+          case error.TIMEOUT:
+            message = "La demande de localisation a expiré. Réessayez.";
+            break;
         }
-        setGpsLoading(false);
+        alert(message);
+        setShowGeoModal(false);
       },
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
+      {
+        enableHighAccuracy: true, //GPS haute précision (mobile)
+        timeout: 15000, //15 secondes avant timeout
+        maximumAge: 0, //  Toujours une position fraîche
+      },
     );
-  };
+  }
+  
 
   // ── Calcule itinéraire via OSRM ──
   const calculateRoute = async (from, to) => {
@@ -1603,7 +1596,7 @@ export default function CartePage() {
                         letterSpacing: 0.5,
                       }}
                     >
-                      Durée à pied
+                      Durée 
                     </p>
                     <p
                       style={{
@@ -1807,7 +1800,7 @@ export default function CartePage() {
                   marginBottom: 24,
                 }}
               >
-                IUTGate a besoin de votre position pour tracer l'itinéraire sur
+                IUT GATE a besoin de votre position pour tracer l'itinéraire sur
                 la carte. Votre localisation n'est pas enregistrée.
               </p>
               <div style={{ display: "flex", gap: 10 }}>
