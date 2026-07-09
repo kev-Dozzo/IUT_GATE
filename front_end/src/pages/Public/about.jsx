@@ -40,7 +40,7 @@ const equipe = [
   },
   {
     nom: "EPALE NGOMBA WILFRIED GIOVANNI",
-    role: "Frontend React $ Pentester",
+    role: "Frontend React & Pentester",
     initiales: "ENWG",
     bg: "#d1fae5",
     color: "#065f46",
