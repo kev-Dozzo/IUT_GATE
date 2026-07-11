@@ -136,7 +136,7 @@ exports.forgotPassword = async (req, res) => {
 
     await admin.update({ reset_token: token, reset_token_expiry: expiry });
 
-    const resetUrl = `http://localhost:5173/admin/reset-password?token=${token}`;
+    const resetUrl = `https://iut-dla.com/admin/reset-password?token=${token}`;
 
     // Email
     await transporter.sendMail({
@@ -171,7 +171,7 @@ exports.forgotPassword = async (req, res) => {
           </div>
 
           <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 16px;">
-            © 2026 IUTGate — Institut Universitaire de Technologie de Douala
+            © 2026 IUT GATE — Institut Universitaire de Technologie de Douala
           </p>
         </div>
       `,
