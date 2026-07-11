@@ -20,7 +20,7 @@ const equipe = [
     initiales: "DTYK",
     bg: "#cffafe",
     color: "#0e7490",
-    portfolio: "https://yobskoler.vercel.app", // ← ton portfolio
+    portfolio: "https://portfolio-yobskolers-projects.vercel.app/", // ← ton portfolio
   },
   {
     nom: "DONFACK WAMBA ANTONIE",
